@@ -1,0 +1,2697 @@
+/* ==================================================== */
+/* ===========  Nexo — Premium Redesign v4  ============ */
+/* ==================================================== */
+/* هذا الملف طبقة تصميم إضافية فوق premium-theme.css / App.css الحاليين.
+   لا يحذف أو يغيّر أي منطق، فقط يعيد تعريف المتغيرات وبعض الأصناف
+   المشتركة (نفس الأصناف المستخدمة بكل الصفحات) لرفع مستوى التصميم
+   لمطابقة الصورة المرجعية، مع الحفاظ الكامل على البنية والوظائف.
+
+   طريقة التركيب: استورد هذا الملف بعد premium-theme.css (وبعد App.css إذا
+   كان مستوردًا بنفس الملف)، مثلاً بآخر سطر استيراد بـ ChatApp.jsx:
+   import '../styles/nexo-premium-v4.css';
+*/
+
+:root {
+  /* عمق أكبر للخلفية + بنفسجي أكثر رقيًا واتساقًا مع الصورة المرجعية */
+  --accent-1: #7c3aed;
+  --accent-2: #a855f7;
+  --accent-1-rgb: 124, 58, 237;
+  --accent-rgb: 168, 85, 247;
+  --accent-light: #cbb0fb;
+
+  --bg-page: #07050d;
+  --bg-main: #0c0815;
+  --bg-sidebar: #08050f;
+  --bg-panel: #14101d;
+  --bg-panel-2: #1a1424;
+
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-input: rgba(255, 255, 255, 0.09);
+
+  /* توهج موحّد يُستخدم بكل مكان بدل قيم متفرقة */
+  --glow-soft: 0 0 24px rgba(var(--accent-rgb), 0.18);
+  --glow-strong: 0 0 40px rgba(var(--accent-rgb), 0.28);
+  --radius-lg: 18px;
+  --radius-md: 13px;
+  --radius-sm: 9px;
+
+  /* ألوان دلالية رسمية — بدل قيم hex متفرقة بكل مكان */
+  --color-success: #4ade80;
+  --color-success-rgb: 74, 222, 128;
+  --color-warning: #facc15;
+  --color-warning-rgb: 250, 204, 21;
+  --color-error: #f87171;
+  --color-error-rgb: 239, 68, 68;
+  --color-info: #60a5fa;
+  --color-info-rgb: 96, 165, 250;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 900px 500px at 18% -8%, rgba(var(--accent-1-rgb), 0.14), transparent 60%),
+    radial-gradient(ellipse 700px 450px at 100% 20%, rgba(168, 85, 247, 0.06), transparent 55%),
+    var(--bg-page);
+}
+
+/* ===================== Sidebar عام ===================== */
+.sidebar {
+  width: 258px;
+  background: linear-gradient(180deg, var(--bg-sidebar), #06040c);
+  border-inline-end: 1px solid rgba(var(--accent-rgb), 0.1);
+  padding: 14px 10px;
+}
+
+.sidebar-brand {
+  padding: 4px 6px 18px;
+  font-size: 15.5px;
+  letter-spacing: -0.2px;
+}
+
+/* زر محادثة جديدة بارز — أول عنصر تفاعلي بالسايدبار كما بالصورة */
+.sidebar-newchat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 14px;
+  margin-bottom: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  background: linear-gradient(135deg, rgba(var(--accent-1-rgb), 0.22), rgba(var(--accent-1-rgb), 0.06));
+  color: var(--text-primary);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.15s ease;
+}
+
+.sidebar-newchat-btn:hover {
+  border-color: rgba(var(--accent-rgb), 0.55);
+  background: linear-gradient(135deg, rgba(var(--accent-1-rgb), 0.32), rgba(var(--accent-1-rgb), 0.1));
+  transform: translateY(-1px);
+}
+
+.sidebar-newchat-btn svg { flex-shrink: 0; color: var(--accent-light); }
+
+/* نظام التنقل الرئيسي — بنود نظيفة، توهج بنفسجي خفيف بحالة active فقط */
+.side-nav-v3 { gap: 1px; padding: 2px 0 12px; margin-bottom: 10px; }
+
+.side-nav-v3-item {
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.side-nav-v3-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+.side-nav-v3-item.active {
+  background: linear-gradient(135deg, rgba(var(--accent-1-rgb), 0.22), rgba(var(--accent-1-rgb), 0.05));
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  box-shadow: var(--glow-soft);
+  color: #fff;
+  font-weight: 600;
+}
+
+.side-nav-v3-item svg { color: var(--accent-light); opacity: 0.9; }
+
+.sidebar-section-label {
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  color: var(--text-faint);
+  padding: 14px 8px 6px;
+}
+
+.chat-item.active {
+  background: rgba(var(--accent-rgb), 0.14);
+  border-inline-start: 2px solid var(--accent-2);
+}
+
+.sidebar-user {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-panel);
+  margin-top: 8px;
+}
+
+/* ===================== TopBar / Header ===================== */
+.top-bar {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.topbar-v3-search {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-subtle);
+  max-width: 300px;
+}
+
+.topbar-v3-search:focus-within {
+  border-color: rgba(var(--accent-rgb), 0.4);
+  box-shadow: var(--glow-soft);
+}
+
+.premium-badge {
+  background: linear-gradient(135deg, rgba(var(--accent-1-rgb), 0.24), rgba(var(--accent-1-rgb), 0.06));
+  border-color: rgba(var(--accent-rgb), 0.35);
+  box-shadow: var(--glow-soft);
+}
+
+.icon-btn {
+  border-radius: var(--radius-sm);
+}
+
+.icon-btn:hover {
+  background: rgba(var(--accent-rgb), 0.12);
+}
+
+/* ===================== شاشة الترحيب + بطاقات الاقتراح ===================== */
+.welcome-v3-greeting h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+}
+
+.welcome-v3-greeting p { color: var(--text-secondary); }
+
+.welcome-cards-grid { gap: 14px; max-width: 760px; }
+
+.welcome-card {
+  background: linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px 16px;
+  gap: 10px;
+}
+
+.welcome-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.4);
+  box-shadow: var(--glow-soft), 0 14px 30px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+}
+
+.welcome-card-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: rgba(var(--accent-1-rgb), 0.16);
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.15);
+  color: var(--accent-light);
+}
+
+.welcome-card-label { font-size: 13.5px; font-weight: 600; }
+.welcome-card-desc { font-size: 11.5px; line-height: 1.55; }
+
+/* ===================== لوحة الأدوات (يمين) ===================== */
+.tools-panel {
+  background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
+  border-inline-start: 1px solid rgba(var(--accent-rgb), 0.1);
+}
+
+.tools-panel-title { font-size: 13.5px; letter-spacing: -0.1px; }
+
+.tools-shortcut-card {
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-subtle);
+  padding: 11px;
+}
+
+.tools-shortcut-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.35);
+  box-shadow: var(--glow-soft);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tools-shortcut-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: rgba(var(--accent-1-rgb), 0.16);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.14);
+}
+
+/* ===================== منطقة الكتابة (Composer) ===================== */
+.composer-v3 {
+  max-width: 760px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(var(--accent-rgb), 0.24);
+  box-shadow: var(--glow-soft);
+}
+
+.composer-v3:focus-within {
+  border-color: rgba(var(--accent-rgb), 0.5);
+  box-shadow: var(--glow-strong);
+}
+
+.plus-btn, .composer-v3-row .icon-btn {
+  border-radius: 50%;
+}
+
+.composer-v3-send {
+  width: 36px;
+  height: 36px;
+  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.35);
+}
+
+/* ===================== بطاقات الميزات (تُستخدم بكل الصفحات الفرعية) ===================== */
+.feature-card, .v2-feature-card {
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel));
+}
+
+.feature-card:hover, .v2-feature-card:hover {
+  box-shadow: var(--glow-soft), 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon {
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.16);
+}
+
+/* ===================== رسائل الشات ===================== */
+.msg-avatar {
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.3);
+}
+
+.bubble.user {
+  background: rgba(255, 255, 255, 0.035);
+  border-radius: 18px 18px 4px 18px;
+}
+
+html[dir='ltr'] .bubble.user { border-radius: 18px 18px 18px 4px; }
+
+/* ===================== سكرول بار موحّد ===================== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: rgba(var(--accent-rgb), 0.28); border-radius: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ===================== استجابة الشاشات الصغيرة ===================== */
+@media (max-width: 1024px) {
+  .tools-panel { position: fixed; inset-inline-end: 0; top: 0; height: 100vh; z-index: 50; box-shadow: -20px 0 40px rgba(0,0,0,0.4); }
+}
+
+@media (max-width: 640px) {
+  .sidebar:not(.collapsed) {
+    position: fixed; inset-inline-start: 0; top: 0; height: 100vh; z-index: 60;
+    box-shadow: 20px 0 40px rgba(0,0,0,0.5);
+  }
+  .welcome-v3-greeting h1 { font-size: 24px; }
+  .composer-v3 { max-width: 100%; }
+}
+
+/* ==================================================== */
+/* ========  لوحة الأدوات اليمنى — RightToolsPanel  ===== */
+/* ==================================================== */
+/* أصناف مستخدمة فعليًا بـ RightToolsPanel.jsx ولم يكن لها تنسيق سابق */
+
+.nexo-tools-panel {
+  width: 240px;
+  flex-shrink: 0;
+  height: 100%;
+  background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
+  border-inline-start: 1px solid rgba(var(--accent-rgb), 0.1);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.2s ease, opacity 0.15s ease;
+  overflow: hidden;
+}
+
+.nexo-tools-panel.collapsed {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  border: none;
+}
+
+.nexo-tools-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 14px 10px;
+  flex-shrink: 0;
+}
+
+.nexo-tools-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 12px 12px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.nexo-tools-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-family: inherit;
+}
+
+.nexo-tools-search input::placeholder { color: var(--text-faint); }
+
+.nexo-tools-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 10px 16px;
+}
+
+.nexo-tools-group-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-faint);
+  letter-spacing: 0.3px;
+  padding: 14px 6px 6px;
+}
+
+.nexo-tool-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.nexo-tool-item:hover {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(var(--accent-rgb), 0.22);
+}
+
+.nexo-tool-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: rgba(var(--accent-1-rgb), 0.16);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.14);
+  color: var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nexo-tool-texts { min-width: 0; flex: 1; }
+
+.nexo-tool-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nexo-tool-desc {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nexo-tools-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 49;
+}
+
+@media (max-width: 1024px) {
+  .nexo-tools-panel {
+    position: fixed;
+    inset-inline-end: 0;
+    top: 0;
+    width: 280px;
+    z-index: 50;
+    box-shadow: -20px 0 40px rgba(0, 0, 0, 0.45);
+  }
+  .nexo-tools-panel.collapsed {
+    width: 0;
+  }
+}
+
+/* ==================================================== */
+/* ==============  اقتراحات سريعة — QuickActions  ======= */
+/* ==================================================== */
+
+.nexo-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  max-width: 760px;
+  width: 100%;
+  padding: 0 8px;
+}
+
+.nexo-premium-card.nexo-quick-action-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.15s ease;
+}
+
+.nexo-quick-action-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.4);
+  background: rgba(255, 255, 255, 0.055);
+  transform: translateY(-2px);
+  box-shadow: var(--glow-soft);
+}
+
+.nexo-quick-action-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: rgba(var(--accent-1-rgb), 0.18);
+  color: var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nexo-quick-action-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+/* الوصف يظهر فقط كـtooltip ضمني عبر title الافتراضي؛ نخفيه بالصف الأفقي حتى يبقى الشريط رفيعًا كما بالصورة */
+.nexo-quick-action-desc { display: none; }
+
+@media (max-width: 640px) {
+  .nexo-quick-actions { gap: 8px; }
+  .nexo-quick-action-card { padding: 8px 11px; }
+  .nexo-quick-action-label { font-size: 11.5px; }
+}
+
+/* ==================================================== */
+/* ====  تحسينات إضافية: هوية Nexo بشاشة الترحيب  ====== */
+/* ==================================================== */
+
+.welcome-v3-badge {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 26px rgba(var(--accent-rgb), 0.4);
+}
+
+.welcome-v3-greeting h1 .gradient-text { font-weight: 800; }
+
+.welcome-v3-sub {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  margin: 4px 0 0;
+}
+
+/* ألوان متنوّعة لبطاقات الاقتراح السريعة — إحساس Premium بدل لون واحد مكرر */
+.nexo-quick-action-card:nth-child(5n+1) .nexo-quick-action-icon {
+  background: rgba(45, 212, 191, 0.16);
+  color: #5eead4;
+}
+.nexo-quick-action-card:nth-child(5n+2) .nexo-quick-action-icon {
+  background: rgba(var(--accent-1-rgb), 0.18);
+  color: var(--accent-light);
+}
+.nexo-quick-action-card:nth-child(5n+3) .nexo-quick-action-icon {
+  background: rgba(236, 72, 153, 0.16);
+  color: #f9a8d4;
+}
+.nexo-quick-action-card:nth-child(5n+4) .nexo-quick-action-icon {
+  background: rgba(250, 204, 21, 0.14);
+  color: #fde68a;
+}
+.nexo-quick-action-card:nth-child(5n+5) .nexo-quick-action-icon {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+/* ==================================================== */
+/* ==========  ترتيب الأعمدة: Sidebar يسار / أدوات يمين  */
+/* ==================================================== */
+/* بدون أي تغيير بالمنطق أو ترتيب DOM بالكود — فقط إعادة ترتيب بصري
+   عبر flex order لمطابقة الصورة المرجعية تمامًا:
+   يمين = لوحة أدوات Nexo، وسط = المحادثة، يسار = Main Sidebar. */
+
+.layout {
+  flex-direction: row;
+}
+
+.layout > .sidebar {
+  order: 3;
+  border-inline-end: none;
+  border-inline-start: 1px solid rgba(var(--accent-rgb), 0.1);
+}
+
+.layout > .chat-main {
+  order: 2;
+}
+
+.layout > .nexo-tools-panel {
+  order: 1;
+  border-inline-start: none;
+  border-inline-end: 1px solid rgba(var(--accent-rgb), 0.1);
+}
+
+@media (max-width: 1024px) {
+  .layout > .nexo-tools-panel {
+    order: 0; /* بالموبايل تبقى Drawer عائمة فوق كل شي، الترتيب البصري مو مهم */
+  }
+}
+
+/* ==================================================== */
+/* ======  بطاقات الإجراءات السريعة: عناصر رئيسية كبيرة  */
+/* ==================================================== */
+
+.nexo-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  max-width: 900px;
+}
+
+.nexo-premium-card.nexo-quick-action-card {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 22px 12px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel));
+  border: 1px solid var(--border-subtle);
+  min-height: 108px;
+}
+
+.nexo-quick-action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glow-soft), 0 18px 36px rgba(0, 0, 0, 0.32);
+}
+
+.nexo-quick-action-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.nexo-quick-action-icon svg { width: 18px; height: 18px; }
+
+.nexo-quick-action-label {
+  font-size: 13.5px;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+@media (max-width: 900px) {
+  .nexo-quick-actions { grid-template-columns: repeat(3, 1fr); max-width: 600px; }
+}
+
+@media (max-width: 640px) {
+  .nexo-quick-actions { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .nexo-premium-card.nexo-quick-action-card { padding: 16px 8px; min-height: 90px; }
+}
+
+/* ==================================================== */
+/* ==========  قسم المشاريع بلوحة الأدوات اليمنى  ======= */
+/* ==================================================== */
+
+.nexo-tools-projects {
+  margin-top: 6px;
+  padding: 0 10px 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.nexo-tools-projects-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 4px 10px;
+}
+
+.nexo-tools-projects-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-faint);
+  letter-spacing: 0.3px;
+}
+
+.nexo-tools-projects-add {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.nexo-tools-projects-add:hover {
+  border-color: rgba(var(--accent-rgb), 0.4);
+  color: var(--text-primary);
+}
+
+.nexo-project-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-bottom: 2px;
+  transition: background 0.15s ease;
+}
+
+.nexo-project-card:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.nexo-project-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: rgba(var(--accent-rgb), 0.14);
+  color: var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nexo-project-texts { min-width: 0; flex: 1; }
+
+.nexo-project-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nexo-project-count {
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.nexo-tools-projects-empty {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  padding: 6px 4px 4px;
+}
+
+/* ==================================================== */
+/* ===============  Premium Polish Pass  =============== */
+/* ==================================================== */
+
+/* ---- توزيع أفضل بالـSidebar الأيسر، استغلال المساحة ---- */
+.sidebar-scroll { display: flex; flex-direction: column; }
+
+.chat-list { min-height: 40px; }
+
+.sidebar-subsection {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.sidebar-empty-hint {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  padding: 8px 10px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ---- لوحة الأدوات: مسافات أوسع وأكثر تنظيمًا ---- */
+.nexo-tools-panel { width: 258px; padding-top: 2px; }
+
+.nexo-tools-panel-header { padding: 18px 16px 12px; }
+
+.nexo-tools-search { margin: 0 14px 16px; padding: 9px 13px; }
+
+.nexo-tools-body { padding: 0 12px 20px; }
+
+.nexo-tools-group {
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+}
+
+.nexo-tools-group + .nexo-tools-group {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 4px;
+}
+
+.nexo-tools-group-title {
+  padding: 12px 8px 8px;
+}
+
+.nexo-tool-item {
+  padding: 10px 9px;
+  margin-bottom: 2px;
+  gap: 11px;
+}
+
+/* ---- Hover / Active + Glow ناعم للأداة المحددة ---- */
+.nexo-tool-item:hover {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(var(--accent-rgb), 0.28);
+  transform: translateX(-2px);
+}
+
+html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
+
+.nexo-tool-item.active {
+  background: linear-gradient(135deg, rgba(var(--accent-1-rgb), 0.2), rgba(var(--accent-1-rgb), 0.05));
+  border-color: rgba(var(--accent-rgb), 0.45);
+  box-shadow: var(--glow-soft);
+}
+
+.nexo-tool-item.active .nexo-tool-icon {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.5);
+}
+
+.nexo-tool-item.active .nexo-tool-label { color: #fff; }
+
+.nexo-tool-item, .nexo-tool-icon {
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, color 0.18s ease;
+}
+
+/* ---- بطاقات الإجراءات السريعة: حركة وإضاءة أنعم ---- */
+.nexo-premium-card.nexo-quick-action-card {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+}
+
+.nexo-quick-action-icon {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
+}
+
+.nexo-quick-action-card:hover .nexo-quick-action-icon {
+  transform: scale(1.12);
+  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.35);
+}
+
+.nexo-quick-action-card:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+/* ==================================================== */
+/* ===================  Responsive  ==================== */
+/* ==================================================== */
+
+@media (max-width: 1180px) {
+  .nexo-tools-panel { width: 230px; }
+}
+
+@media (max-width: 1024px) {
+  .nexo-tools-panel { width: 280px; }
+}
+
+@media (max-width: 640px) {
+  .sidebar-newchat-btn { font-size: 12.5px; padding: 10px 12px; }
+  .nexo-tools-panel { width: 88vw; max-width: 320px; }
+  .nexo-tool-item { padding: 9px 8px; }
+}
+
+/* ==================================================== */
+/* ==========  تلميع أخير: حالات فارغة + الشريط  ======= */
+/* ==================================================== */
+
+.sidebar-empty-hint {
+  line-height: 1.7;
+  padding: 6px 10px 10px;
+  overflow-wrap: break-word;
+}
+
+.sidebar-empty-hint-compact {
+  padding: 2px 10px 8px;
+  opacity: 0.75;
+}
+
+/* ==================================================== */
+/* ============  Live Translate — Hover Polish  ======== */
+/* ==================================================== */
+/* هاي أصناف عامة تُضاف كـclassName جنب style الموجودة أصلًا
+   بـLiveTranslatePage.jsx — بدون أي تغيير بالمنطق، فقط حركة/توهج عند Hover
+   (inline style ما بتقدر تعمل :hover لحالها). */
+
+.lt-hover {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, border-color 0.18s ease;
+}
+.lt-hover:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+.lt-hover:active { transform: translateY(0); }
+
+.lt-primary-btn:hover {
+  box-shadow: 0 14px 36px rgba(124, 58, 237, 0.5) !important;
+}
+
+.lt-fab {
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), filter 0.18s ease, box-shadow 0.18s ease;
+}
+.lt-fab:hover {
+  transform: scale(1.1);
+  filter: brightness(1.12);
+}
+.lt-fab:active {
+  transform: scale(0.93);
+}
+
+.lt-video-tile {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* ==================================================== */
+/* ========  Live Translate — In-Call Redesign  ======== */
+/* ==================================================== */
+
+.lt-callscreen {
+  position: relative;
+  min-height: 100vh;
+  background: #0a0612;
+  color: #f3f0fa;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Top bar ---- */
+.lt-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+}
+
+.lt-topbar-left { display: flex; align-items: center; gap: 10px; }
+
+.lt-brand-dot {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; flex-shrink: 0;
+}
+
+.lt-topbar-title { font-size: 13.5px; font-weight: 700; }
+.lt-topbar-sub { font-size: 10.5px; color: #8a7fa8; }
+
+.lt-topbar-center {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; justify-content: center;
+}
+
+.lt-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px; padding: 6px 12px; font-size: 12px; color: #fff;
+}
+
+.lt-chip-btn { cursor: pointer; font-family: inherit; }
+.lt-chip-icon-btn { background: none; border: none; color: #c4b5fd; cursor: pointer; display: flex; padding: 0; }
+
+.lt-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.lt-dot.good { background: #4ade80; }
+.lt-dot.bad { background: #f87171; }
+
+.lt-end-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 20px; padding: 7px 15px;
+  color: #f87171; cursor: pointer; font-size: 12px; font-weight: 600;
+}
+
+/* ---- Body: 3 columns ---- */
+.lt-callbody {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  gap: 0;
+}
+
+.lt-col { display: flex; flex-direction: column; min-height: 0; }
+
+.lt-col-header {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 700; color: #cbb0fb;
+  padding: 16px 16px 10px;
+}
+
+/* Participants column */
+.lt-participants-col {
+  width: 260px;
+  flex-shrink: 0;
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lt-search-box {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 14px 10px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: #a89fc2;
+}
+
+.lt-search-box input {
+  flex: 1; background: none; border: none; outline: none; color: #fff; font-size: 12.5px; font-family: inherit;
+}
+.lt-search-box input::placeholder { color: #8a7fa8; }
+
+.lt-participants-list { flex: 1; overflow-y: auto; padding: 0 10px; }
+
+.lt-participant-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 8px; border-radius: 12px; margin-bottom: 4px;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.lt-participant-row.speaking {
+  background: rgba(168, 85, 247, 0.14);
+  border-color: rgba(168, 85, 247, 0.35);
+}
+
+.lt-participant-avatar {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12.5px;
+}
+
+.lt-participant-texts { flex: 1; min-width: 0; }
+
+.lt-participant-name {
+  font-size: 12.5px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.lt-participant-langs {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10.5px; color: #a89fc2;
+}
+
+.lt-muted-icon-on { color: #4ade80; flex-shrink: 0; }
+.lt-muted-icon-off { color: #8a7fa8; flex-shrink: 0; }
+
+.lt-invite-btn {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  margin: 10px 12px 14px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  background: rgba(168, 85, 247, 0.1);
+  color: #c4b5fd;
+  cursor: pointer; font-size: 12.5px; font-weight: 600; font-family: inherit;
+}
+
+/* Video column */
+.lt-video-col {
+  flex: 1;
+  padding: 18px 20px;
+  overflow-y: auto;
+}
+
+.lt-video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.lt-video-tile {
+  position: relative;
+  background: linear-gradient(160deg, rgba(124, 58, 237, 0.08), rgba(255, 255, 255, 0.02));
+  border-radius: 18px;
+  overflow: hidden;
+  aspect-ratio: 16/10;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lt-video-tile.speaking {
+  border-color: #a855f7;
+  box-shadow: 0 0 28px rgba(168, 85, 247, 0.4);
+}
+
+.lt-video-avatar-wrap {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+}
+
+.lt-video-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 20px;
+}
+
+.lt-video-tag-topstart { position: absolute; top: 8px; inset-inline-start: 8px; }
+.lt-video-tag-topend { position: absolute; top: 8px; inset-inline-end: 8px; background: rgba(0,0,0,0.5); border-radius: 6px; padding: 3px; }
+.lt-video-tag-bottomstart {
+  position: absolute; bottom: 8px; inset-inline-start: 8px;
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(0,0,0,0.55); padding: 4px 10px; border-radius: 8px; font-size: 11.5px;
+}
+.lt-video-tag-bottomend { position: absolute; bottom: 8px; inset-inline-end: 8px; }
+
+.lt-translated-tag {
+  background: rgba(168, 85, 247, 0.25); border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 20px; padding: 2px 8px; font-size: 10.5px;
+  display: flex; align-items: center; gap: 3px;
+}
+
+/* Translation column */
+.lt-translate-col {
+  width: 300px;
+  flex-shrink: 0;
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lt-translate-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lt-translate-empty { color: #8a7fa8; font-size: 12px; padding: 10px 2px; line-height: 1.7; }
+
+.lt-caption-card {
+  border-radius: 14px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.lt-caption-card.incoming {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.14), rgba(236, 72, 153, 0.06));
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+.lt-caption-card.subtle { opacity: 0.7; padding: 9px 11px; }
+
+.lt-caption-head {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10.5px; color: #c4b5fd; margin-bottom: 6px;
+}
+
+.lt-caption-card p { margin: 0; font-size: 13px; color: #fff; }
+
+.lt-translate-footer {
+  padding: 12px 14px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lt-translate-footer label { font-size: 11px; color: #a89fc2; display: block; margin-bottom: 6px; }
+
+.lt-translate-footer select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 9px 12px;
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+/* ---- Bottom toolbar ---- */
+.lt-bottom-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(15, 9, 24, 0.7);
+  backdrop-filter: blur(14px);
+}
+
+.lt-toolbar-more-wrap, .lt-toolbar-emoji-wrap { position: relative; }
+
+.lt-toolbar-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #a89fc2;
+  cursor: pointer;
+  font-size: 10.5px;
+  font-family: inherit;
+  padding: 8px 14px;
+  border-radius: 12px;
+}
+
+.lt-toolbar-btn:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+.lt-toolbar-btn.active { background: rgba(168, 85, 247, 0.18); color: #fff; }
+.lt-toolbar-btn.danger { color: #f87171; }
+.lt-toolbar-btn.end { color: #fff; background: linear-gradient(135deg, #ef4444, #dc2626); }
+.lt-toolbar-btn.end:hover { filter: brightness(1.1); }
+.lt-toolbar-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.lt-toolbar-soon {
+  font-size: 8px; font-weight: 700; color: #facc15;
+  background: rgba(250, 204, 21, 0.12); padding: 1px 5px; border-radius: 8px;
+}
+
+.lt-more-menu, .lt-emoji-popover {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 12, 32, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  z-index: 40;
+}
+
+.lt-more-menu { padding: 6px; min-width: 190px; }
+
+.lt-more-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 10px; border-radius: 9px;
+  font-size: 12.5px; color: #fff; cursor: pointer;
+  white-space: nowrap;
+}
+.lt-more-item:hover { background: rgba(168, 85, 247, 0.15); }
+
+.lt-emoji-popover { display: flex; gap: 6px; padding: 8px; }
+.lt-emoji-option { background: none; border: none; cursor: pointer; font-size: 21px; }
+
+@media (max-width: 1180px) {
+  .lt-translate-col { width: 260px; }
+  .lt-participants-col { width: 220px; }
+}
+
+@media (max-width: 900px) {
+  .lt-callbody { flex-direction: column; }
+  .lt-participants-col, .lt-translate-col {
+    width: 100%;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    max-height: 260px;
+  }
+  .lt-topbar-center { order: 3; width: 100%; justify-content: flex-start; overflow-x: auto; }
+  .lt-toolbar-btn span:not(.lt-toolbar-soon) { display: none; }
+  .lt-toolbar-btn { padding: 10px; }
+}
+
+/* ==================================================== */
+/* ========  Live Translate — Mic/Cam Busy Spinner  ==== */
+/* ==================================================== */
+
+.lt-spin {
+  animation: lt-spin-anim 0.8s linear infinite;
+}
+
+@keyframes lt-spin-anim {
+  to { transform: rotate(360deg); }
+}
+
+/* ==================================================== */
+/* ==========  Live Translate — Chat + Avatar  ========= */
+/* ==================================================== */
+
+.lt-video-avatar-img {
+  width: 56px; height: 56px; border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.3);
+}
+
+.lt-right-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lt-right-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a89fc2;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  position: relative;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.lt-right-tab:hover { color: #fff; }
+
+.lt-right-tab.active {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(236, 72, 153, 0.08));
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #fff;
+}
+
+.lt-right-tab-badge {
+  background: #a855f7;
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 6px;
+  margin-inline-start: 2px;
+}
+
+/* Chat feed */
+.lt-chat-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lt-chat-bubble-row { display: flex; flex-direction: column; align-items: flex-start; max-width: 88%; }
+.lt-chat-bubble-row.mine { align-self: flex-end; align-items: flex-end; }
+
+.lt-chat-bubble-name { font-size: 10.5px; color: #a89fc2; margin-bottom: 3px; padding: 0 4px; }
+
+.lt-chat-bubble {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px 14px 14px 4px;
+  padding: 9px 13px;
+  font-size: 13px;
+  color: #fff;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.lt-chat-bubble-row.mine .lt-chat-bubble {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.4), rgba(236, 72, 153, 0.22));
+  border-color: rgba(168, 85, 247, 0.4);
+  border-radius: 14px 14px 4px 14px;
+}
+
+.lt-chat-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lt-chat-input-row input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 9px 14px;
+  color: #fff;
+  font-size: 12.5px;
+  outline: none;
+  font-family: inherit;
+}
+
+.lt-chat-input-row input::placeholder { color: #8a7fa8; }
+
+.lt-chat-input-row button {
+  width: 34px; height: 34px; border-radius: 50%; border: none; flex-shrink: 0;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.lt-chat-input-row button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.lt-participant-avatar-img {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  object-fit: cover;
+}
+
+/* ==================================================== */
+/* ======  Live Translate — Private Chat + Polish  ===== */
+/* ==================================================== */
+
+.lt-participant-dm-btn {
+  background: none;
+  border: none;
+  color: #8a7fa8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.lt-participant-dm-btn:hover { background: rgba(168, 85, 247, 0.18); color: #fff; }
+
+.lt-chat-target-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lt-chat-target-row label {
+  font-size: 11px;
+  color: #a89fc2;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lt-chat-target-row select {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9px;
+  padding: 6px 9px;
+  color: #fff;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.lt-chat-bubble-row { display: flex; gap: 8px; align-items: flex-end; max-width: 92%; }
+.lt-chat-bubble-row.mine { align-self: flex-end; flex-direction: row-reverse; }
+
+.lt-chat-bubble-avatar, .lt-chat-bubble-avatar-fallback {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+}
+
+.lt-chat-bubble-avatar { object-fit: cover; }
+
+.lt-chat-bubble-avatar-fallback {
+  background: #6d28d9;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lt-chat-bubble-col { display: flex; flex-direction: column; min-width: 0; }
+.lt-chat-bubble-row.mine .lt-chat-bubble-col { align-items: flex-end; }
+
+.lt-chat-bubble-time {
+  font-size: 9px;
+  color: #6b6180;
+  margin-top: 2px;
+  padding: 0 4px;
+}
+
+.user-avatar-img {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  object-fit: cover;
+}
+
+/* ==================================================== */
+/* ====  Live Translate — Chat Redesign v2 (Full)  ===== */
+/* ==================================================== */
+
+/* تبويبان: الجميع / خاص */
+.lt-chat-subtabs {
+  display: flex;
+  gap: 6px;
+  padding: 12px 14px 8px;
+}
+
+.lt-chat-subtab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a89fc2;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.lt-chat-subtab:hover { color: #fff; }
+
+.lt-chat-subtab.active {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.24), rgba(236, 72, 153, 0.08));
+  border-color: rgba(168, 85, 247, 0.45);
+  color: #fff;
+}
+
+.lt-chat-subtab-badge {
+  background: #ef4444;
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 700;
+  border-radius: 10px;
+  min-width: 16px;
+  padding: 1px 5px;
+  text-align: center;
+}
+
+.lt-chat-scope-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px 10px;
+  font-size: 10.5px;
+  color: #8a7fa8;
+}
+
+/* قائمة المحادثات الخاصة */
+.lt-dm-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 8px;
+}
+
+.lt-dm-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.lt-dm-list-item:hover { background: rgba(255, 255, 255, 0.035); }
+
+.lt-dm-list-item.unread {
+  background: rgba(168, 85, 247, 0.1);
+  border-color: rgba(168, 85, 247, 0.28);
+}
+
+.lt-dm-list-texts { flex: 1; min-width: 0; }
+
+.lt-dm-list-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+
+.lt-dm-list-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lt-dm-list-time { font-size: 9.5px; color: #6b6180; flex-shrink: 0; }
+
+.lt-dm-list-langs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #a89fc2;
+  margin: 2px 0;
+}
+
+.lt-dm-list-preview {
+  font-size: 11.5px;
+  color: #8a7fa8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lt-dm-list-item.unread .lt-dm-list-preview { color: #d8cff0; font-weight: 500; }
+
+.lt-dm-list-badge {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  flex-shrink: 0;
+}
+
+.lt-dm-online-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #4ade80; display: inline-block; flex-shrink: 0;
+}
+
+/* رأس محادثة خاصة مفتوحة */
+.lt-dm-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lt-dm-back {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+
+.lt-dm-header-texts { min-width: 0; }
+
+.lt-dm-header-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.lt-dm-online-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #4ade80;
+}
+
+.lt-dm-header-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  color: #a89fc2;
+  margin-top: 2px;
+}
+
+.lt-dm-lock {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: #c4b5fd;
+  background: rgba(168, 85, 247, 0.12);
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+
+/* توست رسالة خاصة جديدة */
+.lt-dm-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(20, 12, 32, 0.95);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 14px;
+  padding: 10px 16px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  pointer-events: auto;
+  max-width: 320px;
+  animation: lt-toast-in 0.25s ease;
+}
+
+@keyframes lt-toast-in {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.lt-dm-toast-icon {
+  width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.lt-dm-toast-title { font-size: 12px; font-weight: 700; color: #fff; }
+.lt-dm-toast-preview {
+  font-size: 11px; color: #a89fc2;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px;
+}
+
+/* شارة عداد بالشريط السفلي */
+.lt-toolbar-badge {
+  position: absolute;
+  top: 2px;
+  inset-inline-end: 6px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 10px;
+  min-width: 15px;
+  padding: 0 4px;
+  line-height: 15px;
+  text-align: center;
+}
+
+.lt-toolbar-btn { position: relative; }
+
+/* نقطة صغيرة على زر المحادثة الخاصة بقائمة المشاركين */
+.lt-participant-dm-btn { position: relative; }
+
+.lt-participant-dm-dot {
+  position: absolute;
+  top: -1px;
+  inset-inline-end: -1px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 1.5px solid var(--bg-panel, #14101d);
+}
+
+/* حركة دخول رسالة جديدة */
+.lt-msg-in {
+  animation: lt-msg-in-anim 0.22s ease;
+}
+
+@keyframes lt-msg-in-anim {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+  .lt-dm-toast { max-width: 90vw; }
+}
+
+.lt-dm-toast-texts { min-width: 0; flex: 1; }
+
+/* ==================================================== */
+/* ====  Live Translate — Chat/Translate كـBottom Sheet على الموبايل  ==== */
+/* ==================================================== */
+
+@media (max-width: 640px) {
+  .lt-translate-col {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    height: 72vh;
+    max-height: 72vh;
+    z-index: 55;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.55);
+    border-top: 1px solid rgba(168, 85, 247, 0.25);
+  }
+}
+
+/* ==================================================== */
+/* ===========  Nexo Design System — Primitives  ======= */
+/* ==================================================== */
+/* عناصر عامة قابلة لإعادة الاستخدام بكل صفحات Nexo — بادئة nexo- تفرّقها
+   عن أصناف خاصة بصفحة معيّنة (lt-*, sidebar-*...). كلها تستخدم نفس
+   المتغيرات (tokens) المعرّفة بأعلى الملف، ما فيها ألوان أو قيم جديدة —
+   الهدف توحيد الاستخدام، مو تغيير الهوية البصرية.
+   التوثيق الكامل: DESIGN_SYSTEM.md */
+
+/* ---------- أزرار ---------- */
+.nexo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+}
+.nexo-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.nexo-btn-primary {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(var(--accent-1-rgb), 0.3);
+}
+.nexo-btn-primary:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.06); }
+
+.nexo-btn-secondary {
+  background: rgba(var(--accent-rgb), 0.1);
+  border-color: rgba(var(--accent-rgb), 0.25);
+  color: var(--text-primary);
+}
+.nexo-btn-secondary:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.18); }
+
+.nexo-btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+.nexo-btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+
+.nexo-btn-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+.nexo-btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.2); }
+
+.nexo-btn-icon { padding: 9px; border-radius: 50%; }
+.nexo-btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* ---------- بطاقات ---------- */
+.nexo-card {
+  background: linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+.nexo-card-hover:hover {
+  border-color: rgba(var(--accent-rgb), 0.4);
+  box-shadow: var(--glow-soft), 0 16px 36px rgba(0, 0, 0, 0.28);
+  transform: translateY(-3px);
+}
+
+.nexo-card-icon {
+  width: 42px; height: 42px;
+  border-radius: var(--radius-sm);
+  background: rgba(var(--accent-1-rgb), 0.16);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.14);
+  color: var(--accent-light);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+
+/* ---------- حقول إدخال ---------- */
+.nexo-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.nexo-field label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+
+.nexo-input, .nexo-select, .nexo-textarea {
+  background: var(--bg-input-2);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-sm);
+  padding: 10px 13px;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+  width: 100%;
+}
+.nexo-input:focus, .nexo-select:focus, .nexo-textarea:focus { border-color: rgba(var(--accent-rgb), 0.55); }
+.nexo-input::placeholder, .nexo-textarea::placeholder { color: var(--text-faint); }
+.nexo-select { color-scheme: dark; cursor: pointer; }
+.nexo-select option { background: var(--bg-panel); color: var(--text-primary); }
+.nexo-textarea { resize: vertical; min-height: 80px; }
+
+.nexo-field-error { border-color: rgba(239, 68, 68, 0.5) !important; }
+.nexo-field-error-msg { color: #f87171; font-size: 11.5px; }
+
+/* ---------- Tabs عامة ---------- */
+.nexo-tabs { display: flex; gap: 4px; padding: 3px; background: rgba(255,255,255,0.03); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); }
+.nexo-tab {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px; font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer; border: none; background: none; font-family: inherit;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.nexo-tab:hover { color: var(--text-primary); }
+.nexo-tab.active {
+  background: linear-gradient(135deg, rgba(var(--accent-1-rgb), 0.22), rgba(var(--accent-1-rgb), 0.05));
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
+  color: #fff;
+}
+
+/* ---------- Badges ---------- */
+.nexo-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px;
+}
+.nexo-badge-accent { background: var(--accent-2); color: #fff; }
+.nexo-badge-soon { background: rgba(var(--color-warning-rgb), 0.14); color: var(--color-warning); }
+.nexo-badge-success { background: rgba(var(--color-success-rgb), 0.14); color: var(--color-success); }
+.nexo-badge-danger { background: rgba(var(--color-error-rgb), 0.14); color: var(--color-error); }
+
+/* ---------- Dialog / Modal عام ---------- */
+.nexo-dialog-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.nexo-dialog {
+  width: 100%; max-width: 440px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+  padding: 24px;
+  animation: nexoDialogIn 0.2s ease;
+}
+@keyframes nexoDialogIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.nexo-dialog-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.nexo-dialog-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+.nexo-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+/* ---------- Toast عام ---------- */
+.nexo-toast {
+  position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-panel);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  font-size: 13px; color: var(--text-primary);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+  z-index: 300;
+  animation: nexoToastIn 0.25s ease;
+}
+@keyframes nexoToastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.nexo-toast-success svg { color: var(--color-success); }
+.nexo-toast-error svg { color: var(--color-error); }
+
+/* ---------- حالات: Empty / Error / Loading / Offline ---------- */
+.nexo-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 40px 24px;
+  color: var(--text-secondary);
+}
+.nexo-state-icon {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(var(--accent-1-rgb), 0.12);
+  color: var(--accent-light);
+  margin-bottom: 4px;
+}
+.nexo-state-title { font-size: 14.5px; font-weight: 700; color: var(--text-primary); }
+.nexo-state-desc { font-size: 12.5px; color: var(--text-muted); max-width: 320px; line-height: 1.7; }
+
+.nexo-state-error .nexo-state-icon { background: rgba(var(--color-error-rgb), 0.12); color: var(--color-error); }
+.nexo-state-offline .nexo-state-icon { background: rgba(var(--color-warning-rgb), 0.12); color: var(--color-warning); }
+
+/* Loading: Skeleton بتأثير Shimmer */
+.nexo-skeleton {
+  background: linear-gradient(90deg, var(--bg-input) 25%, var(--bg-input-3) 50%, var(--bg-input) 75%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: nexoShimmer 1.6s ease-in-out infinite;
+}
+@keyframes nexoShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.nexo-skeleton-line { height: 12px; margin-bottom: 8px; }
+.nexo-skeleton-line.w-60 { width: 60%; }
+.nexo-skeleton-line.w-80 { width: 80%; }
+.nexo-skeleton-line.w-40 { width: 40%; }
+.nexo-skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; }
+.nexo-skeleton-card { height: 90px; border-radius: var(--radius-lg); }
+
+/* Offline banner */
+.nexo-offline-banner {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: rgba(var(--color-warning-rgb), 0.1);
+  border-bottom: 1px solid rgba(var(--color-warning-rgb), 0.25);
+  color: var(--color-warning);
+  font-size: 12.5px; font-weight: 600;
+  padding: 8px 14px;
+}
+.nexo-offline-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-warning); animation: nexoStatusPulse 1s ease-in-out infinite; }
+
+@media (max-width: 640px) {
+  .nexo-dialog { max-width: 100%; }
+  .nexo-tabs { flex-wrap: wrap; }
+}
+
+/* ==================================================== */
+/* =====  Nexo Design System — Tool Page Shell  ======== */
+/* ==================================================== */
+/* قالب موحّد لأي صفحة أداة (Data Analyzer, OCR, CV Builder...). 
+   الصفحة المرجعية: AIDocumentsPage.jsx — أي أداة جديدة تتبع نفس البنية. */
+
+.nexo-tool-page {
+  color: var(--text-primary);
+}
+
+.nexo-tool-page-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.nexo-tool-page-title {
+  font-size: 21px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--text-primary);
+}
+
+.nexo-tool-page-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.7;
+}
+
+.nexo-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* منطقة الرفع — أكبر وأوضح، توهج عند التفاعل، وحالة Drag حقيقية */
+.nexo-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 48px 20px;
+  border-radius: var(--radius-md);
+  border: 1.5px dashed var(--border-input);
+  cursor: pointer;
+  background: var(--bg-input-2);
+  text-align: center;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.nexo-dropzone:hover {
+  border-color: rgba(var(--accent-rgb), 0.4);
+  background: var(--bg-input-3);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.2), var(--glow-soft);
+}
+.nexo-dropzone.drag-active {
+  border-color: var(--accent-2);
+  background: rgba(var(--accent-1-rgb), 0.1);
+  box-shadow: var(--glow-strong);
+}
+.nexo-dropzone.has-file {
+  border-style: solid;
+  border-color: rgba(var(--accent-rgb), 0.35);
+}
+
+.nexo-dropzone-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(var(--accent-1-rgb), 0.22), rgba(var(--accent-1-rgb), 0.06));
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  color: var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  transition: transform 0.2s ease;
+}
+.nexo-dropzone:hover .nexo-dropzone-icon,
+.nexo-dropzone.drag-active .nexo-dropzone-icon { transform: scale(1.08); }
+
+.nexo-dropzone-text { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
+.nexo-dropzone-hint { font-size: 11px; color: var(--text-faint); }
+
+.nexo-inline-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-error);
+  font-size: 12.5px;
+  margin-top: 12px;
+}
+
+.nexo-spin { animation: nexoSpin 1s linear infinite; }
+@keyframes nexoSpin { to { transform: rotate(360deg); } }
+
+/* رأس بطاقة نتيجة (عنوان + أزرار إجراء) */
+.nexo-card-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.nexo-card-row-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nexo-result-text {
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-primary);
+}
+
+/* قائمة سجل عامة (History List) */
+.nexo-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.nexo-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+.nexo-list-item:hover { border-color: rgba(var(--accent-rgb), 0.25); transform: translateY(-1px); }
+.nexo-list-item-icon {
+  width: 36px; height: 36px; border-radius: var(--radius-sm); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.nexo-list-item-main { flex: 1; min-width: 0; }
+.nexo-list-item-title {
+  font-size: 13.5px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 3px;
+}
+.nexo-list-item-sub { font-size: 11.5px; color: var(--text-muted); }
+
+@media (max-width: 640px) {
+  .nexo-tool-page-inner { padding: 20px 16px 60px; }
+  .nexo-tool-page-header { flex-direction: column; gap: 8px; }
+}
+
+/* ==================================================== */
+/* ====  Tool Page: خلفية أغنى + Hero Icon + Bidi  ====== */
+/* ==================================================== */
+
+.nexo-tool-page {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background:
+    radial-gradient(ellipse 900px 520px at 12% -8%, rgba(var(--accent-1-rgb), 0.24), transparent 62%),
+    radial-gradient(ellipse 700px 480px at 100% 12%, rgba(236, 72, 153, 0.12), transparent 58%),
+    radial-gradient(ellipse 600px 440px at 45% 100%, rgba(var(--accent-1-rgb), 0.09), transparent 60%),
+    var(--bg-page);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.nexo-tool-page::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  inset-inline-end: 4%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.32), transparent 70%);
+  filter: blur(36px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.nexo-tool-page-inner {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 40px 80px;
+}
+
+.nexo-tool-icon-hero {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  box-shadow: 0 10px 28px rgba(var(--accent-1-rgb), 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nexo-tool-page-title { font-size: 24px; }
+
+.nexo-card {
+  position: relative;
+  overflow: hidden;
+}
+.nexo-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  inset-inline-end: -20%;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(var(--accent-1-rgb), 0.08), transparent 70%);
+  pointer-events: none;
+}
+
+/* إصلاح تداخل الاتجاه (Bidi) بالنصوص المختلطة عربي/إنجليزي —
+   كل عنصر فيه dir="auto" يستخدم هاد، عشان كل سطر ياخذ اتجاهه الصح لحاله
+   بدل ما يُفرض عليه اتجاه العنصر الأب بالكامل. */
+[dir='auto'] {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+/* ==================================================== */
+/* ===  Nexo Design System — Glow Orbs + بطاقة فاخرة  === */
+/* ==================================================== */
+/* مستوحاة من المرجع البصري: كرات توهج خلفية ناعمة + حدود بطاقة متدرجة خفيفة */
+
+.nexo-glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.6;
+}
+.nexo-glow-orb-purple { background: radial-gradient(circle, rgba(var(--accent-1-rgb), 0.4), transparent 70%); }
+.nexo-glow-orb-pink { background: radial-gradient(circle, rgba(236, 72, 153, 0.32), transparent 70%); }
+
+/* بطاقة فاخرة — حد علوي متدرج رفيع (Accent Line) بدل حد موحّد اللون بكل الجهات */
+.nexo-card-luxe {
+  position: relative;
+  background: linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  overflow: hidden;
+}
+.nexo-card-luxe::after {
+  content: '';
+  position: absolute;
+  top: 0; inset-inline: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-1), var(--accent-2), transparent);
+  opacity: 0.7;
+}
+
+/* زر أساسي بلمعة داخلية خفيفة (Inset highlight) — إحساس أفخم بدون توهج زايد */
+.nexo-btn-primary {
+  position: relative;
+  box-shadow: 0 8px 22px rgba(var(--accent-1-rgb), 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* ==================================================== */
+/* ==  Tool Page Shell — إضافات: نماذج، Chips، اختبارات == */
+/* ==================================================== */
+/* استخدمت أصلًا بـ StudyModePage.jsx و CVBuilderPage.jsx — عامة لأي أداة فيها فورم أو اختبار. */
+
+/* صف حقول أفقي متجاوب */
+.nexo-form-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.nexo-form-row .nexo-input { flex: 1; min-width: 150px; }
+
+/* بطاقة فرعية جوه بطاقة (عنصر قابل للتكرار: خبرة عمل، إلخ) */
+.nexo-subcard {
+  background: var(--bg-input-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+/* Chip قابل للحذف (مهارة، لغة، مفهوم رئيسي) */
+.nexo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(var(--accent-rgb), 0.14);
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  color: var(--text-primary);
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 12.5px;
+}
+
+/* رفع صورة دائرية (صورة CV، صورة بروفايل) */
+.nexo-avatar-upload {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--bg-input-2);
+  border: 1.5px dashed var(--border-input);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+.nexo-avatar-upload:hover { border-color: rgba(var(--accent-rgb), 0.4); }
+.nexo-avatar-upload img { width: 100%; height: 100%; object-fit: cover; }
+
+/* خيار سؤال اختبار — حالات محايدة/محددة/صح/خطأ بألوان دلالية موحّدة */
+.nexo-quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 13px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input-2);
+  border: 1px solid transparent;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.nexo-quiz-option:hover { border-color: rgba(var(--accent-rgb), 0.25); }
+.nexo-quiz-option.selected { background: rgba(var(--accent-rgb), 0.15); border-color: rgba(var(--accent-rgb), 0.3); }
+.nexo-quiz-option.correct { background: rgba(var(--color-success-rgb), 0.15); border-color: rgba(var(--color-success-rgb), 0.35); cursor: default; }
+.nexo-quiz-option.incorrect { background: rgba(var(--color-error-rgb), 0.15); border-color: rgba(var(--color-error-rgb), 0.35); cursor: default; }
+
+@media (max-width: 640px) {
+  .nexo-form-row { flex-direction: column; }
+  .nexo-form-row .nexo-input { width: 100%; }
+}
+
+/* ==================================================== */
+/* ========  Nexo Design System — Settings Kit  ======== */
+/* ==================================================== */
+/* عناصر مشتركة لكل أقسام صفحة الإعدادات — قالب موحّد بدل أصناف settings-* المتفرقة القديمة. */
+
+.nexo-settings-block {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.nexo-settings-block:last-child { border-bottom: none; }
+
+.nexo-settings-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.nexo-settings-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+  line-height: 1.7;
+}
+
+/* صف: تسمية على جهة + عنصر تحكم على الجهة التانية */
+.nexo-settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.nexo-settings-row-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+/* مفتاح تبديل (Toggle) */
+.nexo-switch {
+  width: 42px;
+  height: 24px;
+  border-radius: 20px;
+  background: var(--bg-input-3);
+  border: 1px solid var(--border-input);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.nexo-switch.on {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  border-color: transparent;
+}
+.nexo-switch-knob {
+  position: absolute;
+  top: 2px;
+  inset-inline-start: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: inset-inline-start 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.nexo-switch.on .nexo-switch-knob { inset-inline-start: 20px; }
+
+/* شبكة خيارات (أسلوب رد، تصنيف...) */
+.nexo-choice-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.nexo-choice-chip {
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 500;
+  background: var(--bg-input-2);
+  border: 1px solid var(--border-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.nexo-choice-chip:hover { color: var(--text-primary); border-color: rgba(var(--accent-rgb), 0.3); }
+.nexo-choice-chip.active {
+  background: linear-gradient(135deg, rgba(var(--accent-1-rgb), 0.24), rgba(var(--accent-1-rgb), 0.08));
+  border-color: rgba(var(--accent-rgb), 0.45);
+  color: #fff;
+}
+
+.nexo-char-count { text-align: end; font-size: 10.5px; color: var(--text-faint); margin-top: 4px; }
+
+/* أيقونة نوع ملف عامة (نفس نمط nexo-list-item-icon بس بدون اعتماد على nexo-list) */
+.nexo-file-row-icon {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  background: rgba(var(--accent-1-rgb), 0.14); color: var(--accent-light);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.nexo-about-logo { text-align: center; padding: 8px 0 20px; }
+.nexo-about-links { display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+
+@media (max-width: 480px) {
+  .nexo-settings-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+
+/* ==================================================== */
+/* =============  Nexo Design System — Auth  =========== */
+/* ==================================================== */
+
+.nexo-auth-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  direction: rtl;
+  background:
+    radial-gradient(ellipse 900px 560px at 20% -10%, rgba(var(--accent-1-rgb), 0.22), transparent 62%),
+    radial-gradient(ellipse 700px 480px at 100% 100%, rgba(236, 72, 153, 0.12), transparent 58%),
+    var(--bg-page);
+}
+
+.nexo-auth-card {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 40px 32px;
+  text-align: center;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+}
+.nexo-auth-card::after {
+  content: '';
+  position: absolute;
+  top: 0; inset-inline: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-1), var(--accent-2), transparent);
+  opacity: 0.8;
+}
+
+.nexo-auth-logo { display: flex; justify-content: center; margin-bottom: 18px; }
+
+.nexo-auth-title {
+  font-size: 23px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  letter-spacing: -0.2px;
+}
+
+.nexo-auth-subtitle {
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  margin: 0 0 26px;
+  line-height: 1.6;
+}
+
+.nexo-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  text-align: start;
+  position: relative;
+}
+
+.nexo-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-faint);
+  font-size: 12px;
+  margin: 22px 0 16px;
+}
+.nexo-auth-divider::before,
+.nexo-auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.nexo-auth-switch {
+  margin-top: 22px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  position: relative;
+}
+.nexo-auth-switch button {
+  background: none;
+  border: none;
+  color: var(--accent-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+.nexo-auth-switch button:hover { text-decoration: underline; }
+
+@media (max-width: 480px) {
+  .nexo-auth-card { padding: 32px 22px; }
+}
+
+/* ==================================================== */
+/* =========  Nexo Design System — Settings Modal  ===== */
+/* ==================================================== */
+
+.nexo-settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.nexo-settings-modal {
+  width: 100%;
+  max-width: 860px;
+  height: min(680px, 88vh);
+  background: linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: nexoDialogIn 0.2s ease;
+}
+
+.nexo-settings-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.nexo-settings-modal-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* التنقل الجانبي بين الأقسام */
+.nexo-settings-nav {
+  width: 200px;
+  flex-shrink: 0;
+  border-inline-end: 1px solid var(--border-subtle);
+  padding: 14px 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nexo-settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: start;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.nexo-settings-nav-item:hover { background: rgba(255, 255, 255, 0.04); color: var(--text-primary); }
+.nexo-settings-nav-item.active {
+  background: linear-gradient(135deg, rgba(var(--accent-1-rgb), 0.2), rgba(var(--accent-1-rgb), 0.05));
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  color: #fff;
+  font-weight: 600;
+}
+.nexo-settings-nav-item svg { flex-shrink: 0; opacity: 0.85; }
+
+/* منطقة المحتوى */
+.nexo-settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 26px;
+  min-width: 0;
+}
+
+.nexo-settings-content-heading {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 18px;
+}
+
+.nexo-settings-section-enter { animation: nexoSettingsFadeIn 0.18s ease; }
+@keyframes nexoSettingsFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 700px) {
+  .nexo-settings-modal { height: 92vh; max-width: 100%; }
+  .nexo-settings-modal-body { flex-direction: column; }
+  .nexo-settings-nav {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-inline-end: none;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 10px 12px;
+  }
+  .nexo-settings-nav-item { white-space: nowrap; flex-shrink: 0; }
+  .nexo-settings-nav-item span { display: none; }
+  .nexo-settings-content { padding: 18px; }
+}
+
+/* ==================================================== */
+/* ============  Nexo Design System — Stepper  ========= */
+/* ==================================================== */
+/* عداد +/- (زي حاسبة المواريث) — عام لأي أداة فيها عد أشخاص/عناصر */
+
+.nexo-stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.nexo-stepper-btn {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border-input);
+  background: var(--bg-input-2);
+  color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.nexo-stepper-btn:hover:not(:disabled) {
+  border-color: rgba(var(--accent-rgb), 0.4);
+  color: var(--text-primary);
+  background: rgba(var(--accent-rgb), 0.1);
+}
+.nexo-stepper-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.nexo-stepper-value {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--text-primary);
+}

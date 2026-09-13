@@ -1,0 +1,141 @@
+/* ============================================
+   Nexo Premium Theme — طبقة تصميم إضافية
+   لا تحذف أو تعدّل أي CSS موجود، فقط تضيف كلاسات جديدة
+   ============================================ */
+
+.nexo-premium-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid rgba(var(--accent-rgb), 0.14);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nexo-premium-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.28);
+  box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.08);
+}
+
+/* بطاقات الإجراءات السريعة بشاشة الترحيب */
+.nexo-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 720px;
+  margin: 24px auto 0;
+}
+
+.nexo-quick-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.nexo-quick-action-icon {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(var(--accent-rgb), 0.14);
+  color: var(--accent-2);
+}
+
+.nexo-quick-action-label {
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+}
+.nexo-quick-action-desc {
+  font-size: 11px; color: var(--text-secondary); line-height: 1.4;
+}
+
+/* لوحة الأدوات اليمنى */
+.nexo-tools-panel {
+  width: 300px;
+  flex-shrink: 0;
+  height: 100%;
+  border-inline-start: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,0.015);
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease, opacity 0.2s ease;
+}
+
+.nexo-tools-panel.collapsed {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  border: none;
+}
+
+.nexo-tools-panel-header {
+  padding: 16px 16px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.nexo-tools-search {
+  margin: 0 16px 12px;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg-input-2);
+  border: 1px solid var(--border-input);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.nexo-tools-search input {
+  background: transparent; border: none; outline: none;
+  color: var(--text-primary); font-size: 13px; width: 100%;
+}
+
+.nexo-tools-body {
+  flex: 1; overflow-y: auto; padding: 0 12px 16px;
+}
+
+.nexo-tools-group-title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase; color: var(--text-secondary);
+  padding: 12px 8px 6px;
+}
+
+.nexo-tool-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 10px;
+  cursor: pointer; transition: background 0.15s ease;
+}
+.nexo-tool-item:hover { background: rgba(var(--accent-rgb), 0.1); }
+
+.nexo-tool-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--accent-2); flex-shrink: 0;
+}
+
+.nexo-tool-texts { min-width: 0; }
+.nexo-tool-label { font-size: 12.5px; color: var(--text-primary); font-weight: 500; }
+.nexo-tool-desc { font-size: 10.5px; color: var(--text-secondary); line-height: 1.3; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.nexo-tools-toggle-btn {
+  position: relative;
+}
+
+/* Drawer للموبايل/التابلت */
+@media (max-width: 1024px) {
+  .nexo-tools-panel {
+    position: fixed; inset-inline-end: 0; top: 0; bottom: 0;
+    width: 280px; z-index: 60;
+    box-shadow: -8px 0 24px rgba(0,0,0,0.35);
+  }
+  .nexo-tools-panel.collapsed { display: none; width: 0; }
+  .nexo-tools-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 55;
+  }
+}
+
+@media (max-width: 768px) {
+  .nexo-quick-actions { grid-template-columns: repeat(2, 1fr); }
+}

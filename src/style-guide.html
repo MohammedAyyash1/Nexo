@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nexo — Design System / Style Guide</title>
+<!--
+  دليل حي مستقل — يستورد نفس ملفات CSS الحقيقية المستخدمة بالتطبيق.
+  حط هاد الملف بمجلد src (أو أي مكان تقدر توصل منه لـ styles/) وافتحه مباشرة بالمتصفح،
+  أو زوّده Route بسيط لو بدك تفتحه من جوه التطبيق نفسه.
+  لا يحتوي أي منطق React — HTML/CSS بحت، بيعكس فعليًا نفس الأصناف المستخدمة بالكود.
+-->
+<link rel="stylesheet" href="./styles/premium-theme.css" />
+<link rel="stylesheet" href="./styles/nexo-premium-v4.css" />
+<style>
+  /* أصناف خاصة بهاد الملف بس — لتنظيم عرض الدليل نفسه، مو جزء من الـDesign System */
+  .sg-page { padding: 40px 32px 120px; max-width: 1180px; margin: 0 auto; }
+  .sg-hero { text-align: center; margin-bottom: 60px; }
+  .sg-hero h1 { font-size: 32px; font-weight: 800; color: var(--text-primary); margin: 0 0 8px; }
+  .sg-hero p { color: var(--text-secondary); font-size: 14px; }
+  .sg-section { margin-bottom: 64px; }
+  .sg-section-title {
+    font-size: 13px; font-weight: 700; color: var(--accent-light);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding-bottom: 10px; margin-bottom: 22px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .sg-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 18px; }
+  .sg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .sg-label { font-size: 11px; color: var(--text-faint); margin-bottom: 8px; }
+  .sg-swatch { width: 100%; height: 64px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-bottom: 6px; }
+  .sg-swatch-name { font-size: 11.5px; color: var(--text-secondary); font-family: monospace; }
+  .sg-nav {
+    position: fixed; top: 0; inset-inline-end: 0; height: 100vh; width: 190px;
+    background: var(--bg-panel); border-inline-start: 1px solid var(--border-subtle);
+    padding: 24px 14px; overflow-y: auto; z-index: 10;
+  }
+  .sg-nav a {
+    display: block; padding: 7px 10px; border-radius: 8px; font-size: 12.5px;
+    color: var(--text-secondary); text-decoration: none; margin-bottom: 2px;
+  }
+  .sg-nav a:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+  body { margin-inline-end: 190px; }
+  @media (max-width: 900px) { .sg-nav { display: none; } body { margin-inline-end: 0; } }
+</style>
+</head>
+<body>
+
+<nav class="sg-nav">
+  <a href="#tokens">Tokens</a>
+  <a href="#buttons">أزرار</a>
+  <a href="#cards">بطاقات</a>
+  <a href="#fields">حقول</a>
+  <a href="#tabs">Tabs</a>
+  <a href="#badges">Badges</a>
+  <a href="#dialog">Dialog</a>
+  <a href="#toast">Toast</a>
+  <a href="#states">الحالات</a>
+  <a href="#skeleton">Loading</a>
+  <a href="#offline">Offline</a>
+  <a href="#chat">فقاعات الشات</a>
+</nav>
+
+<div class="sg-page">
+
+  <div class="sg-hero">
+    <h1>Nexo Design System</h1>
+    <p>دليل حي — كل عنصر هون مأخوذ حرفيًا من <code>nexo-premium-v4.css</code>. المرجع النصي الكامل: <code>DESIGN_SYSTEM.md</code></p>
+  </div>
+
+  <!-- ===================== Tokens ===================== -->
+  <section class="sg-section" id="tokens">
+    <div class="sg-section-title">Design Tokens — الألوان</div>
+    <div class="sg-grid">
+      <div><div class="sg-swatch" style="background:var(--accent-1)"></div><div class="sg-swatch-name">--accent-1</div></div>
+      <div><div class="sg-swatch" style="background:var(--accent-2)"></div><div class="sg-swatch-name">--accent-2</div></div>
+      <div><div class="sg-swatch" style="background:linear-gradient(135deg,var(--accent-1),var(--accent-2))"></div><div class="sg-swatch-name">gradient(1,2)</div></div>
+      <div><div class="sg-swatch" style="background:var(--bg-panel)"></div><div class="sg-swatch-name">--bg-panel</div></div>
+      <div><div class="sg-swatch" style="background:var(--bg-panel-2)"></div><div class="sg-swatch-name">--bg-panel-2</div></div>
+      <div><div class="sg-swatch" style="background:var(--bg-page)"></div><div class="sg-swatch-name">--bg-page</div></div>
+    </div>
+  </section>
+
+  <!-- ===================== Buttons ===================== -->
+  <section class="sg-section" id="buttons">
+    <div class="sg-section-title">أزرار</div>
+    <div class="sg-row">
+      <button class="nexo-btn nexo-btn-primary">إجراء أساسي</button>
+      <button class="nexo-btn nexo-btn-secondary">إجراء ثانوي</button>
+      <button class="nexo-btn nexo-btn-ghost">إجراء خفيف</button>
+      <button class="nexo-btn nexo-btn-danger">حذف</button>
+      <button class="nexo-btn nexo-btn-primary" disabled>معطّل</button>
+    </div>
+    <div class="sg-row">
+      <button class="nexo-btn nexo-btn-primary nexo-btn-sm">زر صغير</button>
+      <button class="nexo-btn nexo-btn-ghost nexo-btn-icon">＋</button>
+    </div>
+  </section>
+
+  <!-- ===================== Cards ===================== -->
+  <section class="sg-section" id="cards">
+    <div class="sg-section-title">بطاقات</div>
+    <div class="sg-grid">
+      <div class="nexo-card nexo-card-hover">
+        <div class="nexo-card-icon">✦</div>
+        <h3 style="color:var(--text-primary);font-size:15px;margin:0 0 6px">عنوان البطاقة</h3>
+        <p style="color:var(--text-secondary);font-size:12.5px;margin:0">وصف مختصر يشرح محتوى البطاقة بسطرين.</p>
+      </div>
+      <div class="nexo-card nexo-card-hover">
+        <div class="nexo-card-icon">◈</div>
+        <h3 style="color:var(--text-primary);font-size:15px;margin:0 0 6px">بطاقة تانية</h3>
+        <p style="color:var(--text-secondary);font-size:12.5px;margin:0">مرّر الماوس فوقها لتشوف حركة الـHover.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Fields ===================== -->
+  <section class="sg-section" id="fields">
+    <div class="sg-section-title">حقول إدخال</div>
+    <div style="max-width:360px">
+      <div class="nexo-field">
+        <label>الاسم</label>
+        <input class="nexo-input" placeholder="اكتب اسمك..." />
+      </div>
+      <div class="nexo-field">
+        <label>اللغة</label>
+        <select class="nexo-select">
+          <option>العربية</option>
+          <option>English</option>
+        </select>
+      </div>
+      <div class="nexo-field">
+        <label>ملاحظات</label>
+        <textarea class="nexo-textarea" placeholder="اكتب هون..."></textarea>
+      </div>
+      <div class="nexo-field">
+        <label>حقل فيه خطأ</label>
+        <input class="nexo-input nexo-field-error" value="قيمة غلط" />
+        <span class="nexo-field-error-msg">هاد الحقل مطلوب.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Tabs ===================== -->
+  <section class="sg-section" id="tabs">
+    <div class="sg-section-title">Tabs</div>
+    <div class="nexo-tabs" style="max-width:320px">
+      <button class="nexo-tab active">الكل</button>
+      <button class="nexo-tab">خاص</button>
+    </div>
+  </section>
+
+  <!-- ===================== Badges ===================== -->
+  <section class="sg-section" id="badges">
+    <div class="sg-section-title">Badges</div>
+    <div class="sg-row">
+      <span class="nexo-badge nexo-badge-accent">3</span>
+      <span class="nexo-badge nexo-badge-soon">قريبًا</span>
+      <span class="nexo-badge nexo-badge-success">تم</span>
+      <span class="nexo-badge nexo-badge-danger">خطأ</span>
+    </div>
+  </section>
+
+  <!-- ===================== Dialog ===================== -->
+  <section class="sg-section" id="dialog">
+    <div class="sg-section-title">Dialog / Modal</div>
+    <div style="position:relative; height:280px; background:var(--bg-page); border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--border-subtle)">
+      <div class="nexo-dialog-overlay" style="position:absolute">
+        <div class="nexo-dialog">
+          <div class="nexo-dialog-header">
+            <span class="nexo-dialog-title">تأكيد الحذف</span>
+            <button class="nexo-btn nexo-btn-ghost nexo-btn-icon">✕</button>
+          </div>
+          <p style="color:var(--text-secondary);font-size:13px;margin:0">هل أنت متأكد؟ هاد الإجراء ما ينرجع.</p>
+          <div class="nexo-dialog-actions">
+            <button class="nexo-btn nexo-btn-ghost">إلغاء</button>
+            <button class="nexo-btn nexo-btn-danger">حذف</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Toast ===================== -->
+  <section class="sg-section" id="toast">
+    <div class="sg-section-title">Toast</div>
+    <div style="position:relative; height:90px; background:var(--bg-page); border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--border-subtle)">
+      <div class="nexo-toast nexo-toast-success" style="position:absolute; bottom:16px;">✓ تم الحفظ بنجاح</div>
+    </div>
+  </section>
+
+  <!-- ===================== States ===================== -->
+  <section class="sg-section" id="states">
+    <div class="sg-section-title">الحالات — Empty / Error</div>
+    <div class="sg-grid">
+      <div class="nexo-card">
+        <div class="nexo-state">
+          <div class="nexo-state-icon">☁</div>
+          <div class="nexo-state-title">لا يوجد بيانات بعد</div>
+          <div class="nexo-state-desc">لسا ما ضفت شي هون. ابدأ بإنشاء أول عنصر.</div>
+          <button class="nexo-btn nexo-btn-primary nexo-btn-sm">إنشاء جديد</button>
+        </div>
+      </div>
+      <div class="nexo-card">
+        <div class="nexo-state nexo-state-error">
+          <div class="nexo-state-icon">⚠</div>
+          <div class="nexo-state-title">صار خطأ بالتحميل</div>
+          <div class="nexo-state-desc">تعذّر الاتصال بالسيرفر. جرّب مرة تانية.</div>
+          <button class="nexo-btn nexo-btn-secondary nexo-btn-sm">إعادة المحاولة</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Skeleton ===================== -->
+  <section class="sg-section" id="skeleton">
+    <div class="sg-section-title">Loading — Skeleton</div>
+    <div class="nexo-card" style="max-width:320px">
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:14px;">
+        <div class="nexo-skeleton nexo-skeleton-avatar"></div>
+        <div style="flex:1">
+          <div class="nexo-skeleton nexo-skeleton-line w-60"></div>
+          <div class="nexo-skeleton nexo-skeleton-line w-40" style="margin-bottom:0"></div>
+        </div>
+      </div>
+      <div class="nexo-skeleton nexo-skeleton-line w-80"></div>
+      <div class="nexo-skeleton nexo-skeleton-line w-60" style="margin-bottom:0"></div>
+    </div>
+  </section>
+
+  <!-- ===================== Offline ===================== -->
+  <section class="sg-section" id="offline">
+    <div class="sg-section-title">Offline / Connection Lost</div>
+    <div style="border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--border-subtle)">
+      <div class="nexo-offline-banner">
+        <span class="nexo-offline-dot"></span> الاتصال ضعيف — عم نحاول نعيد الاتصال...
+      </div>
+      <div style="padding:20px; background:var(--bg-panel); color:var(--text-muted); font-size:12.5px;">محتوى الصفحة تحت الشريط...</div>
+    </div>
+  </section>
+
+  <!-- ===================== Chat bubbles ===================== -->
+  <section class="sg-section" id="chat">
+    <div class="sg-section-title">فقاعات الشات (نمط عام)</div>
+    <div class="nexo-card" style="max-width:420px; display:flex; flex-direction:column; gap:10px;">
+      <div class="lt-chat-bubble-row">
+        <div class="lt-chat-bubble-avatar-fallback">س</div>
+        <div class="lt-chat-bubble-col">
+          <div class="lt-chat-bubble-name">سارة</div>
+          <div class="lt-chat-bubble">أهلًا! كيفك؟</div>
+          <div class="lt-chat-bubble-time">10:02</div>
+        </div>
+      </div>
+      <div class="lt-chat-bubble-row mine">
+        <div class="lt-chat-bubble-col">
+          <div class="lt-chat-bubble">تمام، شكرًا! 🙌</div>
+          <div class="lt-chat-bubble-time">10:03</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

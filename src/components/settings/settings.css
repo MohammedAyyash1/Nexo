@@ -1,0 +1,585 @@
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.settings-modal {
+  background: var(--bg-panel);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  border-radius: 16px;
+  width: 92%;
+  max-width: 780px;
+  height: 560px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.settings-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.settings-modal-header h2 {
+  color: var(--text-primary);
+  font-size: 18px;
+  margin: 0;
+}
+
+.settings-modal-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.settings-nav {
+  width: 200px;
+  flex-shrink: 0;
+  border-inline-end: 1px solid var(--border-subtle);
+  padding: 12px 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-nav-item {
+  text-align: start;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.settings-nav-item:hover {
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.settings-nav-item.active {
+  background: rgba(var(--accent-rgb), 0.18);
+  color: var(--text-primary);
+}
+
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+
+.settings-section-body h3 {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0 0 12px;
+}
+
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.settings-label { color: var(--text-muted); }
+.settings-value { color: var(--text-primary); }
+.settings-hint { color: var(--text-muted); font-size: 13px; }
+
+.settings-facts-list {
+  margin: 0 0 12px;
+  padding-inline-start: 20px;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+
+.settings-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  color: var(--text-primary);
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.settings-btn:hover { background: rgba(var(--accent-rgb), 0.22); }
+
+.settings-btn.danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.settings-btn.danger:hover { background: rgba(239, 68, 68, 0.18); }
+
+.settings-nav-icon {
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.settings-nav-item.active .settings-nav-icon {
+  opacity: 1;
+}
+
+/* تمييز أوضح للقسم النشط */
+.settings-nav-item.active {
+  background: rgba(var(--accent-rgb), 0.22);
+  color: var(--text-primary);
+  box-shadow: inset 3px 0 0 var(--accent-2);
+}
+
+/* عنوان القسم أعلى الصفحة */
+.settings-section-title {
+  margin-bottom: 16px;
+}
+
+.settings-section-heading {
+  color: var(--text-primary);
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* انتقال ناعم عند تبديل الأقسام */
+.settings-section-enter {
+  animation: settingsFadeIn 0.18s ease;
+}
+
+@keyframes settingsFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive للشاشات الصغيرة */
+@media (max-width: 640px) {
+  .settings-modal {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .settings-modal-body {
+    flex-direction: column;
+  }
+
+  .settings-nav {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-inline-end: none;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 8px;
+    gap: 4px;
+  }
+
+  .settings-nav-item {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .settings-nav-item.active {
+    box-shadow: inset 0 -3px 0 var(--accent-2);
+  }
+}
+
+/* عناوين فرعية داخل كل قسم */
+.settings-group-title {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+/* Radio buttons للمظهر */
+.settings-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-radio-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.settings-radio-item input[type="radio"] {
+  accent-color: var(--accent-2);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+/* دوائر لون الواجهة */
+.settings-accent-group {
+  display: flex;
+  gap: 10px;
+}
+
+.settings-accent-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.settings-accent-dot.active {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 2px rgba(var(--overlay-rgb), 0.15);
+}
+
+/* صفوف الإعدادات بنمط ChatGPT (Select على الجانب) */
+.settings-select {
+  background: var(--bg-input-2);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.settings-select:hover {
+  background: var(--bg-input-3);
+}
+
+.settings-select:focus {
+  outline: none;
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.settings-inline-btn {
+  background: transparent;
+  border: none;
+  color: var(--accent-2);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.settings-inline-btn:hover {
+  text-decoration: underline;
+}
+
+/* Dropdown مخصص متوافق مع هوية Nexo */
+.settings-custom-select {
+  position: relative;
+  min-width: 140px;
+}
+
+.settings-custom-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--bg-input-2);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.settings-custom-select-trigger:hover {
+  background: var(--bg-input-3);
+}
+
+.settings-custom-select-trigger svg {
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.settings-custom-select-trigger svg.flipped {
+  transform: rotate(180deg);
+}
+
+.settings-custom-select-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  inset-inline-end: 0;
+  min-width: 140px;
+  background: var(--bg-panel-2);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  border-radius: 10px;
+  padding: 4px;
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.settings-custom-select-option {
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.settings-custom-select-option:hover {
+  background: var(--bg-input);
+}
+
+.settings-custom-select-option.active {
+  background: rgba(var(--accent-rgb), 0.2);
+  color: var(--text-primary);
+}
+
+/* حقول إدخال Personalization */
+.settings-text-input {
+  width: 100%;
+  background: var(--bg-input-3);
+  border: 1px solid var(--border-input);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.settings-text-input:focus {
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.settings-textarea {
+  width: 100%;
+  background: var(--bg-input-3);
+  border: 1px solid var(--border-input);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+  min-height: 90px;
+  transition: border-color 0.2s ease;
+}
+
+.settings-textarea:focus {
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.settings-char-count {
+  text-align: end;
+  color: var(--text-faint);
+  font-size: 11.5px;
+  margin-top: 4px;
+}
+
+/* شبكة خيارات الأسلوب والنبرة */
+.settings-style-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.settings-style-chip {
+  background: var(--bg-input-3);
+  border: 1px solid var(--border-input);
+  color: var(--text-secondary);
+  padding: 9px 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.settings-style-chip:hover {
+  background: rgba(var(--accent-rgb), 0.1);
+}
+
+.settings-style-chip.active {
+  background: rgba(var(--accent-rgb), 0.18);
+  border-color: rgba(var(--accent-rgb), 0.5);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Switch (تشغيل/إيقاف) */
+.settings-switch {
+  width: 42px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  background: var(--bg-input-3);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+  padding: 0;
+}
+
+.settings-switch.on {
+  background: var(--accent-2);
+}
+
+.settings-switch-knob {
+  position: absolute;
+  top: 3px;
+  inset-inline-start: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: inset-inline-start 0.2s ease;
+}
+
+.settings-switch.on .settings-switch-knob {
+  inset-inline-start: 21px;
+}
+
+.settings-row > div:first-child {
+  flex: 1;
+  padding-inline-end: 16px;
+}
+
+.settings-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* قائمة الملفات */
+.settings-files-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-file-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: var(--bg-input-3);
+}
+
+.settings-file-icon {
+  color: var(--accent-2);
+  flex-shrink: 0;
+}
+
+.settings-file-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.settings-file-name {
+  font-size: 13.5px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-file-meta {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+/* قسم حول */
+.settings-about-logo {
+  text-align: center;
+  padding: 10px 0 20px;
+}
+
+.settings-about-logo .nexo-logo {
+  margin: 0 auto;
+}
+
+.settings-about-links {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.about-link-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: linear-gradient(135deg, rgba(var(--accent-1-rgb), 0.14), rgba(var(--accent-1-rgb), 0.04));
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  color: var(--text-primary);
+  padding: 11px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.about-link-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--accent-rgb), 0.45);
+  box-shadow: 0 6px 18px rgba(var(--accent-1-rgb), 0.15);
+}
+
+/* قسم "قريبًا" احترافي (Subscription) */
+.settings-coming-soon {
+  text-align: center;
+  padding: 30px 10px;
+}
+
+.settings-coming-soon-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(var(--accent-rgb), 0.15);
+  color: var(--accent-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.settings-fact-category {
+  display: inline-block;
+  background: rgba(var(--accent-rgb), 0.15);
+  color: var(--accent-2);
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  margin-inline-end: 4px;
+}
