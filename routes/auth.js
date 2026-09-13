@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
@@ -55,6 +56,7 @@ router.post('/signup', async (req, res) => {
       supabase
         .from('users')
         .insert({
+          id: crypto.randomUUID(),
           email: normalizedEmail,
           password: passwordHash,
           name: name || normalizedEmail.split('@')[0],
@@ -142,7 +144,7 @@ router.post('/google-login', async (req, res) => {
       const { data: created, error: insertError } = await withRetry(() =>
         supabase
           .from('users')
-          .insert({ email: normalizedEmail, name: payload.name || normalizedEmail.split('@')[0], password: null })
+          .insert({ id: crypto.randomUUID(), email: normalizedEmail, name: payload.name || normalizedEmail.split('@')[0], password: null })
           .select('id, email, name')
           .single()
       );
