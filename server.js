@@ -38,6 +38,14 @@ const app = express();
 
 app.use(cors({ origin: config.frontendUrl }));
 app.use(express.json({ limit: '50mb' }));
+
+// ===== Health check =====
+// تحتاجه أغلب منصات الاستضافة (Render, Railway, إلخ) للتأكد الدوري أن السيرفر شغّال وصحي.
+// لا يتطلب مصادقة عمدًا، ولا يكشف أي معلومة حساسة.
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
+});
+
 app.use('/api', flashcardsRoutes);
 app.use('/api', codeWorkspaceRoutes);
 app.use('/api', knowledgeBaseRoutes);
@@ -87,9 +95,27 @@ app.use('/api', dataAnalyzerRoutes);
 app.use('/api', meetingNotesRoutes);
 app.use('/api', emailAssistantRoutes);
 app.use('/api', assistantsRoutes);
+
+// ===== 404: أي مسار API غير موجود =====
+// لازم يكون بعد كل الـroutes وقبل الـerror handler
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'المسار المطلوب غير موجود' });
+});
+
+// ===== Error handler مركزي =====
+// لازم يكون آخر middleware بالسلسلة (4 معاملات = Express بيتعرف عليه كـerror handler تلقائيًا).
+// يمنع تسريب أي stack trace أو تفاصيل تقنية حساسة للمستخدم، ويسجل الخطأ الحقيقي بالسيرفر فقط.
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  if (res.headersSent) return next(err);
+  res.status(err.status || 500).json({
+    error: config.isProduction ? 'حدث خطأ غير متوقع في السيرفر' : (err.message || 'حدث خطأ غير متوقع في السيرفر'),
+  });
+});
+
 const server = http.createServer(app);
 setupLiveTranslateSocket(server);
 
 server.listen(config.port, () => {
-  console.log(`✅ Server running on http://localhost:${config.port}`);
+  console.log(`✅ Server running on port ${config.port}`);
 });

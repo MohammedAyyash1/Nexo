@@ -10,7 +10,9 @@ import { API_BASE } from '../../config/api.js';
 const TOKEN_KEY = 'nexo_token';
 const LANG_KEY = 'nexo_lang';
 const BASE = `${API_BASE}/api`;
-const WS_BASE = 'ws://localhost:3001/live-translate-ws';
+
+
+const WS_BASE = API_BASE.replace(/^http/, 'ws') + '/live-translate-ws';
 const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }];
 const VAD_SAMPLE_RATE = 16000;
 const LANG_META = { ar: { flag: '🇸🇦', code: 'AR' }, en: { flag: '🇬🇧', code: 'EN' } };
