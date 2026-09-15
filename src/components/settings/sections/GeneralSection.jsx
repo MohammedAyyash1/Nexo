@@ -4,10 +4,9 @@ import { SettingsSelect } from '../SettingsSelect.jsx';
 import { applyAccent, loadSavedAccent, applyThemeMode, loadSavedThemeMode } from '../../../utils/theme.js';
 import { API_BASE } from '../../../../config/api.js';
 
-const USER_KEY = 'nexo_user';
 const TOKEN_KEY = 'nexo_token';
 
-export function GeneralSection({ user, lang, toggleLang, onLogout }) {
+export function GeneralSection({ user, lang, toggleLang, onLogout, onUserUpdate }) {
   const [appearance, setAppearance] = useState(() => loadSavedThemeMode());
   const [accent, setAccent] = useState(() => loadSavedAccent());
   const savedAvatarUrl = user?.avatar_url || user?.avatar || user?.avatarUrl || user?.photoUrl || user?.picture || null;
@@ -115,13 +114,8 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
         if (!res.ok) throw new Error(data.error || (lang === 'en' ? 'Upload failed' : 'فشل الرفع'));
         setAvatar(data.avatarUrl);
         setPendingBlob(null); // تم الحفظ فعليًا، ما عاد فيه تغيير معلّق
-        try {
-          const saved = localStorage.getItem(USER_KEY);
-          const parsed = saved ? JSON.parse(saved) : (user || {});
-          localStorage.setItem(USER_KEY, JSON.stringify({ ...parsed, avatar_url: data.avatarUrl }));
-        } catch (err) {
-          console.error('Sync avatar to localStorage error:', err);
-        }
+        // نحدّث الـ user بمستوى التطبيق كامل فورًا — هذا يوصل لكل مكان (Sidebar وغيره) بدون أي حاجة لإعادة تحميل الصفحة
+        onUserUpdate?.({ avatar_url: data.avatarUrl });
       })
       .catch((err) => {
         console.error('Avatar upload error:', err);

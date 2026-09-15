@@ -17,11 +17,11 @@ import { AssistantsSection } from './sections/AssistantsSection.jsx';
 import { PlaceholderSection } from './sections/PlaceholderSection.jsx';
 import './settings.css';
 
-export function SettingsModal({ user, lang, toggleLang, onLogout, onClose, showToast, onChatsCleared, onAutoRenameChange, initialSection }) {
+export function SettingsModal({ user, lang, toggleLang, onLogout, onClose, showToast, onChatsCleared, onAutoRenameChange, initialSection, onUserUpdate }) {
   const [active, setActive] = useState(initialSection || 'general');
 
   const renderSection = () => {
-    if (active === 'general') return <GeneralSection user={user} lang={lang} toggleLang={toggleLang} onLogout={onLogout} />;
+    if (active === 'general') return <GeneralSection user={user} lang={lang} toggleLang={toggleLang} onLogout={onLogout} onUserUpdate={onUserUpdate} />;
     if (active === 'personalization') return <PersonalizationSection lang={lang} showToast={showToast} />;
     if (active === 'chat') return <ChatSection lang={lang} showToast={showToast} onChatsCleared={onChatsCleared} onAutoRenameChange={onAutoRenameChange} />;
     if (active === 'ai') return <AISection lang={lang} showToast={showToast} />;

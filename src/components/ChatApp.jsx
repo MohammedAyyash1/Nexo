@@ -26,7 +26,7 @@ function loadLang() {
   return saved === 'en' || saved === 'ar' ? saved : 'ar';
 }
 
-export function ChatApp({ user, onLogout, onGoHome }) {
+export function ChatApp({ user, onLogout, onGoHome, onUserUpdate }) {
   const navigate = useNavigate();
   const [chats, setChats] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
@@ -809,6 +809,7 @@ const handleToggleSpeak = (text, index) => {
           onChatsCleared={() => { setChats([]); setActiveChatId(null); handleNewChat(); }}
           onAutoRenameChange={setAutoRename}
           initialSection={settingsInitialSection}
+          onUserUpdate={onUserUpdate}
         />
       )}
 

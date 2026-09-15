@@ -62,12 +62,20 @@ function App() {
     setUser(null);
     setView('landing');
   };
+
+  const handleUserUpdate = (updates) => {
+    setUser((prev) => {
+      const merged = { ...(prev || {}), ...updates };
+      localStorage.setItem(USER_KEY, JSON.stringify(merged));
+      return merged;
+    });
+  };
   
 const handleGoHome = () => setView('landing');
   const MainView = () => {
     if (view === 'landing') return <Landing onStart={() => setView('auth')} />;
     if (view === 'auth') return <Auth onAuthenticated={handleAuthenticated} />;
-    return <ChatApp user={user} onLogout={handleLogout} onGoHome={handleGoHome} />;
+    return <ChatApp user={user} onLogout={handleLogout} onGoHome={handleGoHome} onUserUpdate={handleUserUpdate} />;
   };
 
   // لسا عم نتحقق من localStorage - ما نقرر شي بعد
