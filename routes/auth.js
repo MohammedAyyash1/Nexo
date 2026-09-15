@@ -2,6 +2,7 @@ import express from 'express';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import multer from 'multer';
 import { OAuth2Client } from 'google-auth-library';
 import { config } from '../config/env.js';
 import { authMiddleware } from '../authMiddleware.js';
@@ -10,10 +11,11 @@ import { supabase } from '../services/supabaseClient.js';
 
 const router = express.Router();
 const googleClient = config.googleClientId ? new OAuth2Client(config.googleClientId) : null;
+const uploadAvatar = multer({ storage: multer.memoryStorage(), limits: { fileSize: 12 * 1024 * 1024 } });
 
 /**
  * ⚠️ افتراض مهم: هذا الملف مبني على افتراض إنه جدول `users` بـ Supabase
- * فيه الأعمدة التالية: id, email, name, password (bcrypt hash), is_admin, created_at.
+ * فيه الأعمدة التالية: id, email, name, password (bcrypt hash), is_admin, created_at, avatar_url.
  * إذا كان اسم عمود كلمة المرور مختلف عندك (مثلاً password_hash)، بدّل
  * كل مكان مكتوب فيه `password` بالاسم الصحيح قبل ما تجرب الكود.
  */
@@ -23,7 +25,7 @@ function signToken(userId) {
 }
 
 function publicUser(user) {
-  return { id: user.id, email: user.email, name: user.name };
+  return { id: user.id, email: user.email, name: user.name, avatar_url: user.avatar_url || null };
 }
 
 // ===== POST /api/signup =====
@@ -61,7 +63,7 @@ router.post('/signup', async (req, res) => {
           password: passwordHash,
           name: name || normalizedEmail.split('@')[0],
         })
-        .select('id, email, name')
+        .select('id, email, name, avatar_url')
         .single()
     );
     if (insertError) {
@@ -88,7 +90,7 @@ router.post('/login', async (req, res) => {
     const normalizedEmail = email.trim().toLowerCase();
 
     const { data: user, error } = await withRetry(() =>
-      supabase.from('users').select('id, email, name, password').eq('email', normalizedEmail).maybeSingle()
+      supabase.from('users').select('id, email, name, password, avatar_url').eq('email', normalizedEmail).maybeSingle()
     );
     if (error) {
       console.error('Login lookup error:', error);
@@ -131,7 +133,7 @@ router.post('/google-login', async (req, res) => {
     const normalizedEmail = payload.email.trim().toLowerCase();
 
     const { data: existing, error: lookupError } = await withRetry(() =>
-      supabase.from('users').select('id, email, name').eq('email', normalizedEmail).maybeSingle()
+      supabase.from('users').select('id, email, name, avatar_url').eq('email', normalizedEmail).maybeSingle()
     );
     if (lookupError) {
       console.error('Google login lookup error:', lookupError);
@@ -145,7 +147,7 @@ router.post('/google-login', async (req, res) => {
         supabase
           .from('users')
           .insert({ id: crypto.randomUUID(), email: normalizedEmail, name: payload.name || normalizedEmail.split('@')[0], password: null })
-          .select('id, email, name')
+          .select('id, email, name, avatar_url')
           .single()
       );
       if (insertError) {
@@ -172,7 +174,7 @@ router.get('/config', (req, res) => {
 // ===== GET /api/account =====
 router.get('/account', authMiddleware, async (req, res) => {
   const { data, error } = await withRetry(() =>
-    supabase.from('users').select('id, email, name').eq('id', req.userId).maybeSingle()
+    supabase.from('users').select('id, email, name, avatar_url').eq('id', req.userId).maybeSingle()
   );
   if (error || !data) {
     return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -215,6 +217,50 @@ router.post('/change-password', authMiddleware, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error('Change password error:', err);
+    res.status(500).json({ error: 'حدث خطأ في السيرفر' });
+  }
+});
+
+// ===== POST /api/account/avatar =====
+router.post('/account/avatar', authMiddleware, uploadAvatar.single('avatar'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'لم يتم إرسال أي صورة' });
+    }
+    if (!req.file.mimetype.startsWith('image/')) {
+      return res.status(400).json({ error: 'الملف المرسل ليس صورة' });
+    }
+
+    const fileExt = (req.file.mimetype.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+    const storagePath = `${req.userId}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(storagePath, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true, // يستبدل الصورة القديمة لنفس المستخدم بدل ما يراكم ملفات جديدة
+      });
+
+    if (uploadError) {
+      console.error('Avatar upload error:', uploadError);
+      return res.status(500).json({ error: 'فشل رفع الصورة' });
+    }
+
+    const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(storagePath);
+    // نضيف طابع زمني بنهاية الرابط لإجبار المتصفح يحدّث الصورة المعروضة فورًا (cache-busting)
+    const avatarUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
+
+    const { error: updateError } = await withRetry(() =>
+      supabase.from('users').update({ avatar_url: avatarUrl }).eq('id', req.userId)
+    );
+    if (updateError) {
+      console.error('Avatar db update error:', updateError);
+      return res.status(500).json({ error: 'تم رفع الصورة لكن فشل حفظ الرابط' });
+    }
+
+    res.json({ avatarUrl });
+  } catch (err) {
+    console.error('Avatar upload error:', err);
     res.status(500).json({ error: 'حدث خطأ في السيرفر' });
   }
 });

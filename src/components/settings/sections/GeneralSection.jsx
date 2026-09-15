@@ -2,14 +2,17 @@ import { useState, useRef } from 'react';
 import { LogOut, Camera } from 'lucide-react';
 import { SettingsSelect } from '../SettingsSelect.jsx';
 import { applyAccent, loadSavedAccent, applyThemeMode, loadSavedThemeMode } from '../../../utils/theme.js';
+import { API_BASE } from '../../../../config/api.js';
 
 const USER_KEY = 'nexo_user';
+const TOKEN_KEY = 'nexo_token';
 
 export function GeneralSection({ user, lang, toggleLang, onLogout }) {
   const [appearance, setAppearance] = useState(() => loadSavedThemeMode());
   const [accent, setAccent] = useState(() => loadSavedAccent());
-  const [avatar, setAvatar] = useState(() => user?.avatar || user?.avatarUrl || user?.photoUrl || user?.picture || null);
+  const [avatar, setAvatar] = useState(() => user?.avatar_url || user?.avatar || user?.avatarUrl || user?.photoUrl || user?.picture || null);
   const [avatarError, setAvatarError] = useState('');
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const fileInputRef = useRef(null);
 
   const appearanceOptions = [
@@ -47,7 +50,7 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        // نصغّر الصورة لمربع 256×256 (Cover crop) ونضغطها JPEG حتى تضل ضمن حد localStorage مهما كان حجم الصورة الأصلية
+        // نصغّر الصورة لمربع 256×256 (Cover crop) ونضغطها JPEG قبل الرفع لتقليل حجم النقل
         const SIZE = 256;
         const canvas = document.createElement('canvas');
         canvas.width = SIZE;
@@ -58,24 +61,17 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
         const drawH = img.height * scale;
         ctx.drawImage(img, (SIZE - drawW) / 2, (SIZE - drawH) / 2, drawW, drawH);
 
-        let compressedDataUrl;
-        try {
-          compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        } catch (err) {
-          console.error('Compress avatar error:', err);
-          setAvatarError(lang === 'en' ? 'Could not process this image.' : 'تعذّر معالجة هذه الصورة.');
-          return;
-        }
-
-        setAvatar(compressedDataUrl);
-        try {
-          const saved = localStorage.getItem(USER_KEY);
-          const parsed = saved ? JSON.parse(saved) : (user || {});
-          localStorage.setItem(USER_KEY, JSON.stringify({ ...parsed, avatar: compressedDataUrl }));
-        } catch (err) {
-          console.error('Save avatar to localStorage error:', err);
-          setAvatarError(lang === 'en' ? 'Could not save the picture on this device (storage full).' : 'تعذّر حفظ الصورة على هذا الجهاز (التخزين ممتلئ).');
-        }
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              setAvatarError(lang === 'en' ? 'Could not process this image.' : 'تعذّر معالجة هذه الصورة.');
+              return;
+            }
+            uploadAvatar(blob);
+          },
+          'image/jpeg',
+          0.85
+        );
       };
       img.onerror = () => setAvatarError(lang === 'en' ? 'Could not read this image.' : 'تعذّر قراءة هذه الصورة.');
       img.src = reader.result;
@@ -84,19 +80,49 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
     reader.readAsDataURL(file);
   };
 
+  const uploadAvatar = (blob) => {
+    setAvatarUploading(true);
+    const formData = new FormData();
+    formData.append('avatar', blob, 'avatar.jpg');
+    const token = localStorage.getItem(TOKEN_KEY);
+
+    fetch(`${API_BASE}/api/account/avatar`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || (lang === 'en' ? 'Upload failed' : 'فشل الرفع'));
+        setAvatar(data.avatarUrl);
+        try {
+          const saved = localStorage.getItem(USER_KEY);
+          const parsed = saved ? JSON.parse(saved) : (user || {});
+          localStorage.setItem(USER_KEY, JSON.stringify({ ...parsed, avatar_url: data.avatarUrl }));
+        } catch (err) {
+          console.error('Sync avatar to localStorage error:', err);
+        }
+      })
+      .catch((err) => {
+        console.error('Avatar upload error:', err);
+        setAvatarError(err.message || (lang === 'en' ? 'Upload failed, try again.' : 'فشل الرفع، حاول مرة أخرى.'));
+      })
+      .finally(() => setAvatarUploading(false));
+  };
+
   return (
     <>
       <div className="settings-row" style={{ alignItems: 'center' }}>
         <span className="settings-label">{lang === 'en' ? 'Profile picture' : 'الصورة الشخصية'}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div
-            onClick={handleAvatarClick}
+            onClick={avatarUploading ? undefined : handleAvatarClick}
             title={lang === 'en' ? 'Change picture' : 'تغيير الصورة'}
             style={{
-              position: 'relative', width: 52, height: 52, borderRadius: '50%', cursor: 'pointer',
+              position: 'relative', width: 52, height: 52, borderRadius: '50%', cursor: avatarUploading ? 'wait' : 'pointer',
               background: avatar ? 'transparent' : 'linear-gradient(135deg, var(--accent-1), var(--accent-2))',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden',
-              border: '1px solid var(--border-subtle)',
+              border: '1px solid var(--border-subtle)', opacity: avatarUploading ? 0.6 : 1,
             }}
           >
             {avatar ? (
@@ -114,15 +140,17 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
               <Camera size={16} color="#fff" />
             </div>
           </div>
-          <button className="settings-inline-btn" onClick={handleAvatarClick}>
-            {lang === 'en' ? 'Change picture' : 'تغيير الصورة'}
+          <button className="settings-inline-btn" onClick={handleAvatarClick} disabled={avatarUploading}>
+            {avatarUploading
+              ? (lang === 'en' ? 'Uploading...' : 'جارِ الرفع...')
+              : (lang === 'en' ? 'Change picture' : 'تغيير الصورة')}
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
         </div>
       </div>
       {avatarError && <p className="settings-hint" style={{ color: '#f87171', marginTop: -8, marginBottom: 12 }}>{avatarError}</p>}
       <p className="settings-hint" style={{ marginTop: 4, marginBottom: 20 }}>
-        {lang === 'en' ? 'Saved on this device only for now — not yet synced to the server.' : 'محفوظة على هذا الجهاز فقط حاليًا — لسه مو متزامنة مع السيرفر.'}
+        {lang === 'en' ? 'Synced to your account and visible on any device.' : 'متزامنة مع حسابك ومرئية من أي جهاز.'}
       </p>
 
       <div className="settings-row">
