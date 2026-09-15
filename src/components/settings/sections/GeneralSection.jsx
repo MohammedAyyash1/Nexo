@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { LogOut, Camera } from 'lucide-react';
+import { LogOut, Camera, Check, X as XIcon } from 'lucide-react';
 import { SettingsSelect } from '../SettingsSelect.jsx';
 import { applyAccent, loadSavedAccent, applyThemeMode, loadSavedThemeMode } from '../../../utils/theme.js';
 import { API_BASE } from '../../../../config/api.js';
@@ -10,10 +10,14 @@ const TOKEN_KEY = 'nexo_token';
 export function GeneralSection({ user, lang, toggleLang, onLogout }) {
   const [appearance, setAppearance] = useState(() => loadSavedThemeMode());
   const [accent, setAccent] = useState(() => loadSavedAccent());
-  const [avatar, setAvatar] = useState(() => user?.avatar_url || user?.avatar || user?.avatarUrl || user?.photoUrl || user?.picture || null);
+  const savedAvatarUrl = user?.avatar_url || user?.avatar || user?.avatarUrl || user?.photoUrl || user?.picture || null;
+  const [avatar, setAvatar] = useState(savedAvatarUrl); // ما يظهر فعليًا بالدائرة (معاينة محلية أو المحفوظة)
+  const [pendingBlob, setPendingBlob] = useState(null); // الصورة الجديدة يلي لسا ما انحفظت بالسيرفر
   const [avatarError, setAvatarError] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const fileInputRef = useRef(null);
+
+  const hasUnsavedAvatar = !!pendingBlob;
 
   const appearanceOptions = [
     { value: 'dark', labelAr: 'داكن', labelEn: 'Dark' },
@@ -29,7 +33,10 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
     { value: 'orange', labelAr: 'برتقالي', labelEn: 'Orange' },
   ];
 
-  const handleAvatarClick = () => fileInputRef.current?.click();
+  const handleAvatarClick = () => {
+    if (avatarUploading) return;
+    fileInputRef.current?.click();
+  };
 
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0];
@@ -50,7 +57,7 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        // نصغّر الصورة لمربع 256×256 (Cover crop) ونضغطها JPEG قبل الرفع لتقليل حجم النقل
+        // نصغّر الصورة لمربع 256×256 (Cover crop) ونضغطها JPEG
         const SIZE = 256;
         const canvas = document.createElement('canvas');
         canvas.width = SIZE;
@@ -61,13 +68,17 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
         const drawH = img.height * scale;
         ctx.drawImage(img, (SIZE - drawW) / 2, (SIZE - drawH) / 2, drawW, drawH);
 
+        // معاينة فورية بدون انتظار أي رفع — نظهرها فورًا بالدائرة
+        const previewDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setAvatar(previewDataUrl);
+
         canvas.toBlob(
           (blob) => {
             if (!blob) {
               setAvatarError(lang === 'en' ? 'Could not process this image.' : 'تعذّر معالجة هذه الصورة.');
               return;
             }
-            uploadAvatar(blob);
+            setPendingBlob(blob); // نخزّنها بانتظار ضغطة "حفظ"
           },
           'image/jpeg',
           0.85
@@ -80,10 +91,18 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
     reader.readAsDataURL(file);
   };
 
-  const uploadAvatar = (blob) => {
+  const handleCancelAvatar = () => {
+    setPendingBlob(null);
+    setAvatar(savedAvatarUrl); // نرجّع الصورة المحفوظة أصلًا، نلغي المعاينة المحلية
+    setAvatarError('');
+  };
+
+  const handleSaveAvatar = () => {
+    if (!pendingBlob) return;
     setAvatarUploading(true);
+    setAvatarError('');
     const formData = new FormData();
-    formData.append('avatar', blob, 'avatar.jpg');
+    formData.append('avatar', pendingBlob, 'avatar.jpg');
     const token = localStorage.getItem(TOKEN_KEY);
 
     fetch(`${API_BASE}/api/account/avatar`, {
@@ -95,6 +114,7 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || (lang === 'en' ? 'Upload failed' : 'فشل الرفع'));
         setAvatar(data.avatarUrl);
+        setPendingBlob(null); // تم الحفظ فعليًا، ما عاد فيه تغيير معلّق
         try {
           const saved = localStorage.getItem(USER_KEY);
           const parsed = saved ? JSON.parse(saved) : (user || {});
@@ -114,15 +134,16 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
     <>
       <div className="settings-row" style={{ alignItems: 'center' }}>
         <span className="settings-label">{lang === 'en' ? 'Profile picture' : 'الصورة الشخصية'}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <div
-            onClick={avatarUploading ? undefined : handleAvatarClick}
+            onClick={handleAvatarClick}
             title={lang === 'en' ? 'Change picture' : 'تغيير الصورة'}
             style={{
               position: 'relative', width: 52, height: 52, borderRadius: '50%', cursor: avatarUploading ? 'wait' : 'pointer',
               background: avatar ? 'transparent' : 'linear-gradient(135deg, var(--accent-1), var(--accent-2))',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden',
-              border: '1px solid var(--border-subtle)', opacity: avatarUploading ? 0.6 : 1,
+              border: hasUnsavedAvatar ? '2px solid var(--accent-2)' : '1px solid var(--border-subtle)',
+              opacity: avatarUploading ? 0.6 : 1,
             }}
           >
             {avatar ? (
@@ -140,17 +161,46 @@ export function GeneralSection({ user, lang, toggleLang, onLogout }) {
               <Camera size={16} color="#fff" />
             </div>
           </div>
-          <button className="settings-inline-btn" onClick={handleAvatarClick} disabled={avatarUploading}>
-            {avatarUploading
-              ? (lang === 'en' ? 'Uploading...' : 'جارِ الرفع...')
-              : (lang === 'en' ? 'Change picture' : 'تغيير الصورة')}
-          </button>
+
+          {!hasUnsavedAvatar && (
+            <button className="settings-inline-btn" onClick={handleAvatarClick}>
+              {lang === 'en' ? 'Change picture' : 'تغيير الصورة'}
+            </button>
+          )}
+
+          {hasUnsavedAvatar && (
+            <>
+              <button
+                className="settings-inline-btn"
+                onClick={handleSaveAvatar}
+                disabled={avatarUploading}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--accent-1)', color: '#fff' }}
+              >
+                <Check size={14} />
+                {avatarUploading
+                  ? (lang === 'en' ? 'Saving...' : 'جارِ الحفظ...')
+                  : (lang === 'en' ? 'Save' : 'حفظ')}
+              </button>
+              <button
+                className="settings-inline-btn"
+                onClick={handleCancelAvatar}
+                disabled={avatarUploading}
+                style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                <XIcon size={14} />
+                {lang === 'en' ? 'Cancel' : 'إلغاء'}
+              </button>
+            </>
+          )}
+
           <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
         </div>
       </div>
       {avatarError && <p className="settings-hint" style={{ color: '#f87171', marginTop: -8, marginBottom: 12 }}>{avatarError}</p>}
       <p className="settings-hint" style={{ marginTop: 4, marginBottom: 20 }}>
-        {lang === 'en' ? 'Synced to your account and visible on any device.' : 'متزامنة مع حسابك ومرئية من أي جهاز.'}
+        {hasUnsavedAvatar
+          ? (lang === 'en' ? 'Preview only — press Save to apply.' : 'معاينة فقط — اضغط "حفظ" لتثبيتها.')
+          : (lang === 'en' ? 'Synced to your account and visible on any device.' : 'متزامنة مع حسابك ومرئية من أي جهاز.')}
       </p>
 
       <div className="settings-row">
