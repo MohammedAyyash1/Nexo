@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, ChevronDown, MoreHorizontal, Pin, Archive, Pencil, Trash2, Search, Sparkles, Bell } from 'lucide-react';
+import { Menu, MoreHorizontal, Pin, Archive, Pencil, Trash2, Search, Sparkles, Bell } from 'lucide-react';
 
 export function TopBar({
   t, lang, sidebarCollapsed, toggleSidebar, handleShare, hasMessages,
@@ -17,12 +17,12 @@ export function TopBar({
           <Menu size={18} />
         </button>
       )}
-      <span className="top-bar-title">{t.brand} <span className="chevron"><ChevronDown size={13} /></span></span>
+      <span className="top-bar-title">{t.brand}</span>
 
       <div className="topbar-v3-row">
-        <div className="topbar-v3-search">
+        <div className="topbar-v3-search" title={lang === 'en' ? 'Coming soon' : 'قريبًا'} style={{ opacity: 0.5, cursor: 'not-allowed' }}>
           <Search size={14} />
-          <input placeholder={lang === 'en' ? 'Search your chats and tools...' : 'ابحث بمحادثاتك وأدواتك...'} />
+          <input placeholder={lang === 'en' ? 'Search coming soon...' : 'البحث قريبًا...'} disabled />
         </div>
       </div>
 

@@ -2963,4 +2963,29 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
 .nexo-list-item.selected {
   background: rgba(var(--accent-rgb), 0.14);
   border-color: rgba(var(--accent-rgb), 0.4);
+}/* ==================================================== */
+/* ================  شعار Nexo الأفخم  ================= */
+/* ==================================================== */
+
+.nexo-logo-v2 {
+  position: relative;
+  background: linear-gradient(145deg, #8b5cf6 0%, var(--accent-1) 45%, #c026d3 100%);
+  border-radius: 27%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow:
+    0 2px 8px rgba(var(--accent-1-rgb), 0.5),
+    0 0 22px rgba(var(--accent-1-rgb), 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+.nexo-logo-v2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.35), transparent 55%);
+  pointer-events: none;
 }

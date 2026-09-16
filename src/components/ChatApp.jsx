@@ -862,7 +862,7 @@ const handleToggleSpeak = (text, index) => {
                   speakingIndex={speakingIndex} handleToggleSpeak={handleToggleSpeak} lang={lang}
                   isLast={i === activeChat.messages.length - 1} onContinue={handleContinue} loading={loading}
                   onEdit={handleEditMessage} onRegenerate={handleRegenerate}
-                  isFavorited={favoriteIds.has(m.id)} onToggleFavorite={handleToggleFavorite} />
+                  isFavorited={favoriteIds.has(m.id)} onToggleFavorite={handleToggleFavorite} user={user} />
               ))}
               {loading && (
                 <div className="msg-row-v3 assistant">

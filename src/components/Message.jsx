@@ -4,7 +4,7 @@ import { Copy, Check, Volume2, Square, Globe, Info, FileText, FileDown, RotateCw
 import { exportMessageAsWord, exportMessageAsPdf, deriveTitleFromContent } from '../utils/exportDoc.js';
 import { useState } from 'react';
 
-export function Message({ m, i, t, copiedIndex, handleCopy, speakingIndex, handleToggleSpeak, lang, isLast, onContinue, loading, onEdit, onRegenerate, isFavorited, onToggleFavorite }) {
+export function Message({ m, i, t, copiedIndex, handleCopy, speakingIndex, handleToggleSpeak, lang, isLast, onContinue, loading, onEdit, onRegenerate, isFavorited, onToggleFavorite, user }) {
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(m.content);
   const isUser = m.role === 'user';
@@ -18,7 +18,7 @@ export function Message({ m, i, t, copiedIndex, handleCopy, speakingIndex, handl
 
   return (
     <div className={`msg-row-v3 ${m.role}`}>
-      <div className="msg-avatar">{isUser ? (t.brand?.[0] || 'U') : 'N'}</div>
+      <div className="msg-avatar">{isUser ? (user?.name?.[0]?.toUpperCase() || 'U') : 'N'}</div>
       <div className={`msg-content-col ${isUser ? 'user-align' : ''}`}>
         {m.image && <img src={m.image} alt="attachment" className="bubble-image" />}
         <div className={`bubble ${m.role}`}>
