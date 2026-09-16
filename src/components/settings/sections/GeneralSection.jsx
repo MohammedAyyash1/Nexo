@@ -168,9 +168,19 @@ export function GeneralSection({ user, lang, toggleLang, onLogout, onUserUpdate 
                 className="settings-inline-btn"
                 onClick={handleSaveAvatar}
                 disabled={avatarUploading}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--accent-1)', color: '#fff' }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 7, fontWeight: 700, fontSize: 14,
+                  padding: '9px 18px', borderRadius: 10, border: 'none', color: '#fff',
+                  background: 'linear-gradient(135deg, var(--accent-1), var(--accent-2))',
+                  boxShadow: '0 4px 14px rgba(var(--accent-1-rgb), 0.4)',
+                  cursor: avatarUploading ? 'wait' : 'pointer',
+                  opacity: avatarUploading ? 0.7 : 1,
+                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                }}
+                onMouseEnter={(e) => { if (!avatarUploading) e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
               >
-                <Check size={14} />
+                <Check size={15} strokeWidth={2.5} />
                 {avatarUploading
                   ? (lang === 'en' ? 'Saving...' : 'جارِ الحفظ...')
                   : (lang === 'en' ? 'Save' : 'حفظ')}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Trash2, AlertCircle, Megaphone, ArrowRight, Copy, Check } from 'lucide-react';
+import { Loader2, Trash2, AlertCircle, Megaphone, ArrowRight, Copy, Check, Inbox } from 'lucide-react';
 import { ComingSoonOverlay } from './ComingSoonOverlay.jsx';
 import { API_BASE } from '../../config/api.js';
 
@@ -27,11 +27,14 @@ export function AdGeneratorPage() {
   const [copied, setCopied] = useState(false);
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [historyError, setHistoryError] = useState(false);
 
   const loadHistory = () => {
+    setLoadingHistory(true);
+    setHistoryError(false);
     fetch(`${BASE}/ads`, { headers: authHeaders() })
       .then((res) => res.json()).then((data) => setHistory(data.ads || []))
-      .catch((err) => console.error(err)).finally(() => setLoadingHistory(false));
+      .catch((err) => { console.error(err); setHistoryError(true); }).finally(() => setLoadingHistory(false));
   };
   useEffect(() => { loadHistory(); }, []);
 
@@ -68,13 +71,21 @@ export function AdGeneratorPage() {
   };
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: 800, margin: '0 auto', color: 'var(--text-primary)' }}>
-      <style>{`@keyframes nexoAdSpin { to { transform: rotate(360deg); } } .nexo-ad-spin { animation: nexoAdSpin 1s linear infinite; }`}</style>
-      <button className="settings-inline-btn" onClick={() => navigate('/')} style={{ marginBottom: 16, padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}><ArrowRight size={15} /> {t('رجوع', 'Back')}</button>
-      <h1 style={{ fontSize: 22, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}><Megaphone size={20} /> {t('مولّد الإعلانات', 'Ad Generator')}</h1>
-      <p className="settings-hint" style={{ marginBottom: 24 }}>{t('اكتب فكرة إعلانك، وسيولّد Nexo عنوانًا ووصفًا ودعوة لاتخاذ إجراء + صورة إعلان، مجانًا بالكامل.', 'Describe your ad idea, and Nexo will generate a headline, description, CTA, and an ad image — completely free.')}</p>
+    <div className="nexo-tool-page">
+     <div className="nexo-tool-page-inner">
+      <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
+        <ArrowRight size={15} /> {t('رجوع', 'Back')}
+      </button>
 
-      <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 24, marginBottom: 32, position: 'relative' }}>
+      <div className="nexo-tool-page-header">
+        <div className="nexo-tool-icon-hero"><Megaphone size={24} /></div>
+        <div>
+          <h1 className="nexo-tool-page-title">{t('مولّد الإعلانات', 'Ad Generator')}</h1>
+          <p className="nexo-tool-page-desc">{t('اكتب فكرة إعلانك، وسيولّد Nexo عنوانًا ووصفًا ودعوة لاتخاذ إجراء + صورة إعلان، مجانًا بالكامل.', 'Describe your ad idea, and Nexo will generate a headline, description, CTA, and an ad image — completely free.')}</p>
+        </div>
+      </div>
+
+      <div className="nexo-card" style={{ marginBottom: 28, position: 'relative' }}>
         <ComingSoonOverlay
           lang={lang}
           titleAr="صورة الإعلان — قريبًا"
@@ -82,43 +93,66 @@ export function AdGeneratorPage() {
           reasonAr="نص الإعلان (العنوان والوصف والـCTA) شغّال بالكامل. صورة الإعلان معطّلة مؤقتًا لحين تجهيز مزوّد صور موثوق."
           reasonEn="Ad copy (headline, description, CTA) is fully working. The ad image is temporarily disabled pending a reliable image provider."
         />
-        <textarea className="settings-textarea" rows={4} value={idea} onChange={(e) => setIdea(e.target.value)} placeholder={t('كل ما وصفت أكتر، كانت النتيجة أدق. مثلاً: "قهوة عربية مختصة بأكياس أنيقة سوداء وذهبية، توصيل خلال ساعة داخل غزة، استهداف محبي القهوة"', 'The more detail you give, the better the result. e.g. "Specialty Arabic coffee in elegant black and gold bags, delivered within an hour in Gaza, targeting coffee lovers"')} />
-        {error && <p className="settings-hint" style={{ color: '#f87171', marginTop: 12 }}><AlertCircle size={13} style={{ display: 'inline', marginInlineEnd: 4 }} />{error}</p>}
-        <button className="settings-btn" onClick={handleGenerate} disabled={generating} style={{ marginTop: 16, maxWidth: 200 }}>
-          {generating && <Loader2 size={14} className="nexo-ad-spin" />} {generating ? t('جارِ التوليد...', 'Generating...') : t('توليد الإعلان', 'Generate Ad')}
+        <textarea className="nexo-textarea" dir="auto" rows={4} value={idea} onChange={(e) => setIdea(e.target.value)} placeholder={t('كل ما وصفت أكتر، كانت النتيجة أدق. مثلاً: "قهوة عربية مختصة بأكياس أنيقة سوداء وذهبية، توصيل خلال ساعة داخل غزة، استهداف محبي القهوة"', 'The more detail you give, the better the result. e.g. "Specialty Arabic coffee in elegant black and gold bags, delivered within an hour in Gaza, targeting coffee lovers"')} />
+        {error && <div className="nexo-inline-error"><AlertCircle size={13} />{error}</div>}
+        <button className="nexo-btn nexo-btn-primary" onClick={handleGenerate} disabled={generating} style={{ marginTop: 16, minWidth: 200 }}>
+          {generating && <Loader2 size={14} className="nexo-spin" />} {generating ? t('جارِ التوليد...', 'Generating...') : t('توليد الإعلان', 'Generate Ad')}
         </button>
       </div>
 
       {current && current.status === 'completed' && (
-        <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 20, marginBottom: 32 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <h4 className="settings-group-title" style={{ margin: 0 }}>{t('نتيجة الإعلان', 'Ad Result')}</h4>
-            <button className="icon-btn" onClick={() => handleCopy(current)}>{copied ? <Check size={15} /> : <Copy size={15} />}</button>
+        <div className="nexo-card" style={{ marginBottom: 28 }}>
+          <div className="nexo-card-row-header">
+            <h4 className="nexo-card-row-title" style={{ margin: 0 }}>{t('نتيجة الإعلان', 'Ad Result')}</h4>
+            <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleCopy(current)}>{copied ? <Check size={15} /> : <Copy size={15} />}</button>
           </div>
-          {current.ad_image_url && <img src={current.ad_image_url} alt="" style={{ width: '100%', borderRadius: 10, marginBottom: 14 }} />}
-          <h3 style={{ margin: '0 0 6px', fontSize: 18 }}>{current.headline}</h3>
-          <p style={{ fontSize: 14, lineHeight: 1.8, margin: '0 0 10px' }}>{current.description}</p>
-          <span className="settings-btn" style={{ display: 'inline-flex', width: 'auto', padding: '8px 18px' }}>{current.cta}</span>
+          {current.ad_image_url && <img src={current.ad_image_url} alt="" style={{ width: '100%', borderRadius: 10, marginBottom: 16 }} />}
+          <h3 dir="auto" style={{ margin: '0 0 8px', fontSize: 19, color: 'var(--text-primary)', fontWeight: 700 }}>{current.headline}</h3>
+          <p className="nexo-result-text" dir="auto" style={{ margin: '0 0 14px' }}>{current.description}</p>
+          <span className="nexo-btn nexo-btn-primary" style={{ display: 'inline-flex', cursor: 'default' }} dir="auto">{current.cta}</span>
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 className="settings-group-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
-        {history.length > 0 && <button className="settings-inline-btn" onClick={handleDeleteAll} style={{ color: '#f87171' }}>{t('مسح الكل', 'Clear all')}</button>}
+      <div className="nexo-tool-page-header" style={{ marginBottom: 14 }}>
+        <h3 className="nexo-section-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
+        {history.length > 0 && <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={handleDeleteAll} style={{ color: 'var(--color-error)', marginInlineStart: 'auto' }}>{t('مسح الكل', 'Clear all')}</button>}
       </div>
-      {loadingHistory ? <p className="settings-hint">{t('جارِ التحميل...', 'Loading...')}</p> : history.length === 0 ? <p className="settings-hint">{t('لا يوجد إعلانات بعد.', 'No ads yet.')}</p> : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
+
+      {loadingHistory ? (
+        <div className="nexo-gallery-grid">
+          {[0, 1, 2, 3].map((i) => <div key={i} className="nexo-skeleton" style={{ height: 130, borderRadius: 12 }} />)}
+        </div>
+      ) : historyError ? (
+        <div className="nexo-card">
+          <div className="nexo-state nexo-state-error">
+            <div className="nexo-state-icon"><AlertCircle size={20} /></div>
+            <div className="nexo-state-title">{t('تعذّر تحميل السجل', 'Could not load history')}</div>
+            <button className="nexo-btn nexo-btn-secondary nexo-btn-sm" onClick={loadHistory}>{t('إعادة المحاولة', 'Retry')}</button>
+          </div>
+        </div>
+      ) : history.length === 0 ? (
+        <div className="nexo-card">
+          <div className="nexo-state">
+            <div className="nexo-state-icon"><Inbox size={20} /></div>
+            <div className="nexo-state-title">{t('لا يوجد إعلانات بعد', 'No ads yet')}</div>
+          </div>
+        </div>
+      ) : (
+        <div className="nexo-gallery-grid">
           {history.map((item) => (
-            <div key={item.id} onClick={() => setCurrent(item)} style={{ background: 'var(--bg-input-3)', borderRadius: 10, padding: 10, cursor: 'pointer' }}>
-              {item.ad_image_url && <img src={item.ad_image_url} alt="" style={{ width: '100%', height: 90, objectFit: 'cover', borderRadius: 6, marginBottom: 6 }} />}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className="settings-hint" style={{ fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{item.headline || t('فشل', 'Failed')}</span>
-                <button className="icon-btn" onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} style={{ width: 20, height: 20, flexShrink: 0 }}><Trash2 size={12} /></button>
+            <div key={item.id} className="nexo-gallery-item" onClick={() => setCurrent(item)}>
+              {item.ad_image_url && <img src={item.ad_image_url} alt="" className="nexo-gallery-thumb" />}
+              <div className="nexo-gallery-footer">
+                <span className="nexo-list-item-sub" dir="auto" style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {item.headline || t('فشل', 'Failed')}
+                </span>
+                <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} style={{ padding: 4 }}><Trash2 size={12} /></button>
               </div>
             </div>
           ))}
         </div>
       )}
+     </div>
     </div>
   );
 }

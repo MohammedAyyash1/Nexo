@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Loader2, Download, Trash2, X, AlertCircle } from 'lucide-react';
+import { Upload, Loader2, Download, Trash2, X, AlertCircle, ArrowRight, Video, Inbox } from 'lucide-react';
 import { ComingSoonOverlay } from './ComingSoonOverlay.jsx';
 import { API_BASE } from '../../config/api.js';
+
 const TOKEN_KEY = 'nexo_token';
 const LANG_KEY = 'nexo_lang';
 const BASE = `${API_BASE}/api`;
@@ -141,18 +142,23 @@ export function AvatarPage({ user }) {
   };
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: 900, margin: '0 auto', color: 'var(--text-primary)' }}>
-      <style>{`@keyframes nexoAvatarSpin { to { transform: rotate(360deg); } } .nexo-avatar-spin { animation: nexoAvatarSpin 1s linear infinite; }`}</style>
-
-      <button className="settings-inline-btn" onClick={() => navigate('/')} style={{ marginBottom: 16, padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+    <div className="nexo-tool-page">
+     <div className="nexo-tool-page-inner" style={{ maxWidth: 900 }}>
+      <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
       </button>
-      <h1 style={{ fontSize: 22, marginBottom: 4 }}>Avatar AI</h1>
-      <p className="settings-hint" style={{ marginBottom: 24 }}>
-        {t('ارفع صورة شخص واكتب نصًا، وسيقوم Nexo بإنشاء فيديو له وهو يتحدث بهذا النص.', 'Upload a portrait and a script — Nexo will generate a video of that person speaking it.')}
-      </p>
 
-      <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 24, marginBottom: 32, position: 'relative' }}>
+      <div className="nexo-tool-page-header">
+        <div className="nexo-tool-icon-hero"><Video size={24} /></div>
+        <div>
+          <h1 className="nexo-tool-page-title">Avatar AI</h1>
+          <p className="nexo-tool-page-desc">
+            {t('ارفع صورة شخص واكتب نصًا، وسيقوم Nexo بإنشاء فيديو له وهو يتحدث بهذا النص.', 'Upload a portrait and a script — Nexo will generate a video of that person speaking it.')}
+          </p>
+        </div>
+      </div>
+
+      <div className="nexo-card" style={{ marginBottom: 28, position: 'relative' }}>
         <ComingSoonOverlay
           lang={lang}
           titleAr="أفاتار الذكاء الاصطناعي — قريبًا"
@@ -161,101 +167,99 @@ export function AvatarPage({ user }) {
           reasonEn="This feature is fully built technically, pending activation of the video provider connection. It will work automatically once available."
         />
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-          <div style={{ flex: '0 0 200px' }}>
-            <label style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              width: 200, height: 200, borderRadius: 12, border: '1px dashed var(--border-input)',
-              cursor: 'pointer', overflow: 'hidden', background: 'var(--bg-input-2)',
-            }}>
-              {imagePreview ? (
-                <img src={imagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <>
-                  <Upload size={22} color="var(--text-secondary)" />
-                  <span className="settings-hint" style={{ marginTop: 8 }}>{t('رفع صورة', 'Upload image')}</span>
-                </>
-              )}
-              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageChange} style={{ display: 'none' }} />
-            </label>
-          </div>
+          <label className={`nexo-image-slot ${imagePreview ? 'has-image' : ''}`} style={{ width: 200, height: 200 }}>
+            {imagePreview ? (
+              <img src={imagePreview} alt="preview" />
+            ) : (
+              <>
+                <Upload size={22} color="var(--text-secondary)" />
+                <span className="nexo-dropzone-hint" style={{ marginTop: 8 }}>{t('رفع صورة', 'Upload image')}</span>
+              </>
+            )}
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageChange} style={{ display: 'none' }} />
+          </label>
 
           <div style={{ flex: 1, minWidth: 240 }}>
             <textarea
-              className="settings-textarea" rows={6} value={script}
+              className="nexo-textarea" dir="auto" rows={6} value={script}
               onChange={(e) => setScript(e.target.value)}
               placeholder={t('اكتب النص اللي بدك الشخص يقوله...', 'Write the script the person should say...')}
               maxLength={MAX_SCRIPT_LENGTH}
             />
-            <div className="settings-char-count">{script.length}/{MAX_SCRIPT_LENGTH}</div>
+            <div className="nexo-char-count">{script.length}/{MAX_SCRIPT_LENGTH}</div>
           </div>
         </div>
 
-        {error && (
-          <p className="settings-hint" style={{ color: '#f87171', marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <AlertCircle size={14} /> {error}
-          </p>
-        )}
+        {error && <div className="nexo-inline-error"><AlertCircle size={14} /> {error}</div>}
 
-        <button className="settings-btn" onClick={handleGenerate} disabled={generating} style={{ marginTop: 16, maxWidth: 220 }}>
-          {generating && <Loader2 size={14} className="nexo-avatar-spin" />}
+        <button className="nexo-btn nexo-btn-primary" onClick={handleGenerate} disabled={generating} style={{ marginTop: 16, minWidth: 200 }}>
+          {generating && <Loader2 size={14} className="nexo-spin" />}
           {generating ? t('جارِ الإرسال...', 'Sending...') : 'Generate Video'}
         </button>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 className="settings-group-title" style={{ margin: 0 }}>{t('فيديوهاتك', 'Your videos')}</h3>
+      <div className="nexo-tool-page-header" style={{ marginBottom: 14 }}>
+        <h3 className="nexo-section-title" style={{ margin: 0 }}>{t('فيديوهاتك', 'Your videos')}</h3>
         {jobs.length > 0 && (
-          <button className="settings-inline-btn" onClick={handleDeleteAll} style={{ color: '#f87171' }}>
+          <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={handleDeleteAll} style={{ color: 'var(--color-error)', marginInlineStart: 'auto' }}>
             {t('مسح الكل', 'Clear all')}
           </button>
         )}
       </div>
 
       {loadingJobs ? (
-        <p className="settings-hint">{t('جارِ التحميل...', 'Loading...')}</p>
+        <div className="nexo-gallery-grid">
+          {[0, 1, 2].map((i) => <div key={i} className="nexo-skeleton" style={{ height: 180, borderRadius: 12 }} />)}
+        </div>
       ) : jobs.length === 0 ? (
-        <p className="settings-hint">{t('لسا ما سويت أي فيديو.', "You haven't generated any videos yet.")}</p>
+        <div className="nexo-card">
+          <div className="nexo-state">
+            <div className="nexo-state-icon"><Inbox size={20} /></div>
+            <div className="nexo-state-title">{t('لسا ما سويت أي فيديو', "You haven't generated any videos yet")}</div>
+          </div>
+        </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
+        <div className="nexo-gallery-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
           {jobs.map((job) => (
-            <div key={job.id} style={{ background: 'var(--bg-input-3)', borderRadius: 12, padding: 14 }}>
+            <div key={job.id} className="nexo-gallery-item" style={{ cursor: 'default' }}>
               {job.status === 'completed' && job.result_video_url ? (
-                <video src={job.result_video_url} controls style={{ width: '100%', borderRadius: 8, marginBottom: 10 }} />
+                <video src={job.result_video_url} controls style={{ width: '100%', borderRadius: 'var(--radius-sm)' }} />
               ) : job.status === 'failed' ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 140, gap: 8 }}>
-                  <AlertCircle size={22} color="#f87171" />
-                  <span style={{ fontSize: 12.5, color: '#f87171', textAlign: 'center' }}>{job.error_message || t('فشل التوليد', 'Generation failed')}</span>
+                <div className="nexo-gallery-placeholder" style={{ height: 140 }}>
+                  <AlertCircle size={22} color="var(--color-error)" />
+                  <span style={{ fontSize: 12, color: 'var(--color-error)', textAlign: 'center', padding: '0 8px' }}>{job.error_message || t('فشل التوليد', 'Generation failed')}</span>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 140, gap: 8 }}>
-                  <Loader2 size={22} className="nexo-avatar-spin" color="var(--accent-2)" />
-                  <span className="settings-hint">{STATUS_LABELS[job.status]?.[lang] || job.status}</span>
+                <div className="nexo-gallery-placeholder" style={{ height: 140 }}>
+                  <Loader2 size={22} className="nexo-spin" color="var(--accent-2)" />
+                  <span className="nexo-list-item-sub">{STATUS_LABELS[job.status]?.[lang] || job.status}</span>
                 </div>
               )}
 
-              <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: '0 0 10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <p className="nexo-list-item-sub" dir="auto" style={{ margin: '8px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {job.script_text}
               </p>
 
               <div style={{ display: 'flex', gap: 6 }}>
                 {job.status === 'completed' && job.result_video_url && (
-                  <a href={job.result_video_url} download className="icon-btn" title={t('تنزيل', 'Download')}>
-                    <Download size={15} />
+                  <a href={job.result_video_url} download className="nexo-btn nexo-btn-ghost nexo-btn-icon" title={t('تنزيل', 'Download')}>
+                    <Download size={14} />
                   </a>
                 )}
                 {(job.status === 'queued' || job.status === 'processing') && (
-                  <button className="icon-btn" onClick={() => handleCancel(job.id)} title={t('إلغاء', 'Cancel')}>
-                    <X size={15} />
+                  <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleCancel(job.id)} title={t('إلغاء', 'Cancel')}>
+                    <X size={14} />
                   </button>
                 )}
-                <button className="icon-btn" onClick={() => handleDelete(job.id)} title={t('حذف', 'Delete')}>
-                  <Trash2 size={15} />
+                <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleDelete(job.id)} title={t('حذف', 'Delete')}>
+                  <Trash2 size={14} />
                 </button>
               </div>
             </div>
           ))}
         </div>
       )}
+     </div>
     </div>
   );
 }

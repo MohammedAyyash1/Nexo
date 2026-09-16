@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Trash2, AlertCircle, Search, ArrowRight, Download } from 'lucide-react';
+import { Loader2, Trash2, AlertCircle, Search, ArrowRight, Download, Inbox, ExternalLink } from 'lucide-react';
 import { exportMessageAsWord } from '../utils/exportDoc.js';
 import { API_BASE } from '../../config/api.js';
 
@@ -26,11 +26,14 @@ export function ResearcherPage() {
   const [current, setCurrent] = useState(null);
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [historyError, setHistoryError] = useState(false);
 
   const loadHistory = () => {
+    setLoadingHistory(true);
+    setHistoryError(false);
     fetch(`${BASE}/researcher/reports`, { headers: authHeaders() })
       .then((res) => res.json()).then((data) => setHistory(data.reports || []))
-      .catch((err) => console.error(err)).finally(() => setLoadingHistory(false));
+      .catch((err) => { console.error(err); setHistoryError(true); }).finally(() => setLoadingHistory(false));
   };
   useEffect(() => { loadHistory(); }, []);
 
@@ -62,52 +65,88 @@ export function ResearcherPage() {
   };
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: 800, margin: '0 auto', color: 'var(--text-primary)' }}>
-      <style>{`@keyframes nexoResSpin { to { transform: rotate(360deg); } } .nexo-res-spin { animation: nexoResSpin 1s linear infinite; }`}</style>
-      <button className="settings-inline-btn" onClick={() => navigate('/')} style={{ marginBottom: 16, padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}><ArrowRight size={15} /> {t('رجوع', 'Back')}</button>
-      <h1 style={{ fontSize: 22, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}><Search size={20} /> {t('الباحث', 'Researcher')}</h1>
-      <p className="settings-hint" style={{ marginBottom: 24 }}>{t('اطرح سؤال بحث معمّق، وسيبحث Nexo بالويب ويعدّ تقريرًا منظمًا بمصادر حقيقية.', "Ask a deep research question, and Nexo will search the web and prepare an organized report with real sources.")}</p>
+    <div className="nexo-tool-page">
+     <div className="nexo-tool-page-inner">
+      <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
+        <ArrowRight size={15} /> {t('رجوع', 'Back')}
+      </button>
 
-      <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 24, marginBottom: 32 }}>
-        <textarea className="settings-textarea" rows={3} value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('مثلاً: شو أحدث التطورات بمجال الطاقة المتجددة بفلسطين؟', 'e.g. What are the latest developments in renewable energy in Palestine?')} />
-        {error && <p className="settings-hint" style={{ color: '#f87171', marginTop: 12 }}><AlertCircle size={13} style={{ display: 'inline', marginInlineEnd: 4 }} />{error}</p>}
-        <button className="settings-btn" onClick={handleRun} disabled={running} style={{ marginTop: 16, maxWidth: 200 }}>
-          {running && <Loader2 size={14} className="nexo-res-spin" />} {running ? t('جارِ البحث...', 'Researching...') : t('ابدأ البحث', 'Start Research')}
+      <div className="nexo-tool-page-header">
+        <div className="nexo-tool-icon-hero"><Search size={24} /></div>
+        <div>
+          <h1 className="nexo-tool-page-title">{t('الباحث', 'Researcher')}</h1>
+          <p className="nexo-tool-page-desc">{t('اطرح سؤال بحث معمّق، وسيبحث Nexo بالويب ويعدّ تقريرًا منظمًا بمصادر حقيقية.', 'Ask a deep research question, and Nexo will search the web and prepare an organized report with real sources.')}</p>
+        </div>
+      </div>
+
+      <div className="nexo-card-luxe" style={{ marginBottom: 28 }}>
+        <span className="nexo-glow-orb nexo-glow-orb-purple" style={{ width: 200, height: 200, top: -60, insetInlineEnd: -40 }} />
+        <textarea className="nexo-textarea" dir="auto" rows={3} value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('مثلاً: شو أحدث التطورات بمجال الطاقة المتجددة بفلسطين؟', 'e.g. What are the latest developments in renewable energy in Palestine?')} />
+        {error && <div className="nexo-inline-error"><AlertCircle size={13} />{error}</div>}
+        <button className="nexo-btn nexo-btn-primary" onClick={handleRun} disabled={running} style={{ marginTop: 18, minWidth: 200 }}>
+          {running && <Loader2 size={14} className="nexo-spin" />} {running ? t('جارِ البحث...', 'Researching...') : t('ابدأ البحث', 'Start Research')}
         </button>
       </div>
 
       {current && current.status === 'completed' && (
-        <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 20, marginBottom: 32 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <h4 className="settings-group-title" style={{ margin: 0 }}>{current.query}</h4>
-            <button className="icon-btn" onClick={() => exportMessageAsWord(current.report_text, current.query, lang)}><Download size={15} /></button>
+        <div className="nexo-card" style={{ marginBottom: 28 }}>
+          <div className="nexo-card-row-header">
+            <h4 className="nexo-card-row-title" dir="auto" style={{ whiteSpace: 'normal' }}>{current.query}</h4>
+            <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => exportMessageAsWord(current.report_text, current.query, lang)}><Download size={15} /></button>
           </div>
-          <div style={{ whiteSpace: 'pre-wrap', fontSize: 14, lineHeight: 1.8, marginBottom: current.sources?.length ? 14 : 0 }}>{current.report_text}</div>
+          <div className="nexo-result-text" dir="auto" style={{ marginBottom: current.sources?.length ? 18 : 0 }}>{current.report_text}</div>
           {current.sources?.length > 0 && (
             <div>
-              <h5 className="settings-hint" style={{ marginBottom: 6 }}>{t('المصادر', 'Sources')}</h5>
-              <ul style={{ margin: 0, paddingInlineStart: 18, fontSize: 12.5 }}>
-                {current.sources.map((s, i) => <li key={i} style={{ marginBottom: 4 }}><a href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-2)' }}>{s.title}</a></li>)}
-              </ul>
+              <div className="nexo-section-title" style={{ fontSize: 11, marginBottom: 8 }}>{t('المصادر', 'Sources')}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {current.sources.map((s, i) => (
+                  <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="nexo-source-link" dir="auto">
+                    <ExternalLink size={12} /> {s.title}
+                  </a>
+                ))}
+              </div>
             </div>
           )}
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 className="settings-group-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
-        {history.length > 0 && <button className="settings-inline-btn" onClick={handleDeleteAll} style={{ color: '#f87171' }}>{t('مسح الكل', 'Clear all')}</button>}
+      <div className="nexo-tool-page-header" style={{ marginBottom: 14 }}>
+        <h3 className="nexo-section-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
+        {history.length > 0 && <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={handleDeleteAll} style={{ color: 'var(--color-error)', marginInlineStart: 'auto' }}>{t('مسح الكل', 'Clear all')}</button>}
       </div>
-      {loadingHistory ? <p className="settings-hint">{t('جارِ التحميل...', 'Loading...')}</p> : history.length === 0 ? <p className="settings-hint">{t('لا يوجد تقارير بعد.', 'No reports yet.')}</p> : (
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+
+      {loadingHistory ? (
+        <div className="nexo-card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[0, 1, 2].map((i) => <div key={i} className="nexo-skeleton nexo-skeleton-line w-60" />)}
+        </div>
+      ) : historyError ? (
+        <div className="nexo-card">
+          <div className="nexo-state nexo-state-error">
+            <div className="nexo-state-icon"><AlertCircle size={20} /></div>
+            <div className="nexo-state-title">{t('تعذّر تحميل التقارير', 'Could not load reports')}</div>
+            <button className="nexo-btn nexo-btn-secondary nexo-btn-sm" onClick={loadHistory}>{t('إعادة المحاولة', 'Retry')}</button>
+          </div>
+        </div>
+      ) : history.length === 0 ? (
+        <div className="nexo-card">
+          <div className="nexo-state">
+            <div className="nexo-state-icon"><Inbox size={20} /></div>
+            <div className="nexo-state-title">{t('لا يوجد تقارير بعد', 'No reports yet')}</div>
+          </div>
+        </div>
+      ) : (
+        <ul className="nexo-list">
           {history.map((item) => (
-            <li key={item.id} style={{ background: 'var(--bg-input-3)', borderRadius: 10, padding: '10px 14px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span onClick={() => setCurrent(item)} style={{ cursor: 'pointer', fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{item.query}</span>
-              <button className="icon-btn" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></button>
+            <li key={item.id} className="nexo-list-item">
+              <div className="nexo-list-item-main" onClick={() => setCurrent(item)} style={{ cursor: 'pointer' }}>
+                <div className="nexo-list-item-title" dir="auto">{item.query}</div>
+              </div>
+              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></button>
             </li>
           ))}
         </ul>
       )}
+     </div>
     </div>
   );
 }

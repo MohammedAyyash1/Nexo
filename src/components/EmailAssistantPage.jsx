@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Copy, Check, Trash2, AlertCircle, Mail, ArrowRight } from 'lucide-react';
+import { Loader2, Copy, Check, Trash2, AlertCircle, Mail, ArrowRight, Inbox } from 'lucide-react';
 import { SettingsSelect } from './settings/SettingsSelect.jsx';
 import { API_BASE } from '../../config/api.js';
 
@@ -36,12 +36,15 @@ export function EmailAssistantPage() {
   const [copied, setCopied] = useState(false);
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [historyError, setHistoryError] = useState(false);
 
   const loadHistory = () => {
+    setLoadingHistory(true);
+    setHistoryError(false);
     fetch(`${BASE}/email-assistant/history`, { headers: authHeaders() })
       .then((res) => res.json())
       .then((data) => setHistory(data.items || []))
-      .catch((err) => console.error('Load history error:', err))
+      .catch((err) => { console.error('Load history error:', err); setHistoryError(true); })
       .finally(() => setLoadingHistory(false));
   };
 
@@ -89,86 +92,105 @@ export function EmailAssistantPage() {
     ? t('اكتب هدف الإيميل: مين المستلم، شو بدك توصله؟', 'Describe the email goal: who is it for, what do you want to convey?')
     : mode === 'reply'
     ? t('الصق نص الإيميل الأصلي يلي بدك ترد عليه...', 'Paste the original email you want to reply to...')
-    : t('الصق مسودتك الحالية وبنحسّنها...', 'Paste your current draft and we\'ll improve it...');
+    : t('الصق مسودتك الحالية وبنحسّنها...', "Paste your current draft and we'll improve it...");
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: 800, margin: '0 auto', color: 'var(--text-primary)' }}>
-      <style>{`@keyframes nexoEmailSpin { to { transform: rotate(360deg); } } .nexo-email-spin { animation: nexoEmailSpin 1s linear infinite; }`}</style>
-
-      <button className="settings-inline-btn" onClick={() => navigate('/')} style={{ marginBottom: 16, padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+    <div className="nexo-tool-page">
+     <div className="nexo-tool-page-inner">
+      <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
       </button>
 
-      <h1 style={{ fontSize: 22, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Mail size={20} /> {t('مساعد الإيميلات', 'Email Assistant')}
-      </h1>
-      <p className="settings-hint" style={{ marginBottom: 24 }}>
-        {t('اكتب، ردّ، أو حسّن إيميلاتك بالذكاء الاصطناعي مجانًا.', 'Compose, reply to, or improve your emails with AI, for free.')}
-      </p>
+      <div className="nexo-tool-page-header">
+        <div className="nexo-tool-icon-hero"><Mail size={24} /></div>
+        <div>
+          <h1 className="nexo-tool-page-title">{t('مساعد الإيميلات', 'Email Assistant')}</h1>
+          <p className="nexo-tool-page-desc">{t('اكتب، ردّ، أو حسّن إيميلاتك بالذكاء الاصطناعي مجانًا.', 'Compose, reply to, or improve your emails with AI, for free.')}</p>
+        </div>
+      </div>
 
-      <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 24, marginBottom: 32 }}>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+      <div className="nexo-card-luxe" style={{ marginBottom: 28 }}>
+        <span className="nexo-glow-orb nexo-glow-orb-purple" style={{ width: 200, height: 200, top: -60, insetInlineEnd: -40 }} />
+
+        <div className="nexo-tabs" style={{ marginBottom: 14 }}>
           {Object.entries(MODES).map(([key, labels]) => (
-            <button key={key} className={`settings-style-chip ${mode === key ? 'active' : ''}`} onClick={() => setMode(key)} style={{ flex: 1 }}>
+            <button key={key} className={`nexo-tab ${mode === key ? 'active' : ''}`} onClick={() => setMode(key)}>
               {lang === 'en' ? labels.en : labels.ar}
             </button>
           ))}
         </div>
 
-        <div className="settings-row" style={{ marginBottom: 10 }}>
-          <span className="settings-label">{t('النبرة', 'Tone')}</span>
+        <div className="nexo-settings-row" style={{ marginBottom: 14 }}>
+          <span className="nexo-settings-row-label">{t('النبرة', 'Tone')}</span>
           <SettingsSelect value={tone} onChange={setTone} options={TONES} />
         </div>
 
-        <textarea className="settings-textarea" rows={6} value={text} onChange={(e) => setText(e.target.value)} placeholder={placeholder} maxLength={MAX_TEXT_LENGTH} />
-        <div className="settings-char-count">{text.length}/{MAX_TEXT_LENGTH}</div>
+        <textarea className="nexo-textarea" dir="auto" rows={6} value={text} onChange={(e) => setText(e.target.value)} placeholder={placeholder} maxLength={MAX_TEXT_LENGTH} />
+        <div className="nexo-char-count">{text.length}/{MAX_TEXT_LENGTH}</div>
 
-        {error && (
-          <p className="settings-hint" style={{ color: '#f87171', marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <AlertCircle size={14} /> {error}
-          </p>
-        )}
+        {error && <div className="nexo-inline-error"><AlertCircle size={14} /> {error}</div>}
 
-        <button className="settings-btn" onClick={handleGenerate} disabled={generating} style={{ marginTop: 16, maxWidth: 200 }}>
-          {generating && <Loader2 size={14} className="nexo-email-spin" />}
+        <button className="nexo-btn nexo-btn-primary" onClick={handleGenerate} disabled={generating} style={{ marginTop: 16, minWidth: 200 }}>
+          {generating && <Loader2 size={14} className="nexo-spin" />}
           {generating ? t('جارِ الكتابة...', 'Writing...') : t('توليد الإيميل', 'Generate Email')}
         </button>
       </div>
 
       {result && result.status === 'completed' && (
-        <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 20, marginBottom: 32 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <h4 className="settings-group-title" style={{ margin: 0 }}>{t('الإيميل', 'Email')}</h4>
-            <button className="icon-btn" onClick={() => handleCopy(result)}>{copied ? <Check size={15} /> : <Copy size={15} />}</button>
+        <div className="nexo-card" style={{ marginBottom: 28 }}>
+          <div className="nexo-card-row-header">
+            <h4 className="nexo-card-row-title" style={{ margin: 0 }}>{t('الإيميل', 'Email')}</h4>
+            <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleCopy(result)}>{copied ? <Check size={15} /> : <Copy size={15} />}</button>
           </div>
-          {result.subject && <p style={{ fontWeight: 600, marginBottom: 8 }}>{t('الموضوع', 'Subject')}: {result.subject}</p>}
-          <div style={{ whiteSpace: 'pre-wrap', fontSize: 14, lineHeight: 1.8 }}>{result.body}</div>
+          {result.subject && (
+            <p dir="auto" style={{ fontWeight: 600, marginBottom: 10, color: 'var(--text-primary)', fontSize: 14 }}>
+              {t('الموضوع', 'Subject')}: {result.subject}
+            </p>
+          )}
+          <div className="nexo-result-text" dir="auto">{result.body}</div>
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 className="settings-group-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
+      <div className="nexo-tool-page-header" style={{ marginBottom: 14 }}>
+        <h3 className="nexo-section-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
         {history.length > 0 && (
-          <button className="settings-inline-btn" onClick={handleDeleteAll} style={{ color: '#f87171' }}>{t('مسح الكل', 'Clear all')}</button>
+          <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={handleDeleteAll} style={{ color: 'var(--color-error)', marginInlineStart: 'auto' }}>{t('مسح الكل', 'Clear all')}</button>
         )}
       </div>
 
       {loadingHistory ? (
-        <p className="settings-hint">{t('جارِ التحميل...', 'Loading...')}</p>
+        <div className="nexo-card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[0, 1, 2].map((i) => <div key={i} className="nexo-skeleton nexo-skeleton-line w-60" />)}
+        </div>
+      ) : historyError ? (
+        <div className="nexo-card">
+          <div className="nexo-state nexo-state-error">
+            <div className="nexo-state-icon"><AlertCircle size={20} /></div>
+            <div className="nexo-state-title">{t('تعذّر تحميل السجل', 'Could not load history')}</div>
+            <button className="nexo-btn nexo-btn-secondary nexo-btn-sm" onClick={loadHistory}>{t('إعادة المحاولة', 'Retry')}</button>
+          </div>
+        </div>
       ) : history.length === 0 ? (
-        <p className="settings-hint">{t('لا يوجد إيميلات سابقة.', 'No drafts yet.')}</p>
+        <div className="nexo-card">
+          <div className="nexo-state">
+            <div className="nexo-state-icon"><Inbox size={20} /></div>
+            <div className="nexo-state-title">{t('لا يوجد إيميلات بعد', 'No drafts yet')}</div>
+          </div>
+        </div>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+        <ul className="nexo-list">
           {history.map((item) => (
-            <li key={item.id} style={{ background: 'var(--bg-input-3)', borderRadius: 10, padding: '10px 14px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span onClick={() => setResult(item)} style={{ cursor: 'pointer', fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-                {item.subject || item.body?.slice(0, 50)}
-              </span>
-              <button className="icon-btn" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></button>
+            <li key={item.id} className="nexo-list-item">
+              <div className="nexo-list-item-main" onClick={() => setResult(item)} style={{ cursor: 'pointer' }}>
+                <div className="nexo-list-item-title" dir="auto">{item.subject || item.body?.slice(0, 50)}</div>
+                <span className="nexo-list-item-sub">{MODES[item.mode]?.[lang] || item.mode}</span>
+              </div>
+              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></button>
             </li>
           ))}
         </ul>
       )}
+     </div>
     </div>
   );
 }

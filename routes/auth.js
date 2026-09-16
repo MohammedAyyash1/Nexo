@@ -232,14 +232,12 @@ router.post('/account/avatar', authMiddleware, uploadAvatar.single('avatar'), as
     }
 
     const fileExt = (req.file.mimetype.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
-    const storagePath = `${req.userId}.${fileExt}`;
+    // اسم ملف فريد بكل مرة (مش ثابت) — يمنع أي مشكلة كاش من الأساس
+    const storagePath = `${req.userId}/${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from('avatars')
-      .upload(storagePath, req.file.buffer, {
-        contentType: req.file.mimetype,
-        upsert: true, // يستبدل الصورة القديمة لنفس المستخدم بدل ما يراكم ملفات جديدة
-      });
+      .upload(storagePath, req.file.buffer, { contentType: req.file.mimetype });
 
     if (uploadError) {
       console.error('Avatar upload error:', uploadError);
@@ -247,8 +245,9 @@ router.post('/account/avatar', authMiddleware, uploadAvatar.single('avatar'), as
     }
 
     const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(storagePath);
-    // نضيف طابع زمني بنهاية الرابط لإجبار المتصفح يحدّث الصورة المعروضة فورًا (cache-busting)
-    const avatarUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
+    const avatarUrl = publicUrlData.publicUrl;
+
+    const { data: existingUser } = await supabase.from('users').select('avatar_url').eq('id', req.userId).maybeSingle();
 
     const { error: updateError } = await withRetry(() =>
       supabase.from('users').update({ avatar_url: avatarUrl }).eq('id', req.userId)
@@ -256,6 +255,15 @@ router.post('/account/avatar', authMiddleware, uploadAvatar.single('avatar'), as
     if (updateError) {
       console.error('Avatar db update error:', updateError);
       return res.status(500).json({ error: 'تم رفع الصورة لكن فشل حفظ الرابط' });
+    }
+
+    if (existingUser?.avatar_url) {
+      try {
+        const oldPath = existingUser.avatar_url.split('/avatars/')[1]?.split('?')[0];
+        if (oldPath) await supabase.storage.from('avatars').remove([oldPath]);
+      } catch (cleanupErr) {
+        console.error('Old avatar cleanup error (non-fatal):', cleanupErr);
+      }
     }
 
     res.json({ avatarUrl });

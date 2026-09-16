@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Loader2, Trash2, AlertCircle, Users, ArrowRight, Download } from 'lucide-react';
+import { Upload, Loader2, Trash2, AlertCircle, Users, ArrowRight, Download, Inbox } from 'lucide-react';
 import { exportMessageAsWord } from '../utils/exportDoc.js';
 import { API_BASE } from '../../config/api.js';
 
@@ -22,22 +22,35 @@ export function MeetingNotesPage() {
   const [inputMode, setInputMode] = useState('audio');
   const [title, setTitle] = useState('');
   const [file, setFile] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
   const [pastedTranscript, setPastedTranscript] = useState('');
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
   const [current, setCurrent] = useState(null);
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [historyError, setHistoryError] = useState(false);
 
   const loadHistory = () => {
+    setLoadingHistory(true);
+    setHistoryError(false);
     fetch(`${BASE}/meeting-notes`, { headers: authHeaders() })
       .then((res) => res.json())
       .then((data) => setHistory(data.meetings || []))
-      .catch((err) => console.error('Load meetings error:', err))
+      .catch((err) => { console.error('Load meetings error:', err); setHistoryError(true); })
       .finally(() => setLoadingHistory(false));
   };
 
   useEffect(() => { loadHistory(); }, []);
+
+  const handleDragOver = (e) => { e.preventDefault(); setDragActive(true); };
+  const handleDragLeave = (e) => { e.preventDefault(); setDragActive(false); };
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) { setError(''); setFile(f); }
+  };
 
   const handleGenerate = () => {
     setError('');
@@ -85,116 +98,149 @@ export function MeetingNotesPage() {
   };
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: 800, margin: '0 auto', color: 'var(--text-primary)' }}>
-      <style>{`@keyframes nexoMeetSpin { to { transform: rotate(360deg); } } .nexo-meet-spin { animation: nexoMeetSpin 1s linear infinite; }`}</style>
-
-      <button className="settings-inline-btn" onClick={() => navigate('/')} style={{ marginBottom: 16, padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+    <div className="nexo-tool-page">
+     <div className="nexo-tool-page-inner">
+      <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
       </button>
 
-      <h1 style={{ fontSize: 22, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Users size={20} /> {t('محاضر الاجتماعات', 'Meeting Notes')}
-      </h1>
-      <p className="settings-hint" style={{ marginBottom: 24 }}>
-        {t('ارفع تسجيل الاجتماع أو الصق نصه، وسيولّد Nexo محضرًا منظمًا: ملخص، قرارات، ومهام بمسؤوليها.', "Upload the meeting recording or paste its text, and Nexo will generate organized notes: summary, decisions, and action items.")}
-      </p>
+      <div className="nexo-tool-page-header">
+        <div className="nexo-tool-icon-hero"><Users size={24} /></div>
+        <div>
+          <h1 className="nexo-tool-page-title">{t('محاضر الاجتماعات', 'Meeting Notes')}</h1>
+          <p className="nexo-tool-page-desc">
+            {t('ارفع تسجيل الاجتماع أو الصق نصه، وسيولّد Nexo محضرًا منظمًا: ملخص، قرارات، ومهام بمسؤوليها.', 'Upload the meeting recording or paste its text, and Nexo will generate organized notes: summary, decisions, and action items.')}
+          </p>
+        </div>
+      </div>
 
-      <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 24, marginBottom: 32 }}>
-        <input className="settings-text-input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('عنوان الاجتماع (اختياري)', 'Meeting title (optional)')} style={{ marginBottom: 12 }} />
+      <div className="nexo-card-luxe" style={{ marginBottom: 28 }}>
+        <span className="nexo-glow-orb nexo-glow-orb-purple" style={{ width: 200, height: 200, top: -60, insetInlineEnd: -40 }} />
 
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          <button className={`settings-style-chip ${inputMode === 'audio' ? 'active' : ''}`} onClick={() => setInputMode('audio')} style={{ flex: 1 }}>{t('تسجيل صوتي', 'Audio recording')}</button>
-          <button className={`settings-style-chip ${inputMode === 'text' ? 'active' : ''}`} onClick={() => setInputMode('text')} style={{ flex: 1 }}>{t('لصق نص', 'Paste text')}</button>
+        <input className="nexo-input" dir="auto" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('عنوان الاجتماع (اختياري)', 'Meeting title (optional)')} style={{ marginBottom: 14 }} />
+
+        <div className="nexo-tabs" style={{ marginBottom: 14 }}>
+          <button className={`nexo-tab ${inputMode === 'audio' ? 'active' : ''}`} onClick={() => setInputMode('audio')}>{t('تسجيل صوتي', 'Audio recording')}</button>
+          <button className={`nexo-tab ${inputMode === 'text' ? 'active' : ''}`} onClick={() => setInputMode('text')}>{t('لصق نص', 'Paste text')}</button>
         </div>
 
         {inputMode === 'audio' ? (
-          <label style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            padding: '30px 16px', borderRadius: 12, border: '1px dashed var(--border-input)',
-            cursor: 'pointer', background: 'var(--bg-input-2)', textAlign: 'center',
-          }}>
-            <Upload size={22} color="var(--text-secondary)" />
-            <span style={{ marginTop: 8, fontSize: 13.5 }}>{file ? file.name : t('اضغط لاختيار تسجيل (حتى 25MB)', 'Click to select a recording (up to 25MB)')}</span>
+          <label
+            className={`nexo-dropzone ${dragActive ? 'drag-active' : ''} ${file ? 'has-file' : ''}`}
+            onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
+          >
+            <div className="nexo-dropzone-icon"><Upload size={22} /></div>
+            {file ? (
+              <>
+                <span className="nexo-dropzone-text" dir="auto">{file.name}</span>
+                <span className="nexo-dropzone-hint">{t('اضغط لاختيار ملف آخر', 'Click to choose a different file')}</span>
+              </>
+            ) : (
+              <>
+                <span className="nexo-dropzone-text">{t('اضغط لاختيار تسجيل، أو اسحبه وأفلته هون', 'Click to select a recording, or drag and drop it here')}</span>
+                <span className="nexo-dropzone-hint">{t('حتى 25MB', 'Up to 25MB')}</span>
+              </>
+            )}
             <input type="file" accept="audio/*,video/mp4,video/webm" onChange={(e) => setFile(e.target.files?.[0] || null)} style={{ display: 'none' }} />
           </label>
         ) : (
-          <textarea className="settings-textarea" rows={6} value={pastedTranscript} onChange={(e) => setPastedTranscript(e.target.value)} placeholder={t('الصق نص محضر الاجتماع هون...', 'Paste the meeting transcript here...')} />
+          <textarea className="nexo-textarea" dir="auto" rows={6} value={pastedTranscript} onChange={(e) => setPastedTranscript(e.target.value)} placeholder={t('الصق نص محضر الاجتماع هون...', 'Paste the meeting transcript here...')} />
         )}
 
         {error && (
-          <p className="settings-hint" style={{ color: '#f87171', marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <AlertCircle size={14} /> {error}
-          </p>
+          <div className="nexo-inline-error"><AlertCircle size={14} /> {error}</div>
         )}
 
-        <button className="settings-btn" onClick={handleGenerate} disabled={processing} style={{ marginTop: 16, maxWidth: 220 }}>
-          {processing && <Loader2 size={14} className="nexo-meet-spin" />}
+        <button className="nexo-btn nexo-btn-primary" onClick={handleGenerate} disabled={processing} style={{ marginTop: 18, minWidth: 200 }}>
+          {processing && <Loader2 size={14} className="nexo-spin" />}
           {processing ? t('جارِ المعالجة...', 'Processing...') : t('توليد المحضر', 'Generate Notes')}
         </button>
       </div>
 
       {current && current.status === 'completed' && (
-        <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 20, marginBottom: 32 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <h4 className="settings-group-title" style={{ margin: 0 }}>{current.title}</h4>
-            <button className="icon-btn" onClick={() => handleExport(current)} title="Word"><Download size={15} /></button>
+        <div className="nexo-card" style={{ marginBottom: 28 }}>
+          <div className="nexo-card-row-header">
+            <h4 className="nexo-card-row-title" dir="auto" style={{ margin: 0 }}>{current.title}</h4>
+            <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleExport(current)} title="Word"><Download size={15} /></button>
           </div>
 
-          <p style={{ fontSize: 14, lineHeight: 1.8 }}>{current.summary}</p>
+          <p className="nexo-result-text" dir="auto" style={{ marginBottom: 18 }}>{current.summary}</p>
 
           {current.key_points?.length > 0 && (
-            <div style={{ marginBottom: 14 }}>
-              <h5 className="settings-hint" style={{ marginBottom: 6 }}>{t('نقاط النقاش', 'Key Points')}</h5>
-              <ul style={{ margin: 0, paddingInlineStart: 18, fontSize: 13.5 }}>
-                {current.key_points.map((p, i) => <li key={i} style={{ marginBottom: 4 }}>{p}</li>)}
+            <div style={{ marginBottom: 16 }}>
+              <div className="nexo-section-title" style={{ fontSize: 11, marginBottom: 8 }}>{t('نقاط النقاش', 'Key Points')}</div>
+              <ul style={{ margin: 0, paddingInlineStart: 18, fontSize: 13.5, color: 'var(--text-primary)', lineHeight: 1.9 }} dir="auto">
+                {current.key_points.map((p, i) => <li key={i}>{p}</li>)}
               </ul>
             </div>
           )}
 
           {current.decisions?.length > 0 && (
-            <div style={{ marginBottom: 14 }}>
-              <h5 className="settings-hint" style={{ marginBottom: 6 }}>{t('القرارات', 'Decisions')}</h5>
-              <ul style={{ margin: 0, paddingInlineStart: 18, fontSize: 13.5 }}>
-                {current.decisions.map((d, i) => <li key={i} style={{ marginBottom: 4 }}>{d}</li>)}
+            <div style={{ marginBottom: 16 }}>
+              <div className="nexo-section-title" style={{ fontSize: 11, marginBottom: 8 }}>{t('القرارات', 'Decisions')}</div>
+              <ul style={{ margin: 0, paddingInlineStart: 18, fontSize: 13.5, color: 'var(--text-primary)', lineHeight: 1.9 }} dir="auto">
+                {current.decisions.map((d, i) => <li key={i}>{d}</li>)}
               </ul>
             </div>
           )}
 
           {current.action_items?.length > 0 && (
             <div>
-              <h5 className="settings-hint" style={{ marginBottom: 6 }}>{t('المهام', 'Action Items')}</h5>
-              {current.action_items.map((a, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border-subtle)', fontSize: 13 }}>
-                  <span>{a.task}</span>
-                  <span className="settings-hint">{a.owner} — {a.dueDate}</span>
-                </div>
-              ))}
+              <div className="nexo-section-title" style={{ fontSize: 11, marginBottom: 8 }}>{t('المهام', 'Action Items')}</div>
+              <ul className="nexo-list">
+                {current.action_items.map((a, i) => (
+                  <li key={i} className="nexo-list-item">
+                    <div className="nexo-list-item-main">
+                      <div className="nexo-list-item-title" dir="auto" style={{ whiteSpace: 'normal' }}>{a.task}</div>
+                    </div>
+                    <span className="nexo-list-item-sub" dir="auto" style={{ flexShrink: 0 }}>{a.owner} — {a.dueDate}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 className="settings-group-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
+      <div className="nexo-tool-page-header" style={{ marginBottom: 14 }}>
+        <h3 className="nexo-section-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
         {history.length > 0 && (
-          <button className="settings-inline-btn" onClick={handleDeleteAll} style={{ color: '#f87171' }}>{t('مسح الكل', 'Clear all')}</button>
+          <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={handleDeleteAll} style={{ color: 'var(--color-error)', marginInlineStart: 'auto' }}>{t('مسح الكل', 'Clear all')}</button>
         )}
       </div>
 
       {loadingHistory ? (
-        <p className="settings-hint">{t('جارِ التحميل...', 'Loading...')}</p>
+        <div className="nexo-card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[0, 1, 2].map((i) => <div key={i} className="nexo-skeleton nexo-skeleton-line w-60" />)}
+        </div>
+      ) : historyError ? (
+        <div className="nexo-card">
+          <div className="nexo-state nexo-state-error">
+            <div className="nexo-state-icon"><AlertCircle size={20} /></div>
+            <div className="nexo-state-title">{t('تعذّر تحميل السجل', 'Could not load history')}</div>
+            <button className="nexo-btn nexo-btn-secondary nexo-btn-sm" onClick={loadHistory}>{t('إعادة المحاولة', 'Retry')}</button>
+          </div>
+        </div>
       ) : history.length === 0 ? (
-        <p className="settings-hint">{t('لا يوجد اجتماعات بعد.', 'No meetings yet.')}</p>
+        <div className="nexo-card">
+          <div className="nexo-state">
+            <div className="nexo-state-icon"><Inbox size={20} /></div>
+            <div className="nexo-state-title">{t('لا يوجد اجتماعات بعد', 'No meetings yet')}</div>
+          </div>
+        </div>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+        <ul className="nexo-list">
           {history.map((item) => (
-            <li key={item.id} style={{ background: 'var(--bg-input-3)', borderRadius: 10, padding: '10px 14px', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span onClick={() => setCurrent(item)} style={{ cursor: 'pointer', fontSize: 13.5 }}>{item.title}</span>
-              <button className="icon-btn" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></button>
+            <li key={item.id} className="nexo-list-item">
+              <div className="nexo-list-item-main" onClick={() => setCurrent(item)} style={{ cursor: 'pointer' }}>
+                <div className="nexo-list-item-title" dir="auto">{item.title}</div>
+              </div>
+              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></button>
             </li>
           ))}
         </ul>
       )}
+     </div>
     </div>
   );
 }

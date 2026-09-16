@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Loader2, Download, Trash2, AlertCircle, Image as ImageIcon, ArrowRight, X } from 'lucide-react';
+import { Upload, Loader2, Download, Trash2, AlertCircle, Image as ImageIcon, ArrowRight, X, Inbox } from 'lucide-react';
 import { ComingSoonOverlay } from './ComingSoonOverlay.jsx';
 import { API_BASE } from '../../config/api.js';
 
@@ -30,12 +30,15 @@ export function ImageStudioPage() {
   const [currentResult, setCurrentResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [historyError, setHistoryError] = useState(false);
 
   const loadHistory = () => {
+    setLoadingHistory(true);
+    setHistoryError(false);
     fetch(`${BASE}/images`, { headers: authHeaders() })
       .then((res) => res.json())
       .then((data) => setHistory(data.generations || []))
-      .catch((err) => console.error('Load image history error:', err))
+      .catch((err) => { console.error('Load image history error:', err); setHistoryError(true); })
       .finally(() => setLoadingHistory(false));
   };
 
@@ -100,17 +103,13 @@ export function ImageStudioPage() {
   };
 
   const ImageSlot = ({ slot, preview }) => (
-    <label style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      width: 140, height: 140, borderRadius: 12, border: '1px dashed var(--border-input)',
-      cursor: 'pointer', overflow: 'hidden', background: 'var(--bg-input-2)', position: 'relative', flexShrink: 0,
-    }}>
+    <label className={`nexo-image-slot ${preview ? 'has-image' : ''}`}>
       {preview ? (
         <>
-          <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={preview} alt="" />
           <button
+            className="nexo-image-slot-clear"
             onClick={(e) => { e.preventDefault(); clearImage(slot); }}
-            style={{ position: 'absolute', top: 4, insetInlineEnd: 4, background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
           >
             <X size={12} color="#fff" />
           </button>
@@ -118,7 +117,7 @@ export function ImageStudioPage() {
       ) : (
         <>
           <Upload size={18} color="var(--text-secondary)" />
-          <span className="settings-hint" style={{ marginTop: 6, fontSize: 11.5, textAlign: 'center', padding: '0 6px' }}>
+          <span className="nexo-dropzone-hint" style={{ marginTop: 6, padding: '0 6px' }}>
             {t(`صورة ${slot} (اختياري)`, `Image ${slot} (optional)`)}
           </span>
         </>
@@ -128,21 +127,23 @@ export function ImageStudioPage() {
   );
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: 900, margin: '0 auto', color: 'var(--text-primary)' }}>
-      <style>{`@keyframes nexoImgSpin { to { transform: rotate(360deg); } } .nexo-img-spin { animation: nexoImgSpin 1s linear infinite; }`}</style>
-
-      <button className="settings-inline-btn" onClick={() => navigate('/')} style={{ marginBottom: 16, padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+    <div className="nexo-tool-page">
+     <div className="nexo-tool-page-inner" style={{ maxWidth: 900 }}>
+      <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
       </button>
 
-      <h1 style={{ fontSize: 22, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <ImageIcon size={20} /> {t('استوديو الصور الذكي', 'AI Image Studio')}
-      </h1>
-      <p className="settings-hint" style={{ marginBottom: 24 }}>
-        {t('اكتب وصفًا لتوليد صورة احترافية من الصفر، أو ارفع صورة/صورتين واطلب من Nexo دمجهما أو تعديلهما بدقة (مثل: تغيير الخلفية، دمج شخصين بمشهد واحد، أو تعديل عناصر معينة بالصورة).', 'Write a description to generate a professional image from scratch, or upload 1-2 images and ask Nexo to precisely merge or edit them (e.g. change the background, combine two people into one scene, or adjust specific elements in the photo).')}
-      </p>
+      <div className="nexo-tool-page-header">
+        <div className="nexo-tool-icon-hero"><ImageIcon size={24} /></div>
+        <div>
+          <h1 className="nexo-tool-page-title">{t('استوديو الصور الذكي', 'AI Image Studio')}</h1>
+          <p className="nexo-tool-page-desc">
+            {t('اكتب وصفًا لتوليد صورة احترافية من الصفر، أو ارفع صورة/صورتين واطلب من Nexo دمجهما أو تعديلهما بدقة (مثل: تغيير الخلفية، دمج شخصين بمشهد واحد، أو تعديل عناصر معينة بالصورة).', 'Write a description to generate a professional image from scratch, or upload 1-2 images and ask Nexo to precisely merge or edit them (e.g. change the background, combine two people into one scene, or adjust specific elements in the photo).')}
+          </p>
+        </div>
+      </div>
 
-      <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 24, marginBottom: 32, position: 'relative' }}>
+      <div className="nexo-card" style={{ marginBottom: 28, position: 'relative' }}>
         <ComingSoonOverlay
           lang={lang}
           titleAr="استوديو الصور — قريبًا"
@@ -156,77 +157,91 @@ export function ImageStudioPage() {
         </div>
 
         <textarea
-          className="settings-textarea" rows={4} value={prompt}
+          className="nexo-textarea" dir="auto" rows={4} value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder={t('مثلاً: ادمج الصورتين بحيث يبدو الشخصان يتصافحان بخلفية مكتب عصري...', 'e.g. merge the two photos so both people appear shaking hands in a modern office background...')}
           maxLength={MAX_PROMPT_LENGTH}
         />
-        <div className="settings-char-count">{prompt.length}/{MAX_PROMPT_LENGTH}</div>
+        <div className="nexo-char-count">{prompt.length}/{MAX_PROMPT_LENGTH}</div>
 
         {error && (
-          <p className="settings-hint" style={{ color: '#f87171', marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <AlertCircle size={14} /> {error}
-          </p>
+          <div className="nexo-inline-error"><AlertCircle size={14} /> {error}</div>
         )}
 
-        <button className="settings-btn" onClick={handleGenerate} disabled={generating} style={{ marginTop: 16, maxWidth: 220 }}>
-          {generating && <Loader2 size={14} className="nexo-img-spin" />}
+        <button className="nexo-btn nexo-btn-primary" onClick={handleGenerate} disabled={generating} style={{ marginTop: 16, minWidth: 200 }}>
+          {generating && <Loader2 size={14} className="nexo-spin" />}
           {generating ? t('جارِ التوليد...', 'Generating...') : t('توليد الصورة', 'Generate Image')}
         </button>
       </div>
 
       {currentResult && currentResult.result_image_url && (
-        <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 20, marginBottom: 32 }}>
-          <h4 className="settings-group-title" style={{ marginBottom: 10 }}>{t('النتيجة', 'Result')}</h4>
-          <img src={currentResult.result_image_url} alt="" style={{ width: '100%', borderRadius: 10, marginBottom: 12 }} />
-          <a href={currentResult.result_image_url} download className="settings-btn" style={{ maxWidth: 160, textDecoration: 'none' }}>
+        <div className="nexo-card" style={{ marginBottom: 28 }}>
+          <h4 className="nexo-card-row-title" style={{ marginBottom: 12 }}>{t('النتيجة', 'Result')}</h4>
+          <img src={currentResult.result_image_url} alt="" style={{ width: '100%', borderRadius: 10, marginBottom: 14 }} />
+          <a href={currentResult.result_image_url} download className="nexo-btn nexo-btn-secondary" style={{ textDecoration: 'none' }}>
             <Download size={14} /> {t('تنزيل', 'Download')}
           </a>
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 className="settings-group-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
+      <div className="nexo-tool-page-header" style={{ marginBottom: 14 }}>
+        <h3 className="nexo-section-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
         {history.length > 0 && (
-          <button className="settings-inline-btn" onClick={handleDeleteAll} style={{ color: '#f87171' }}>
+          <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={handleDeleteAll} style={{ color: 'var(--color-error)', marginInlineStart: 'auto' }}>
             {t('مسح الكل', 'Clear all')}
           </button>
         )}
       </div>
 
       {loadingHistory ? (
-        <p className="settings-hint">{t('جارِ التحميل...', 'Loading...')}</p>
+        <div className="nexo-gallery-grid">
+          {[0, 1, 2, 3].map((i) => <div key={i} className="nexo-skeleton" style={{ height: 170, borderRadius: 12 }} />)}
+        </div>
+      ) : historyError ? (
+        <div className="nexo-card">
+          <div className="nexo-state nexo-state-error">
+            <div className="nexo-state-icon"><AlertCircle size={20} /></div>
+            <div className="nexo-state-title">{t('تعذّر تحميل السجل', 'Could not load history')}</div>
+            <button className="nexo-btn nexo-btn-secondary nexo-btn-sm" onClick={loadHistory}>{t('إعادة المحاولة', 'Retry')}</button>
+          </div>
+        </div>
       ) : history.length === 0 ? (
-        <p className="settings-hint">{t('لا يوجد صور سابقة.', 'No images yet.')}</p>
+        <div className="nexo-card">
+          <div className="nexo-state">
+            <div className="nexo-state-icon"><Inbox size={20} /></div>
+            <div className="nexo-state-title">{t('لا يوجد صور بعد', 'No images yet')}</div>
+          </div>
+        </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 14 }}>
+        <div className="nexo-gallery-grid">
           {history.map((item) => (
-            <div key={item.id} style={{ background: 'var(--bg-input-3)', borderRadius: 12, padding: 10 }}>
+            <div key={item.id} className="nexo-gallery-item">
               {item.status === 'completed' && item.result_image_url ? (
-                <img src={item.result_image_url} alt="" style={{ width: '100%', height: 130, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }} />
+                <img src={item.result_image_url} alt="" className="nexo-gallery-thumb" />
               ) : item.status === 'failed' ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 130, gap: 6 }}>
-                  <AlertCircle size={20} color="#f87171" />
-                  <span style={{ fontSize: 11, color: '#f87171', textAlign: 'center' }}>{t('فشل', 'Failed')}</span>
+                <div className="nexo-gallery-placeholder">
+                  <AlertCircle size={20} color="var(--color-error)" />
+                  <span style={{ fontSize: 11, color: 'var(--color-error)' }}>{t('فشل', 'Failed')}</span>
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 130 }}>
-                  <Loader2 size={20} className="nexo-img-spin" color="var(--accent-2)" />
+                <div className="nexo-gallery-placeholder">
+                  <Loader2 size={20} className="nexo-spin" color="var(--accent-2)" />
                 </div>
               )}
-              <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '0 0 8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <p className="nexo-list-item-sub" dir="auto" style={{ margin: '8px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {item.prompt}
               </p>
               <div style={{ display: 'flex', gap: 6 }}>
                 {item.status === 'completed' && item.result_image_url && (
-                  <a href={item.result_image_url} download className="icon-btn" title={t('تنزيل', 'Download')}><Download size={13} /></a>
+                  <a href={item.result_image_url} download className="nexo-btn nexo-btn-ghost nexo-btn-icon" title={t('تنزيل', 'Download')}><Download size={13} /></a>
                 )}
-                <button className="icon-btn" onClick={() => handleDelete(item.id)} title={t('حذف', 'Delete')}><Trash2 size={13} /></button>
+                <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleDelete(item.id)} title={t('حذف', 'Delete')}><Trash2 size={13} /></button>
               </div>
             </div>
           ))}
         </div>
       )}
+     </div>
     </div>
   );
 }

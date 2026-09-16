@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Trash2, AlertCircle, ShieldCheck, ArrowRight, ShieldAlert, ShieldQuestion, ShieldX } from 'lucide-react';
+import { Loader2, Trash2, AlertCircle, ShieldCheck, ArrowRight, ShieldAlert, ShieldQuestion, ShieldX, Inbox, ExternalLink } from 'lucide-react';
 import { API_BASE } from '../../config/api.js';
 
 const TOKEN_KEY = 'nexo_token';
@@ -13,10 +13,10 @@ function loadLang() {
 }
 
 const VERDICT_META = {
-  likely_true: { color: '#4ade80', icon: ShieldCheck, ar: 'يبدو صحيحًا', en: 'Likely True' },
-  likely_false: { color: '#f87171', icon: ShieldX, ar: 'يبدو غير صحيح', en: 'Likely False' },
-  misleading: { color: '#facc15', icon: ShieldAlert, ar: 'مضلّل جزئيًا', en: 'Misleading' },
-  unverified: { color: '#9ca3af', icon: ShieldQuestion, ar: 'غير مؤكّد', en: 'Unverified' },
+  likely_true: { color: 'var(--color-success)', icon: ShieldCheck, ar: 'يبدو صحيحًا', en: 'Likely True' },
+  likely_false: { color: 'var(--color-error)', icon: ShieldX, ar: 'يبدو غير صحيح', en: 'Likely False' },
+  misleading: { color: 'var(--color-warning)', icon: ShieldAlert, ar: 'مضلّل جزئيًا', en: 'Misleading' },
+  unverified: { color: 'var(--text-muted)', icon: ShieldQuestion, ar: 'غير مؤكّد', en: 'Unverified' },
 };
 
 export function NewsCheckPage() {
@@ -32,12 +32,15 @@ export function NewsCheckPage() {
   const [currentResult, setCurrentResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [historyError, setHistoryError] = useState(false);
 
   const loadHistory = () => {
+    setLoadingHistory(true);
+    setHistoryError(false);
     fetch(`${BASE}/news-check/history`, { headers: authHeaders() })
       .then((res) => res.json())
       .then((data) => setHistory(data.items || []))
-      .catch((err) => console.error('Load history error:', err))
+      .catch((err) => { console.error('Load history error:', err); setHistoryError(true); })
       .finally(() => setLoadingHistory(false));
   };
 
@@ -80,22 +83,22 @@ export function NewsCheckPage() {
     const meta = VERDICT_META[result.verdict] || VERDICT_META.unverified;
     const Icon = meta.icon;
     return (
-      <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 20, marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Icon size={20} color={meta.color} />
-          <span style={{ fontWeight: 700, color: meta.color }}>{lang === 'en' ? meta.en : meta.ar}</span>
+      <div className="nexo-card" style={{ marginBottom: 24 }}>
+        <div className="nexo-verdict-banner" style={{ borderColor: meta.color }}>
+          <Icon size={22} color={meta.color} />
+          <span style={{ fontWeight: 700, color: meta.color, fontSize: 15 }}>{lang === 'en' ? meta.en : meta.ar}</span>
         </div>
-        <p style={{ fontSize: 14, lineHeight: 1.8, marginBottom: result.sources?.length ? 14 : 0 }}>{result.explanation}</p>
+        <p className="nexo-result-text" dir="auto" style={{ marginBottom: result.sources?.length ? 18 : 0 }}>{result.explanation}</p>
         {result.sources?.length > 0 && (
           <div>
-            <h5 className="settings-hint" style={{ marginBottom: 6 }}>{t('المصادر', 'Sources')}</h5>
-            <ul style={{ margin: 0, paddingInlineStart: 18, fontSize: 12.5 }}>
+            <div className="nexo-section-title" style={{ fontSize: 11, marginBottom: 8 }}>{t('المصادر', 'Sources')}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {result.sources.map((s, i) => (
-                <li key={i} style={{ marginBottom: 4 }}>
-                  <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-2)' }}>{s.title}</a>
-                </li>
+                <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="nexo-source-link" dir="auto">
+                  <ExternalLink size={12} /> {s.title}
+                </a>
               ))}
-            </ul>
+            </div>
           </div>
         )}
       </div>
@@ -103,68 +106,87 @@ export function NewsCheckPage() {
   };
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: 800, margin: '0 auto', color: 'var(--text-primary)' }}>
-      <style>{`@keyframes nexoNewsSpin { to { transform: rotate(360deg); } } .nexo-news-spin { animation: nexoNewsSpin 1s linear infinite; }`}</style>
-
-      <button className="settings-inline-btn" onClick={() => navigate('/')} style={{ marginBottom: 16, padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+    <div className="nexo-tool-page">
+     <div className="nexo-tool-page-inner">
+      <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
       </button>
 
-      <h1 style={{ fontSize: 22, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <ShieldCheck size={20} /> {t('كاشف مصداقية الأخبار', 'News Credibility Checker')}
-      </h1>
-      <p className="settings-hint" style={{ marginBottom: 24 }}>
-        {t('الصق خبرًا أو ادعاءً أو رابطًا، وسيتحقق Nexo من مصداقيته عبر البحث بمصادر حقيقية.', 'Paste a news claim or link, and Nexo will fact-check it using real web sources.')}
-      </p>
+      <div className="nexo-tool-page-header">
+        <div className="nexo-tool-icon-hero"><ShieldCheck size={24} /></div>
+        <div>
+          <h1 className="nexo-tool-page-title">{t('كاشف مصداقية الأخبار', 'News Credibility Checker')}</h1>
+          <p className="nexo-tool-page-desc">
+            {t('الصق خبرًا أو ادعاءً أو رابطًا، وسيتحقق Nexo من مصداقيته عبر البحث بمصادر حقيقية.', 'Paste a news claim or link, and Nexo will fact-check it using real web sources.')}
+          </p>
+        </div>
+      </div>
 
-      <div style={{ background: 'var(--bg-input-3)', borderRadius: 14, padding: 24, marginBottom: 20 }}>
+      <div className="nexo-card-luxe" style={{ marginBottom: 24 }}>
+        <span className="nexo-glow-orb nexo-glow-orb-purple" style={{ width: 200, height: 200, top: -60, insetInlineEnd: -40 }} />
         <textarea
-          className="settings-textarea" rows={3} value={text}
+          className="nexo-textarea" dir="auto" rows={3} value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={t('مثلاً: "فلان اتخذ قرارًا بكذا" أو رابط خبر...', 'e.g. "X made this decision" or a news link...')}
         />
-        {error && (
-          <p className="settings-hint" style={{ color: '#f87171', marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <AlertCircle size={14} /> {error}
-          </p>
-        )}
-        <button className="settings-btn" onClick={handleCheck} disabled={checking} style={{ marginTop: 16, maxWidth: 200 }}>
-          {checking && <Loader2 size={14} className="nexo-news-spin" />}
+        {error && <div className="nexo-inline-error"><AlertCircle size={14} /> {error}</div>}
+        <button className="nexo-btn nexo-btn-primary" onClick={handleCheck} disabled={checking} style={{ marginTop: 16, minWidth: 200 }}>
+          {checking && <Loader2 size={14} className="nexo-spin" />}
           {checking ? t('جارِ التحقق...', 'Checking...') : t('تحقق الآن', 'Check now')}
         </button>
       </div>
 
       {currentResult && currentResult.status === 'completed' && renderResult(currentResult)}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 className="settings-group-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
+      <div className="nexo-tool-page-header" style={{ marginBottom: 14 }}>
+        <h3 className="nexo-section-title" style={{ margin: 0 }}>{t('السجل', 'History')}</h3>
         {history.length > 0 && (
-          <button className="settings-inline-btn" onClick={handleDeleteAll} style={{ color: '#f87171' }}>{t('مسح الكل', 'Clear all')}</button>
+          <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={handleDeleteAll} style={{ color: 'var(--color-error)', marginInlineStart: 'auto' }}>{t('مسح الكل', 'Clear all')}</button>
         )}
       </div>
 
       {loadingHistory ? (
-        <p className="settings-hint">{t('جارِ التحميل...', 'Loading...')}</p>
+        <div className="nexo-card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[0, 1, 2].map((i) => <div key={i} className="nexo-skeleton nexo-skeleton-line w-60" />)}
+        </div>
+      ) : historyError ? (
+        <div className="nexo-card">
+          <div className="nexo-state nexo-state-error">
+            <div className="nexo-state-icon"><AlertCircle size={20} /></div>
+            <div className="nexo-state-title">{t('تعذّر تحميل السجل', 'Could not load history')}</div>
+            <button className="nexo-btn nexo-btn-secondary nexo-btn-sm" onClick={loadHistory}>{t('إعادة المحاولة', 'Retry')}</button>
+          </div>
+        </div>
       ) : history.length === 0 ? (
-        <p className="settings-hint">{t('لا يوجد فحوصات سابقة.', 'No checks yet.')}</p>
+        <div className="nexo-card">
+          <div className="nexo-state">
+            <div className="nexo-state-icon"><Inbox size={20} /></div>
+            <div className="nexo-state-title">{t('لا يوجد فحوصات بعد', 'No checks yet')}</div>
+          </div>
+        </div>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+        <ul className="nexo-list">
           {history.map((item) => {
             const meta = VERDICT_META[item.verdict] || VERDICT_META.unverified;
+            const Icon = meta.icon;
             return (
-              <li key={item.id} style={{ background: 'var(--bg-input-3)', borderRadius: 10, padding: '12px 14px', marginBottom: 8 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                  <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => setCurrentResult(item)}>
-                    <span style={{ color: meta.color, fontSize: 11.5, fontWeight: 600 }}>{lang === 'en' ? meta.en : meta.ar}</span>
-                    <div style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.input_text}</div>
-                  </div>
-                  <button className="icon-btn" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></button>
+              <li key={item.id} className="nexo-list-item">
+                <div className="nexo-file-row-icon" style={{ background: 'transparent' }}>
+                  <Icon size={16} color={meta.color} />
                 </div>
+                <div className="nexo-list-item-main" onClick={() => setCurrentResult(item)} style={{ cursor: 'pointer' }}>
+                  <span style={{ color: meta.color, fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 2 }}>
+                    {lang === 'en' ? meta.en : meta.ar}
+                  </span>
+                  <div className="nexo-list-item-title" dir="auto">{item.input_text}</div>
+                </div>
+                <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></button>
               </li>
             );
           })}
         </ul>
       )}
+     </div>
     </div>
   );
 }
