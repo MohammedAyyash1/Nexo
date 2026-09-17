@@ -2159,7 +2159,8 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
     radial-gradient(ellipse 600px 440px at 45% 100%, rgba(var(--accent-1-rgb), 0.09), transparent 60%),
     var(--bg-page);
   isolation: isolate;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .nexo-tool-page::before {
