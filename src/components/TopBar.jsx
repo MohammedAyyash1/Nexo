@@ -1,14 +1,24 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, MoreHorizontal, Pin, Archive, Pencil, Trash2, Search, Sparkles, Bell } from 'lucide-react';
+import { Menu, MoreHorizontal, Pin, Archive, Pencil, Trash2, Search, Sparkles, Bell, MessageSquare } from 'lucide-react';
 
 export function TopBar({
   t, lang, sidebarCollapsed, toggleSidebar, handleShare, hasMessages,
   moreMenuOpen, setMoreMenuOpen, activeChat, handleTogglePin, handleToggleArchive,
   handleRenameChat, handleDeleteCurrentChat,
+  searchQuery, setSearchQuery, filteredChats, setActiveChatId,
 }) {
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+
+  const showResults = searchFocused && searchQuery.trim() !== '';
+
+  const handlePickResult = (chatId) => {
+    setActiveChatId(chatId);
+    setSearchQuery('');
+    setSearchFocused(false);
+  };
 
   return (
     <div className="top-bar">
@@ -20,9 +30,48 @@ export function TopBar({
       <span className="top-bar-title">{t.brand}</span>
 
       <div className="topbar-v3-row">
-        <div className="topbar-v3-search" title={lang === 'en' ? 'Coming soon' : 'قريبًا'} style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+        <div className="topbar-v3-search" style={{ position: 'relative' }}>
           <Search size={14} />
-          <input placeholder={lang === 'en' ? 'Search coming soon...' : 'البحث قريبًا...'} disabled />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+            placeholder={lang === 'en' ? 'Search your chats...' : 'ابحث بمحادثاتك...'}
+          />
+
+          {showResults && (
+            <div
+              className="notif-dropdown"
+              style={{
+                position: 'absolute', top: 'calc(100% + 8px)', insetInlineStart: 0,
+                width: 320, maxHeight: 320, overflowY: 'auto', padding: 6,
+              }}
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              {filteredChats.length === 0 ? (
+                <div style={{ padding: '10px 8px', color: 'var(--text-muted)', fontSize: 13 }}>
+                  {lang === 'en' ? 'No matching chats' : 'لا توجد محادثات مطابقة'}
+                </div>
+              ) : (
+                filteredChats.slice(0, 20).map((c) => (
+                  <div
+                    key={c.id}
+                    onClick={() => handlePickResult(c.id)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px',
+                      borderRadius: 8, cursor: 'pointer', fontSize: 13.5, color: 'var(--text-primary)',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(var(--accent-rgb), 0.12)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <MessageSquare size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 

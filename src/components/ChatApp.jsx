@@ -819,6 +819,7 @@ const handleToggleSpeak = (text, index) => {
           handleShare={handleShare} hasMessages={hasMessages} moreMenuOpen={moreMenuOpen} setMoreMenuOpen={setMoreMenuOpen}
           activeChat={activeChat} handleTogglePin={handleTogglePin} handleToggleArchive={handleToggleArchive}
           handleRenameChat={handleRenameChat} handleDeleteCurrentChat={handleDeleteCurrentChat}
+          searchQuery={searchQuery} setSearchQuery={setSearchQuery} filteredChats={filteredChats} setActiveChatId={setActiveChatId}
         />
 
         {activeAssistant && (
