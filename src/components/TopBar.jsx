@@ -12,6 +12,7 @@ export function TopBar({
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
+  const q = searchQuery.toLowerCase();
   const showResults = searchFocused && searchQuery.trim() !== '';
 
   const handlePickResult = (chatId) => {
@@ -45,7 +46,7 @@ export function TopBar({
               className="notif-dropdown"
               style={{
                 position: 'absolute', top: 'calc(100% + 8px)', insetInlineStart: 0,
-                width: 320, maxHeight: 320, overflowY: 'auto', padding: 6,
+                width: 340, maxHeight: 340, overflowY: 'auto', padding: 6,
               }}
               onMouseDown={(e) => e.preventDefault()}
             >
@@ -54,21 +55,43 @@ export function TopBar({
                   {lang === 'en' ? 'No matching chats' : 'لا توجد محادثات مطابقة'}
                 </div>
               ) : (
-                filteredChats.slice(0, 20).map((c) => (
-                  <div
-                    key={c.id}
-                    onClick={() => handlePickResult(c.id)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px',
-                      borderRadius: 8, cursor: 'pointer', fontSize: 13.5, color: 'var(--text-primary)',
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(var(--accent-rgb), 0.12)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <MessageSquare size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</span>
-                  </div>
-                ))
+                filteredChats.slice(0, 20).map((c) => {
+                  const titleMatches = c.title.toLowerCase().includes(q);
+                  const matchedMsg = !titleMatches
+                    ? c.messages.find((m) => m.content?.toLowerCase().includes(q))
+                    : null;
+
+                  return (
+                    <div
+                      key={c.id}
+                      onClick={() => handlePickResult(c.id)}
+                      style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 8, padding: '9px 10px',
+                        borderRadius: 8, cursor: 'pointer',
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(var(--accent-rgb), 0.12)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <MessageSquare size={14} style={{ flexShrink: 0, opacity: 0.7, marginTop: 2 }} />
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{
+                          fontSize: 13.5, color: 'var(--text-primary)',
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {c.title}
+                        </div>
+                        {matchedMsg && (
+                          <div style={{
+                            fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2,
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {matchedMsg.content.slice(0, 70)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
           )}
