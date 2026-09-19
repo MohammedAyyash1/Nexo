@@ -74,16 +74,26 @@ export function Sidebar(props) {
   const safeCall = (fn) => (typeof fn === 'function' ? fn : () => {});
   const t2 = (ar, en) => (lang === 'en' ? en : ar);
 
+  const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 640;
+  const withAutoClose = (fn) => () => {
+    safeCall(fn)();
+    if (isMobile()) toggleSidebar();
+  };
+
   const NAV_ITEMS = [
-    { icon: Home, label: t2('الرئيسية', 'Home'), onClick: onGoHome },
-    { icon: MessageSquare, label: t2('المحادثات', 'Chats'), onClick: scrollToRecentChats },
-    { icon: Star, label: t2('المفضلة', 'Favorites'), onClick: onOpenFavorites },
-    { icon: Sparkles, label: t2('الأدوات', 'Tools'), onClick: onToggleToolsPanel },
-    { icon: FolderOpen, label: t2('المستندات', 'Documents'), onClick: onOpenLibrary },
-    { icon: SettingsIcon, label: t2('الإعدادات', 'Settings'), onClick: onOpenSettings },
+    { icon: Home, label: t2('الرئيسية', 'Home'), onClick: withAutoClose(onGoHome) },
+    { icon: MessageSquare, label: t2('المحادثات', 'Chats'), onClick: withAutoClose(scrollToRecentChats) },
+    { icon: Star, label: t2('المفضلة', 'Favorites'), onClick: withAutoClose(onOpenFavorites) },
+    { icon: Sparkles, label: t2('الأدوات', 'Tools'), onClick: withAutoClose(onToggleToolsPanel) },
+    { icon: FolderOpen, label: t2('المستندات', 'Documents'), onClick: withAutoClose(onOpenLibrary) },
+    { icon: SettingsIcon, label: t2('الإعدادات', 'Settings'), onClick: withAutoClose(onOpenSettings) },
   ];
 
   return (
+    <>
+      {!sidebarCollapsed && isMobile() && (
+        <div className="nexo-sidebar-backdrop" onClick={toggleSidebar} />
+      )}
     <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div className="sidebar-top">
         <button className="icon-btn" title={t.collapse} onClick={toggleSidebar}><Menu size={18} /></button>
@@ -127,7 +137,7 @@ export function Sidebar(props) {
 
         <div className="chat-list">
           {filteredChats.map((c) => (
-            <div key={c.id} className={`chat-item ${c.id === activeChatId ? 'active' : ''}`} onClick={() => setActiveChatId(c.id)}>
+            <div key={c.id} className={`chat-item ${c.id === activeChatId ? 'active' : ''}`} onClick={() => { setActiveChatId(c.id); if (isMobile()) toggleSidebar(); }}>
               <span className="chat-item-title">{c.title}</span>
               <button className="chat-delete-btn" onClick={(e) => handleDeleteChat(e, c.id)} title={t.deleteChat}><X size={13} /></button>
             </div>
@@ -224,5 +234,6 @@ export function Sidebar(props) {
         </div>
       </div>
     </aside>
+    </>
   );
 }

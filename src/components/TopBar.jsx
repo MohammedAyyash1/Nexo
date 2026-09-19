@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, MoreHorizontal, Pin, Archive, Pencil, Trash2, Search, Sparkles, Bell, MessageSquare } from 'lucide-react';
+import { Menu, MoreHorizontal, Pin, Archive, Pencil, Trash2, Search, Sparkles, Bell, MessageSquare, X } from 'lucide-react';
 
 export function TopBar({
   t, lang, sidebarCollapsed, toggleSidebar, handleShare, hasMessages,
@@ -11,6 +11,7 @@ export function TopBar({
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const q = searchQuery.toLowerCase();
   const showResults = searchFocused && searchQuery.trim() !== '';
@@ -30,7 +31,16 @@ export function TopBar({
       )}
       <span className="top-bar-title">{t.brand}</span>
 
-      <div className="topbar-v3-row">
+      <div className={`topbar-v3-row ${mobileSearchOpen ? 'mobile-search-open' : ''}`}>
+        {mobileSearchOpen && (
+          <button
+            className="icon-btn top-bar-mobile-search-close"
+            onClick={() => { setMobileSearchOpen(false); setSearchQuery(''); }}
+            title={lang === 'en' ? 'Close search' : 'إغلاق البحث'}
+          >
+            <X size={16} />
+          </button>
+        )}
         <div className="topbar-v3-search" style={{ position: 'relative' }}>
           <Search size={14} />
           <input
@@ -46,7 +56,7 @@ export function TopBar({
               className="notif-dropdown"
               style={{
                 position: 'absolute', top: 'calc(100% + 8px)', insetInlineStart: 0,
-                width: 340, maxHeight: 340, overflowY: 'auto', padding: 6,
+                width: 'min(340px, calc(100vw - 32px))', maxHeight: 340, overflowY: 'auto', padding: 6,
               }}
               onMouseDown={(e) => e.preventDefault()}
             >
@@ -99,6 +109,13 @@ export function TopBar({
       </div>
 
       <div className="top-bar-actions">
+        <button
+          className="icon-btn top-bar-mobile-search-btn"
+          title={lang === 'en' ? 'Search' : 'بحث'}
+          onClick={() => setMobileSearchOpen(true)}
+        >
+          <Search size={17} />
+        </button>
         <button className="premium-badge" onClick={() => navigate('/upgrade')}>
           <Sparkles size={13} /> {lang === 'en' ? 'Nexo Premium' : 'Nexo Premium'}
         </button>

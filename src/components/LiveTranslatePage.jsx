@@ -145,7 +145,7 @@ export function LiveTranslatePage({ user }) {
   const [lastTranslation, setLastTranslation] = useState('');
   const [lastTranslationFrom, setLastTranslationFrom] = useState('');
   const [myLastCaption, setMyLastCaption] = useState('');
-  const [showLog, setShowLog] = useState(true);
+  const [showLog, setShowLog] = useState(() => typeof window !== 'undefined' && window.innerWidth > 900);
   const [showQr, setShowQr] = useState(false);
   const [participantSearch, setParticipantSearch] = useState('');
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -158,7 +158,7 @@ export function LiveTranslatePage({ user }) {
   const [unreadCounts, setUnreadCounts] = useState({}); // threadKey -> عدد الرسائل غير المقروءة
   const [dmToast, setDmToast] = useState(null); // { name, text } إشعار رسالة خاصة جديدة
   const [chatInput, setChatInput] = useState('');
-  const [showParticipants, setShowParticipants] = useState(true);
+  const [showParticipants, setShowParticipants] = useState(() => typeof window !== 'undefined' && window.innerWidth > 900);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [floatingReactions, setFloatingReactions] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -1416,7 +1416,14 @@ export function LiveTranslatePage({ user }) {
               <div className="lt-more-item" onClick={() => { setShowQr((s) => !s); setMoreMenuOpen(false); }}>
                 <QrCode size={14} /> {t('عرض QR', 'Show QR')}
               </div>
-              <div className="lt-more-item" onClick={() => { setShowParticipants((s) => !s); setMoreMenuOpen(false); }}>
+              <div className="lt-more-item" onClick={() => {
+                setShowParticipants((s) => {
+                  const next = !s;
+                  if (next && typeof window !== 'undefined' && window.innerWidth <= 900) setShowLog(false);
+                  return next;
+                });
+                setMoreMenuOpen(false);
+              }}>
                 <Users size={14} /> {showParticipants ? t('إخفاء المشاركين', 'Hide participants') : t('إظهار المشاركين', 'Show participants')}
               </div>
             </div>
@@ -1425,7 +1432,11 @@ export function LiveTranslatePage({ user }) {
 
         <button
           className={`lt-hover lt-toolbar-btn ${showLog && rightTab === 'chat' ? 'active' : ''}`}
-          onClick={() => { if (showLog && rightTab === 'chat') setShowLog(false); else { setRightTab('chat'); setShowLog(true); } }}
+          onClick={() => {
+            if (showLog && rightTab === 'chat') { setShowLog(false); return; }
+            setRightTab('chat'); setShowLog(true);
+            if (typeof window !== 'undefined' && window.innerWidth <= 900) setShowParticipants(false);
+          }}
         >
           <MessageSquare size={17} />
           <span>{t('المحادثة', 'Chat')}</span>
@@ -1434,7 +1445,11 @@ export function LiveTranslatePage({ user }) {
 
         <button
           className={`lt-hover lt-toolbar-btn ${showLog && rightTab === 'translate' ? 'active' : ''}`}
-          onClick={() => { if (showLog && rightTab === 'translate') setShowLog(false); else { setRightTab('translate'); setShowLog(true); } }}
+          onClick={() => {
+            if (showLog && rightTab === 'translate') { setShowLog(false); return; }
+            setRightTab('translate'); setShowLog(true);
+            if (typeof window !== 'undefined' && window.innerWidth <= 900) setShowParticipants(false);
+          }}
         >
           <Languages size={17} />
           <span>{t('الترجمة', 'Translation')}</span>

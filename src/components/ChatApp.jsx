@@ -17,7 +17,6 @@ import { SettingsModal } from './settings/SettingsModal.jsx';
 import { AssistantModal } from './AssistantModal.jsx';
 import { ProjectModal } from './ProjectModal.jsx';
 import { API_BASE } from '../../config/api.js';
-   import '../styles/nexo-premium-v4.css';
 const LANG_KEY = 'nexo_lang';
 const TOKEN_KEY = 'nexo_token';
 
@@ -41,7 +40,9 @@ export function ChatApp({ user, onLogout, onGoHome, onUserUpdate }) {
   const endRef = useRef(null);
   const fileInputRef = useRef(null);
   const [showBrandMenu, setShowBrandMenu] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth <= 640
+  );
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -66,7 +67,9 @@ export function ChatApp({ user, onLogout, onGoHome, onUserUpdate }) {
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
     const [favoriteIds, setFavoriteIds] = useState(new Set());
-    const [toolsPanelCollapsed, setToolsPanelCollapsed] = useState(false);
+    const [toolsPanelCollapsed, setToolsPanelCollapsed] = useState(
+      () => typeof window !== 'undefined' && window.innerWidth <= 1024
+    );
     const t = translations[lang];
   const activeChat = chats.find((c) => c.id === activeChatId);
   const hasMessages = activeChat && activeChat.messages.length > 0;

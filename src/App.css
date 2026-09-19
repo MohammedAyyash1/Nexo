@@ -600,6 +600,7 @@ a, button {
 .layout {
   display: flex;
   height: 100vh;
+  height: 100dvh;
 }
 
 .sidebar {
@@ -792,6 +793,7 @@ a, button {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   background:
     radial-gradient(ellipse 700px 400px at 50% 0%, rgba(var(--accent-1-rgb), 0.1), transparent),
     var(--bg-main);
@@ -1248,6 +1250,7 @@ html[dir='ltr'] .msg-row.assistant {
   border-radius: 12px;
   padding: 6px;
   min-width: 180px;
+  max-width: calc(100vw - 32px);
   z-index: 20;
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
@@ -3426,6 +3429,12 @@ html[dir='ltr'] .more-menu {
   opacity: 1;
 }
 
+@media (max-width: 768px) {
+  .msg-actions-hover {
+    opacity: 1;
+  }
+}
+
 /* ===== صندوق الكتابة الجديد (أكبر وأنعم) ===== */
 .composer-v3-wrap {
   padding: 12px 24px 22px;
@@ -3562,6 +3571,7 @@ html[dir='ltr'] .more-menu {
   border-radius: 12px;
   padding: 14px;
   width: 220px;
+  max-width: calc(100vw - 32px);
   font-size: 12.5px;
   color: var(--text-secondary);
   box-shadow: 0 15px 40px rgba(0,0,0,0.4);
@@ -3609,4 +3619,32 @@ html[dir='ltr'] .more-menu {
   align-items: center;
   gap: 12px;
   flex: 1;
+}/* ===== TopBar Mobile Responsive ===== */
+.top-bar-mobile-search-btn { display: none; }
+
+@media (max-width: 640px) {
+  .top-bar {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  .top-bar-mobile-search-btn { display: flex; }
+  .topbar-v3-row { display: none; }
+  .topbar-v3-row.mobile-search-open {
+    display: flex;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--bg-main);
+    z-index: 70;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+  }
+  .topbar-v3-row.mobile-search-open .topbar-v3-search {
+    flex: 1;
+    max-width: none;
+  }
+  .top-bar-title { display: none; }
+  .premium-badge { padding: 8px; font-size: 0; gap: 0; }
+  .top-bar-actions { gap: 2px; }
 }
