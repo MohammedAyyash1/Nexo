@@ -71,6 +71,10 @@ app.use('/api/login', authLimiter);
 app.use('/api/google-login', authLimiter);
 app.use('/api/change-password', authLimiter);
 app.use('/api/account', authLimiter);
+app.use('/api/forgot-password', authLimiter);
+app.use('/api/reset-password', authLimiter);
+app.use('/api/forgot-password', authLimiter);
+app.use('/api/reset-password', authLimiter);
 
 app.use('/api', authRoutes);
 app.use('/api/chat', chatLimiter);

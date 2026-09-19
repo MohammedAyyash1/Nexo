@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
+import { Resend } from 'resend';
 import { OAuth2Client } from 'google-auth-library';
 import { config } from '../config/env.js';
 import { authMiddleware } from '../authMiddleware.js';
@@ -12,12 +13,12 @@ import { supabase } from '../services/supabaseClient.js';
 const router = express.Router();
 const googleClient = config.googleClientId ? new OAuth2Client(config.googleClientId) : null;
 const uploadAvatar = multer({ storage: multer.memoryStorage(), limits: { fileSize: 12 * 1024 * 1024 } });
+const resend = config.resendApiKey ? new Resend(config.resendApiKey) : null;
 
 /**
  * ⚠️ افتراض مهم: هذا الملف مبني على افتراض إنه جدول `users` بـ Supabase
- * فيه الأعمدة التالية: id, email, name, password (bcrypt hash), is_admin, created_at, avatar_url.
- * إذا كان اسم عمود كلمة المرور مختلف عندك (مثلاً password_hash)، بدّل
- * كل مكان مكتوب فيه `password` بالاسم الصحيح قبل ما تجرب الكود.
+ * فيه الأعمدة التالية: id, email, name, password (bcrypt hash), is_admin,
+ * created_at, avatar_url, reset_token, reset_token_expires.
  */
 
 function signToken(userId) {
@@ -96,7 +97,6 @@ router.post('/login', async (req, res) => {
       console.error('Login lookup error:', error);
       return res.status(500).json({ error: 'حدث خطأ في السيرفر' });
     }
-    // نفس رسالة الخطأ لعدم وجود المستخدم أو خطأ كلمة المرور، لمنع اكتشاف بريد مسجّل من عدمه
     if (!user || !user.password) {
       return res.status(401).json({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
     }
@@ -142,7 +142,6 @@ router.post('/google-login', async (req, res) => {
 
     let user = existing;
     if (!user) {
-      // حساب جوجل جديد بدون كلمة مرور محلية (يسجل دايمًا عبر جوجل)
       const { data: created, error: insertError } = await withRetry(() =>
         supabase
           .from('users')
@@ -166,7 +165,6 @@ router.post('/google-login', async (req, res) => {
 });
 
 // ===== GET /api/config =====
-// إعدادات عامة آمنة يحتاجها الفرونت قبل تسجيل الدخول (Client ID فقط، ليس Secret)
 router.get('/config', (req, res) => {
   res.json({ googleClientId: config.googleClientId || null });
 });
@@ -232,7 +230,6 @@ router.post('/account/avatar', authMiddleware, uploadAvatar.single('avatar'), as
     }
 
     const fileExt = (req.file.mimetype.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
-    // اسم ملف فريد بكل مرة (مش ثابت) — يمنع أي مشكلة كاش من الأساس
     const storagePath = `${req.userId}/${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
@@ -269,6 +266,123 @@ router.post('/account/avatar', authMiddleware, uploadAvatar.single('avatar'), as
     res.json({ avatarUrl });
   } catch (err) {
     console.error('Avatar upload error:', err);
+    res.status(500).json({ error: 'حدث خطأ في السيرفر' });
+  }
+});
+
+// ===== POST /api/forgot-password =====
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'البريد الإلكتروني مطلوب' });
+    }
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const { data: user, error } = await withRetry(() =>
+      supabase.from('users').select('id, email, name, password').eq('email', normalizedEmail).maybeSingle()
+    );
+
+    const genericResponse = {
+      message: 'إذا كان هذا البريد الإلكتروني مسجّلاً لدينا، سيصلك رابط إعادة تعيين كلمة المرور خلال دقائق.',
+    };
+
+    if (error || !user || !user.password) {
+      return res.json(genericResponse);
+    }
+
+    if (!resend) {
+      console.error('Forgot password error: RESEND_API_KEY not configured');
+      return res.status(500).json({ error: 'خدمة البريد الإلكتروني غير مفعّلة حاليًا' });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    const { error: updateError } = await withRetry(() =>
+      supabase.from('users').update({
+        reset_token: resetToken,
+        reset_token_expires: expiresAt.toISOString(),
+      }).eq('id', user.id)
+    );
+    if (updateError) {
+      console.error('Forgot password token save error:', updateError);
+      return res.status(500).json({ error: 'حدث خطأ في السيرفر' });
+    }
+
+    const resetUrl = `${config.frontendUrl}/reset-password?token=${resetToken}`;
+
+    try {
+      await resend.emails.send({
+        from: 'Nexo <onboarding@resend.dev>',
+        to: user.email,
+        subject: 'إعادة تعيين كلمة المرور — Nexo',
+        html: `
+          <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; direction: rtl;">
+            <h2 style="color: #7c3aed;">إعادة تعيين كلمة المرور</h2>
+            <p>مرحبًا ${user.name || ''}،</p>
+            <p>وصلنا طلب لإعادة تعيين كلمة المرور لحسابك بـ Nexo. اضغط الرابط التالي لإنشاء كلمة مرور جديدة:</p>
+            <p style="margin: 24px 0;">
+              <a href="${resetUrl}" style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 600;">
+                إعادة تعيين كلمة المرور
+              </a>
+            </p>
+            <p style="color: #666; font-size: 13px;">هذا الرابط صالح لمدة ساعة واحدة فقط. إذا لم تطلب هذا، تجاهل هذا البريد ولن يتغيّر شيء بحسابك.</p>
+          </div>
+        `,
+      });
+    } catch (emailErr) {
+      console.error('Resend send error:', emailErr);
+      return res.status(500).json({ error: 'فشل إرسال البريد الإلكتروني' });
+    }
+
+    res.json(genericResponse);
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'حدث خطأ في السيرفر' });
+  }
+});
+
+// ===== POST /api/reset-password =====
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: 'الرمز وكلمة المرور الجديدة مطلوبان' });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' });
+    }
+
+    const { data: user, error } = await withRetry(() =>
+      supabase.from('users').select('id, reset_token, reset_token_expires').eq('reset_token', token).maybeSingle()
+    );
+
+    if (error || !user) {
+      return res.status(400).json({ error: 'رابط إعادة التعيين غير صالح أو منتهي الصلاحية' });
+    }
+
+    const isExpired = !user.reset_token_expires || new Date(user.reset_token_expires) < new Date();
+    if (isExpired) {
+      return res.status(400).json({ error: 'رابط إعادة التعيين غير صالح أو منتهي الصلاحية' });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 12);
+    const { error: updateError } = await withRetry(() =>
+      supabase.from('users').update({
+        password: newHash,
+        reset_token: null,
+        reset_token_expires: null,
+      }).eq('id', user.id)
+    );
+    if (updateError) {
+      console.error('Reset password update error:', updateError);
+      return res.status(500).json({ error: 'فشل تحديث كلمة المرور' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Reset password error:', err);
     res.status(500).json({ error: 'حدث خطأ في السيرفر' });
   }
 });

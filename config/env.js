@@ -38,6 +38,8 @@ export const config = {
 
   supabaseUrl: process.env.SUPABASE_URL,
   supabaseKey: process.env.SUPABASE_SERVICE_KEY,
+  resendApiKey: process.env.RESEND_API_KEY,
+  resendApiKey: process.env.RESEND_API_KEY,
 
   // بالتطوير: يرجع لـ localhost:5173 تلقائيًا (نفس منفذ Vite الافتراضي)
   // بالإنتاج: لازم FRONTEND_URL يكون معرّفًا فعليًا بدومين الفرونت الحقيقي (https://...)
