@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Landing } from './components/Landing.jsx';
 import { Auth } from './components/Auth.jsx';
+import { ForgotPasswordPage } from './components/ForgotPasswordPage.jsx';
+import { ResetPasswordPage } from './components/ResetPasswordPage.jsx';
 import { ChatApp } from './components/ChatApp.jsx';
 import { LibraryPage } from './components/LibraryPage.jsx';
 import { AvatarPage } from './components/AvatarPage.jsx';
@@ -156,7 +158,9 @@ const handleGoHome = () => setView('landing');
         path="/subscribe"
         element={user ? <SubscribePage /> : <Navigate to="/" replace />}
       />
-      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+<Route path="/reset-password" element={<ResetPasswordPage />} />
+<Route path="/privacy" element={<PrivacyPolicyPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/features" element={<FeaturesPage />} />
       <Route path="/about" element={<AboutUsPage />} />

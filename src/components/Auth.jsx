@@ -96,7 +96,15 @@ export function Auth({ onAuthenticated }) {
         <div className="auth-divider">أو</div>
         <div ref={googleBtnRef} style={{ display: 'flex', justifyContent: 'center' }}></div>
 
-        <div className="auth-v2-switch">
+                {mode === 'login' && (
+          <div style={{ textAlign: 'center', marginTop: 12 }}>
+            <a href="/forgot-password" style={{ color: 'var(--accent-2)', fontSize: 13, textDecoration: 'none' }}>
+              نسيت كلمة المرور؟
+            </a>
+          </div>
+        )}
+
+        <div className="nexo-auth-switch">
           {mode === 'login' ? (
             <span>ليس لديك حساب؟ <button type="button" onClick={() => { setMode('signup'); setError(''); }}>أنشئ حسابًا</button></span>
           ) : (
