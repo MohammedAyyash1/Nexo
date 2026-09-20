@@ -50,7 +50,7 @@ export function LibraryPage({ user }) {
   };
 
   return (
-    <div style={{ padding: 40, color: 'var(--text-primary)' }}>
+    <div className="nexo-simple-page" style={{ color: 'var(--text-primary)' }}>
       <h1>{t.library}</h1>
 
       {loading ? (
@@ -74,9 +74,9 @@ export function LibraryPage({ user }) {
                   cursor: 'pointer',
                 }}
               >
-                <Icon size={18} />
-                <div>
-                  <div>{file.name}</div>
+                <Icon size={18} style={{ flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div dir="auto" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                     {formatSize(file.size)}
                   </div>

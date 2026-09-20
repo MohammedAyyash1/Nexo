@@ -46,7 +46,7 @@ export function FavoritesPage() {
   const goToChat = (chatId) => navigate(`/?chat=${chatId}`);
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: 800, margin: '0 auto', color: 'var(--text-primary)' }}>
+    <div className="nexo-simple-page" style={{ maxWidth: 800, margin: '0 auto', color: 'var(--text-primary)' }}>
       <button className="settings-inline-btn" onClick={() => navigate('/')} style={{ marginBottom: 16, padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
       </button>

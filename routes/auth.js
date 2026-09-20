@@ -29,6 +29,96 @@ function publicUser(user) {
   return { id: user.id, email: user.email, name: user.name, avatar_url: user.avatar_url || null };
 }
 
+// ===== قالب بريد الترحيب — يُرسل مرة واحدة عند إنشاء حساب جديد =====
+function buildWelcomeEmailHtml(name) {
+  const displayName = name || 'صديقنا';
+  return `
+    <div style="margin:0;padding:0;background:#0a0612;font-family:-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;">
+      <div style="max-width:520px;margin:0 auto;padding:40px 20px;direction:rtl;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(160deg,#1a1424,#14101d);border:1px solid rgba(168,85,247,0.18);border-radius:20px;overflow:hidden;">
+          <tr>
+            <td style="padding:0;height:4px;background:linear-gradient(90deg,transparent,#7c3aed,#a855f7,transparent);"></td>
+          </tr>
+          <tr>
+            <td style="padding:44px 40px 8px;text-align:center;">
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 22px;">
+                <tr>
+                  <td style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#8b5cf6,#7c3aed,#c026d3);text-align:center;vertical-align:middle;box-shadow:0 8px 24px rgba(124,58,237,0.4);">
+                    <span style="font-size:26px;line-height:56px;color:#fff;">⚡</span>
+                  </td>
+                </tr>
+              </table>
+              <h1 style="margin:0 0 10px;font-size:24px;font-weight:800;color:#ffffff;letter-spacing:-0.3px;">
+                أهلًا بك في Nexo، ${displayName} 👋
+              </h1>
+              <p style="margin:0;font-size:14.5px;line-height:1.8;color:#a8a2b5;">
+                حسابك جاهز الآن. Nexo هو مساعدك الذكي الشامل — محادثة، تحليل مستندات، صور،
+                صوت، وأدوات متخصصة، كلها بمكان واحد.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:28px 40px 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;">
+                    <span style="font-size:13.5px;color:#ececec;">💬 &nbsp; ابدأ محادثة واسأل Nexo عن أي شيء</span>
+                  </td>
+                </tr>
+                <tr><td style="height:10px;"></td></tr>
+                <tr>
+                  <td style="padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;">
+                    <span style="font-size:13.5px;color:#ececec;">📄 &nbsp; لخّص مستنداتك أو حلّل بياناتك بثوانٍ</span>
+                  </td>
+                </tr>
+                <tr><td style="height:10px;"></td></tr>
+                <tr>
+                  <td style="padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;">
+                    <span style="font-size:13.5px;color:#ececec;">🎙️ &nbsp; حوّل الصوت لنص، أو النص لصوت حقيقي</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:26px 40px 44px;text-align:center;">
+              <a href="${config.frontendUrl}" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#ffffff;font-size:14.5px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:12px;box-shadow:0 8px 22px rgba(124,58,237,0.35);">
+                ابدأ الآن
+              </a>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:20px 40px;border-top:1px solid rgba(255,255,255,0.06);text-align:center;">
+              <p style="margin:0;font-size:11.5px;color:#6a6275;line-height:1.7;">
+                وصلك هذا البريد لأنه تم إنشاء حساب على Nexo بهذا العنوان.<br />
+                إذا لم تكن أنت من قام بذلك، يمكنك تجاهل هذه الرسالة بأمان.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+async function sendWelcomeEmail(user) {
+  if (!resend) return;
+  try {
+    await resend.emails.send({
+      from: 'Nexo <onboarding@resend.dev>',
+      to: user.email,
+      subject: 'أهلًا بك في Nexo ⚡',
+      html: buildWelcomeEmailHtml(user.name),
+    });
+  } catch (err) {
+    // ما بنوقف عملية التسجيل أبدًا بسبب فشل إرسال بريد ترحيبي — هذا تحسين إضافي، مو خطوة حرجة
+    console.error('Welcome email send error (non-fatal):', err);
+  }
+}
+
 // ===== POST /api/signup =====
 router.post('/signup', async (req, res) => {
   try {
@@ -74,6 +164,9 @@ router.post('/signup', async (req, res) => {
 
     const token = signToken(created.id);
     res.json({ token, user: publicUser(created) });
+
+    // نرسل بريد الترحيب بالخلفية بعد إرسال الرد — ما نأخّر تسجيل المستخدم بانتظار البريد
+    sendWelcomeEmail(created);
   } catch (err) {
     console.error('Signup error:', err);
     res.status(500).json({ error: 'حدث خطأ في السيرفر' });
@@ -141,6 +234,7 @@ router.post('/google-login', async (req, res) => {
     }
 
     let user = existing;
+    let isNewUser = false;
     if (!user) {
       const { data: created, error: insertError } = await withRetry(() =>
         supabase
@@ -154,10 +248,13 @@ router.post('/google-login', async (req, res) => {
         return res.status(500).json({ error: 'فشل إنشاء الحساب' });
       }
       user = created;
+      isNewUser = true;
     }
 
     const token = signToken(user.id);
     res.json({ token, user: publicUser(user) });
+
+    if (isNewUser) sendWelcomeEmail(user);
   } catch (err) {
     console.error('Google login error:', err);
     res.status(401).json({ error: 'فشل تسجيل الدخول عبر جوجل' });

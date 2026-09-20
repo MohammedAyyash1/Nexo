@@ -2854,6 +2854,13 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
+
+@media (max-width: 400px) {
+  .nexo-flashcard {
+    padding: 30px 18px;
+    min-height: 160px;
+  }
+}
 .nexo-flashcard:hover { border-color: rgba(var(--accent-rgb), 0.45); box-shadow: var(--glow-soft); }
 .nexo-flashcard.flipped {
   background: linear-gradient(160deg, rgba(var(--accent-1-rgb), 0.16), rgba(var(--accent-1-rgb), 0.04));
@@ -2988,4 +2995,31 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 59;
+}
+/* ==================================================== */
+/* ================  CV Builder — نصفين  =============== */
+/* ==================================================== */
+
+.nexo-cv-half-card {
+  flex: 1;
+  min-width: 260px;
+}
+
+@media (max-width: 400px) {
+  .nexo-cv-half-card {
+    min-width: 100%;
+  }
+}
+/* ==================================================== */
+/* ========  صفحة بسيطة (Favorites, Library)  ========== */
+/* ==================================================== */
+
+.nexo-simple-page {
+  padding: 32px 40px;
+}
+
+@media (max-width: 640px) {
+  .nexo-simple-page {
+    padding: 20px 16px;
+  }
 }

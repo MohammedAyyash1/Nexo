@@ -236,8 +236,8 @@ export function CVBuilderPage() {
       </div>
 
       {/* ===== المهارات واللغات ===== */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
-        <div className="nexo-card" style={{ flex: 1, minWidth: 260 }}>
+      <div className="nexo-cv-half-row" style={{ display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
+        <div className="nexo-card nexo-cv-half-card">
           <h4 className="nexo-card-row-title" style={{ marginBottom: 12 }}>{t('المهارات', 'Skills')}</h4>
           <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
             <input className="nexo-input" dir="auto" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addSkill()} placeholder={t('اكتب مهارة واضغط Enter', 'Type a skill and press Enter')} />
@@ -252,7 +252,7 @@ export function CVBuilderPage() {
           </div>
         </div>
 
-        <div className="nexo-card" style={{ flex: 1, minWidth: 260 }}>
+        <div className="nexo-card nexo-cv-half-card">
           <h4 className="nexo-card-row-title" style={{ marginBottom: 12 }}>{t('اللغات', 'Languages')}</h4>
           <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
             <input className="nexo-input" dir="auto" value={langInput} onChange={(e) => setLangInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addLanguage()} placeholder={t('اكتب لغة واضغط Enter', 'Type a language and press Enter')} />
