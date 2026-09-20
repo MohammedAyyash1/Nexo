@@ -23,7 +23,9 @@ function stripMarkdownPreview(text, maxLen = 60) {
 
 function loadLang() {
   const saved = localStorage.getItem(LANG_KEY);
-  return saved === 'en' || saved === 'ar' ? saved : 'ar';
+  if (saved === 'en' || saved === 'ar') return saved;
+  const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+  return browserLang.startsWith('ar') ? 'ar' : 'en';
 }
 
 // أيقونة + لون حسب نوع الملف — تحسين بصري بحت، ما بيغيّر أي بيانات

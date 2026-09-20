@@ -9,7 +9,9 @@ const BASE = `${API_BASE}/api`;
 
 function loadLang() {
   const saved = localStorage.getItem(LANG_KEY);
-  return saved === 'en' || saved === 'ar' ? saved : 'ar';
+  if (saved === 'en' || saved === 'ar') return saved;
+  const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+  return browserLang.startsWith('ar') ? 'ar' : 'en';
 }
 
 export function OCRPage() {

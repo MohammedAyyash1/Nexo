@@ -13,6 +13,17 @@ export function Auth({ onAuthenticated }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const googleBtnRef = useRef(null);
+  const [googleBtnWidth, setGoogleBtnWidth] = useState(320);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      const available = window.innerWidth - 48 - 32;
+      setGoogleBtnWidth(Math.max(200, Math.min(320, available)));
+    };
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -64,7 +75,7 @@ export function Auth({ onAuthenticated }) {
           theme: 'filled_black',
           size: 'large',
           shape: 'pill',
-          width: 320,
+          width: googleBtnWidth,
           text: 'continue_with',
         });
       })

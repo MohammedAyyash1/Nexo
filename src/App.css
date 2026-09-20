@@ -1115,6 +1115,7 @@ a, button {
 
 .auth-screen-v2 {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1133,6 +1134,12 @@ a, button {
   border-radius: 20px;
   padding: 40px 32px;
   text-align: center;
+}
+
+@media (max-width: 380px) {
+  .auth-v2-card {
+    padding: 28px 16px;
+  }
 }
 
 .auth-v2-logo {
