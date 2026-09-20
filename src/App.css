@@ -184,6 +184,13 @@ a, button {
   letter-spacing: -2px;
 }
 
+@media (max-width: 900px) {
+  .hero h1 {
+    font-size: 52px;
+    letter-spacing: -1.4px;
+  }
+}
+
 .gradient-text {
   background: linear-gradient(90deg, var(--accent-1), var(--accent-2), #ec4899);
   -webkit-background-clip: text;
@@ -562,6 +569,14 @@ a, button {
 }
 
 @media (max-width: 640px) {
+  .chat-input-bar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .chat-window {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
   .landing-nav {
     padding: 20px;
   }
@@ -607,7 +622,7 @@ a, button {
   width: 264px;
   flex-shrink: 0;
   background: var(--bg-sidebar);
-  border-left: 1px solid rgba(var(--accent-rgb), 0.12);
+  border-inline-start: 1px solid rgba(var(--accent-rgb), 0.12);
   display: flex;
   flex-direction: column;
   padding: 10px 8px;
@@ -728,6 +743,13 @@ a, button {
   flex-shrink: 0;
   opacity: 0;
   transition: opacity 0.15s ease;
+}
+
+@media (max-width: 640px) {
+  .chat-delete-btn {
+    opacity: 1;
+    padding: 8px;
+  }
 }
 
 .chat-item:hover .chat-delete-btn {
@@ -978,6 +1000,7 @@ a, button {
 
 .chat-input-bar {
   padding: 10px 24px 24px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
   display: flex;
   justify-content: center;
   flex-shrink: 0;
@@ -1079,14 +1102,7 @@ a, button {
   background: transparent;
 }
 
-/* دعم اللغة الإنجليزية */
-html[dir='ltr'] .msg-row.user {
-  align-items: flex-end;
-}
 
-html[dir='ltr'] .msg-row.assistant {
-  align-items: flex-start;
-}
 
 .lang-btn {
   font-weight: 700;
@@ -1244,7 +1260,7 @@ html[dir='ltr'] .msg-row.assistant {
 .brand-menu {
   position: absolute;
   top: 100%;
-  right: 0;
+  inset-inline-end: 0;
   background: var(--bg-panel);
   border: 1px solid rgba(var(--accent-rgb), 0.25);
   border-radius: 12px;
@@ -1457,14 +1473,8 @@ html, body {
 
 .more-menu {
   top: calc(100% + 6px);
-  left: 0;
-  right: auto;
+  inset-inline-start: 0;
   z-index: 30;
-}
-
-html[dir='ltr'] .more-menu {
-  left: auto;
-  right: 0;
 }
 
 /* ===== شريط الإشعار المنبثق (Toast) ===== */
@@ -1729,6 +1739,13 @@ html[dir='ltr'] .more-menu {
   letter-spacing: -1.8px;
 }
 
+@media (max-width: 900px) {
+  .ms-hero h1 {
+    font-size: 46px;
+    letter-spacing: -1.2px;
+  }
+}
+
 .ms-hero-sub {
   font-size: 18px;
   color: var(--text-secondary);
@@ -1763,7 +1780,7 @@ html[dir='ltr'] .more-menu {
   height: 220px;
   background: var(--accent-1);
   top: -20px;
-  right: 40px;
+  inset-inline-end: 40px;
 }
 
 .ms-orb-2 {
@@ -1771,7 +1788,7 @@ html[dir='ltr'] .more-menu {
   height: 180px;
   background: #ec4899;
   bottom: -10px;
-  left: 30px;
+  inset-inline-start: 30px;
   opacity: 0.35;
 }
 
@@ -2233,6 +2250,12 @@ html[dir='ltr'] .more-menu {
   color: var(--text-primary);
   letter-spacing: -1.5px;
   margin: 0 0 18px;
+}
+
+@media (max-width: 900px) {
+  .owp-hero h1 {
+    font-size: 42px;
+  }
 }
 
 .owp-hero-tagline {
@@ -3438,6 +3461,7 @@ html[dir='ltr'] .more-menu {
 /* ===== صندوق الكتابة الجديد (أكبر وأنعم) ===== */
 .composer-v3-wrap {
   padding: 12px 24px 22px;
+  padding-bottom: calc(22px + env(safe-area-inset-bottom));
   display: flex;
   justify-content: center;
   flex-shrink: 0;

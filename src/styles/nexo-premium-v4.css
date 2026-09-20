@@ -623,6 +623,13 @@ html[dir='ltr'] .bubble.user { border-radius: 18px 18px 18px 4px; }
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 
+@media (max-width: 640px) {
+  .nexo-tools-projects-add {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 .nexo-tools-projects-add:hover {
   border-color: rgba(var(--accent-rgb), 0.4);
   color: var(--text-primary);
@@ -998,11 +1005,23 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
   overflow-y: auto;
 }
 
+@media (max-width: 640px) {
+  .lt-video-col {
+    padding: 12px;
+  }
+}
+
 .lt-video-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 14px;
   align-items: start;
+}
+
+@media (max-width: 400px) {
+  .lt-video-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .lt-video-tile {
@@ -2246,6 +2265,10 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
   padding: 5px 11px;
   border-radius: 20px;
   font-size: 12.5px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* رفع صورة دائرية (صورة CV، صورة بروفايل) */
@@ -2634,6 +2657,13 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
+
+@media (max-width: 640px) {
+  .nexo-stepper-btn {
+    width: 38px;
+    height: 38px;
+  }
+}
 .nexo-stepper-btn:hover:not(:disabled) {
   border-color: rgba(var(--accent-rgb), 0.4);
   color: var(--text-primary);
@@ -2800,6 +2830,12 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
   border-radius: var(--radius-lg);
   z-index: 5;
   gap: 4px;
+}
+
+@media (max-width: 480px) {
+  .nexo-coming-soon-overlay {
+    padding: 20px;
+  }
 }
 
 /* بطاقة تعليمية قابلة للقلب */
