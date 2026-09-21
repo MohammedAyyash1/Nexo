@@ -327,6 +327,7 @@
   top: calc(100% + 4px);
   inset-inline-end: 0;
   min-width: 140px;
+  max-width: calc(100vw - 32px);
   background: var(--bg-panel-2);
   border: 1px solid rgba(var(--accent-rgb), 0.25);
   border-radius: 10px;

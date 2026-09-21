@@ -840,7 +840,7 @@ export function LiveTranslatePage({ user }) {
             ))}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 20 }}>
+          <div className="lt-lobby-grid">
             {/* معاينة الفيديو */}
             <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 22, padding: 18, backdropFilter: 'blur(12px)' }}>
               <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', aspectRatio: '16/10', background: '#150d22' }}>
