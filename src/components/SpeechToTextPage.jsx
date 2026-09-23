@@ -183,7 +183,14 @@ export function SpeechToTextPage() {
   const visibleHistory = showAllHistory ? history : history.slice(0, HISTORY_PREVIEW_COUNT);
 
   return (
-    <div className="nexo-tool-page">
+    <div className="nexo-tool-page stt-page">
+     <div className="stt-hero-art" aria-hidden="true">
+       <div className="stt-hero-glow" />
+       <Mic size={92} className="stt-hero-mic" />
+       <div className="stt-hero-bars">
+         {[0, 1, 2, 3, 4, 5].map((i) => <span key={i} style={{ animationDelay: `${i * 0.12}s` }} />)}
+       </div>
+     </div>
      <div className="nexo-tool-page-inner">
       <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}

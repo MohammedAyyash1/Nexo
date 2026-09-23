@@ -3382,4 +3382,74 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
 .nexo-tools-group .nexo-tool-item.active .nexo-tool-icon {
   background: linear-gradient(135deg, var(--accent-1), var(--accent-2)) !important;
   color: #fff !important;
+}/* ==================================================== */
+/* ===  Speech to Text — Decorative Hero Art (stt-*)  === */
+/* ==================================================== */
+/* خاصة بصفحة تحويل الصوت إلى نص فقط، زي أصناف lt-* الخاصة بـLiveTranslate.
+   عنصر زخرفي بحت (pointer-events: none) على الجزء الفاضي من الصفحة،
+   ما بيأثر على أي تفاعل أو منطق. */
+
+.stt-page.nexo-tool-page::before {
+  width: 420px;
+  height: 420px;
+  opacity: 0.9;
+}
+
+.stt-hero-art {
+  position: absolute;
+  inset-inline-start: 3%;
+  top: 150px;
+  width: 320px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.stt-hero-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.35), rgba(124, 58, 237, 0.12) 45%, transparent 72%);
+  filter: blur(22px);
+}
+
+.stt-hero-mic {
+  position: relative;
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 0 26px rgba(168, 85, 247, 0.55));
+}
+
+.stt-hero-bars {
+  position: absolute;
+  inset-inline-start: calc(50% + 62px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 70px;
+}
+
+.stt-hero-bars span {
+  width: 5px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--accent-2), var(--accent-1));
+  animation: sttBarPulse 1.3s ease-in-out infinite;
+}
+
+@keyframes sttBarPulse {
+  0%, 100% { height: 14px; opacity: 0.6; }
+  50% { height: 58px; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stt-hero-bars span { animation: none; height: 34px; }
+}
+
+/* على الشاشات الأضيق ما في مساحة فاضية لهالزخرفة، فبتختفي والمحتوى يضل مركزي متل باقي الأدوات */
+@media (max-width: 1180px) {
+  .stt-hero-art { display: none; }
 }
