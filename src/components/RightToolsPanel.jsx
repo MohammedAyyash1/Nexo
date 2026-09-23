@@ -33,9 +33,9 @@ export function RightToolsPanel({
 
   return (
     <>
-      {!collapsed && (
-        <div className="nexo-tools-backdrop" onClick={onToggleCollapse} />
-      )}
+      {!collapsed && isMobileDrawer && (
+  <div className="nexo-tools-backdrop" onClick={onToggleCollapse} />
+)}
       <aside className={`nexo-tools-panel ${collapsed ? 'collapsed' : ''}`}>
         <div className="nexo-tools-panel-header">
           <span className="nexo-tools-panel-title-text">
