@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { PanelRightClose, PanelRightOpen, Search, Plus, FolderKanban } from 'lucide-react';
+import { X, Search, Plus, FolderKanban } from 'lucide-react';
 
 // نفس مجموعات الأدوات الموجودة أصلًا بالـSidebar - انتقلت هون فقط، بدون حذف ولا نسخة مكررة
 export function getToolGroups(TOOL_GROUPS_SOURCE) {
@@ -26,18 +26,23 @@ export function RightToolsPanel({
     }))
     .filter((group) => group.tools.length > 0);
 
+  const handleToolClick = (handlerKey) => {
+    toolHandlers[handlerKey]();
+    if (isMobileDrawer) onToggleCollapse();
+  };
+
   return (
     <>
-      {isMobileDrawer && !collapsed && (
+      {!collapsed && (
         <div className="nexo-tools-backdrop" onClick={onToggleCollapse} />
       )}
       <aside className={`nexo-tools-panel ${collapsed ? 'collapsed' : ''}`}>
         <div className="nexo-tools-panel-header">
-          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+          <span className="nexo-tools-panel-title-text">
             {lang === 'en' ? 'Nexo Tools' : 'أدوات Nexo'}
           </span>
-          <button className="icon-btn" onClick={onToggleCollapse} title={t('إغلاق', 'Close')}>
-            <PanelRightClose size={16} />
+          <button className="icon-btn nexo-tools-close-btn" onClick={onToggleCollapse} title={t('إغلاق', 'Close')}>
+            <X size={18} />
           </button>
         </div>
 
@@ -60,7 +65,7 @@ export function RightToolsPanel({
                   <div
                     key={tool.key}
                     className={`nexo-tool-item ${isActive ? 'active' : ''}`}
-                    onClick={toolHandlers[tool.handlerKey]}
+                    onClick={() => handleToolClick(tool.handlerKey)}
                   >
                     <div className="nexo-tool-icon"><Icon size={15} /></div>
                     <div className="nexo-tool-texts">

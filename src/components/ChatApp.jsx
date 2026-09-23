@@ -859,6 +859,29 @@ const handleToggleSpeak = (text, index) => {
             </div>
             <InputBar welcome {...inputBarProps} />
             <QuickActions lang={lang} onAction={handleQuickAction} />
+
+            {chats.length > 0 && (
+              <div className="nexo-recent-chats-section">
+                <div className="nexo-recent-chats-title">
+                  {lang === 'en' ? 'Recent chats' : 'المحادثات الأخيرة'}
+                </div>
+                <div className="nexo-recent-chats-grid">
+                  {chats.slice(0, 6).map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      className="nexo-recent-chat-card"
+                      onClick={() => setActiveChatId(c.id)}
+                    >
+                      <div className="nexo-recent-chat-title" dir="auto">{c.title}</div>
+                      <div className="nexo-recent-chat-meta">
+                        {c.messages.length} {lang === 'en' ? (c.messages.length === 1 ? 'message' : 'messages') : 'رسالة'}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <>

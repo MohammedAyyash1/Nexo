@@ -116,11 +116,11 @@ export function TopBar({
         >
           <Search size={17} />
         </button>
-        <button className="premium-badge" onClick={() => navigate('/upgrade')}>
+        <button className="premium-badge top-bar-premium-desktop" onClick={() => navigate('/upgrade')}>
           <Sparkles size={13} /> {lang === 'en' ? 'Nexo Premium' : 'Nexo Premium'}
         </button>
 
-        <div className="notif-btn-wrap">
+        <div className="notif-btn-wrap top-bar-notif-desktop">
           <button className="icon-btn" title={lang === 'en' ? 'Notifications' : 'الإشعارات'} onClick={() => setNotifOpen((v) => !v)}>
             <Bell size={17} />
           </button>
@@ -131,29 +131,42 @@ export function TopBar({
           )}
         </div>
 
-        <button className="pill-btn" onClick={handleShare} disabled={!hasMessages}>
+        <button className="pill-btn top-bar-share-desktop" onClick={handleShare} disabled={!hasMessages}>
           {t.share}
         </button>
         <div className="more-menu-wrapper">
-          <button className="icon-btn" title={t.more} onClick={() => setMoreMenuOpen((prev) => !prev)} disabled={!hasMessages}>
+          <button className="icon-btn" title={t.more} onClick={() => setMoreMenuOpen((prev) => !prev)}>
             <MoreHorizontal size={18} />
           </button>
           {moreMenuOpen && (
             <div className="brand-menu more-menu" onClick={(e) => e.stopPropagation()}>
-              <div className="brand-menu-item" onClick={handleTogglePin}>
-                <Pin size={14} />
-                {activeChat?.pinned ? (lang === 'en' ? 'Unpin chat' : 'إلغاء تثبيت المحادثة') : (lang === 'en' ? 'Pin chat' : 'تثبيت المحادثة')}
+              <div className="brand-menu-item top-bar-mobile-only" onClick={() => navigate('/upgrade')}>
+                <Sparkles size={14} /> {lang === 'en' ? 'Nexo Premium' : 'ترقية إلى Premium'}
               </div>
-              <div className="brand-menu-item" onClick={handleToggleArchive}>
-                <Archive size={14} />
-                {activeChat?.archived ? (lang === 'en' ? 'Unarchive' : 'إلغاء الأرشفة') : (lang === 'en' ? 'Archive' : 'أرشفة')}
+              <div className="brand-menu-item top-bar-mobile-only" onClick={() => { setNotifOpen(true); setMoreMenuOpen(false); }}>
+                <Bell size={14} /> {lang === 'en' ? 'Notifications' : 'الإشعارات'}
               </div>
-              <div className="brand-menu-item" onClick={handleRenameChat}>
-                <Pencil size={14} /> {lang === 'en' ? 'Rename chat' : 'إعادة تسمية المحادثة'}
-              </div>
-              <div className="brand-menu-item danger" onClick={handleDeleteCurrentChat}>
-                <Trash2 size={14} /> {t.deleteChat}
-              </div>
+              {hasMessages && (
+                <>
+                  <div className="brand-menu-item top-bar-mobile-only" onClick={handleShare}>
+                    <MessageSquare size={14} /> {t.share}
+                  </div>
+                  <div className="brand-menu-item" onClick={handleTogglePin}>
+                    <Pin size={14} />
+                    {activeChat?.pinned ? (lang === 'en' ? 'Unpin chat' : 'إلغاء تثبيت المحادثة') : (lang === 'en' ? 'Pin chat' : 'تثبيت المحادثة')}
+                  </div>
+                  <div className="brand-menu-item" onClick={handleToggleArchive}>
+                    <Archive size={14} />
+                    {activeChat?.archived ? (lang === 'en' ? 'Unarchive' : 'إلغاء الأرشفة') : (lang === 'en' ? 'Archive' : 'أرشفة')}
+                  </div>
+                  <div className="brand-menu-item" onClick={handleRenameChat}>
+                    <Pencil size={14} /> {lang === 'en' ? 'Rename chat' : 'إعادة تسمية المحادثة'}
+                  </div>
+                  <div className="brand-menu-item danger" onClick={handleDeleteCurrentChat}>
+                    <Trash2 size={14} /> {t.deleteChat}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

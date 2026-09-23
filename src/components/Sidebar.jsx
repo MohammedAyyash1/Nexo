@@ -119,7 +119,7 @@ export function Sidebar(props) {
       </button>
 
       <div className="sidebar-scroll" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-        <nav className="side-nav-v3">
+        <nav className="side-nav-v3 side-nav-v3-primary">
           {NAV_ITEMS.map((item) => (
             <div key={item.label} className="side-nav-v3-item" onClick={item.onClick}>
               <item.icon size={16} />
@@ -129,7 +129,7 @@ export function Sidebar(props) {
         </nav>
 
         {/* المحادثات الأخيرة — مباشرة تحت التنقل، كما طُلب */}
-        <div ref={recentChatsRef} className="sidebar-section-label">{t.recentChats}</div>
+        <div ref={recentChatsRef} className="sidebar-section-label sidebar-section-label-first">{t.recentChats}</div>
 
         {searchOpen && (
           <input type="text" className="sidebar-search-input" placeholder={t.search} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoFocus />
