@@ -16,7 +16,6 @@ export function QuickActions({ lang, onAction }) {
           key={a.key}
           type="button"
           className="nexo-premium-card nexo-quick-action-card"
-          style={{ '--qa-index': i }}
           onClick={() => onAction(a)}
         >
           <div className="nexo-quick-action-icon"><a.icon size={16} /></div>

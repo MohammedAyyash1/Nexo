@@ -643,20 +643,20 @@ html[dir='ltr'] .bubble.user { border-radius: 18px 18px 18px 4px; }
 }
 
 /* ألوان متنوّعة لكل بطاقة حسب ترتيبها — إحساس Premium متعدد الألوان زي المرجع */
-.nexo-quick-action-card[style*="--qa-index: 0"] { background: linear-gradient(160deg, rgba(124, 58, 237, 0.16), rgba(124, 58, 237, 0.04)); }
-.nexo-quick-action-card[style*="--qa-index: 0"] .nexo-quick-action-icon { background: rgba(124, 58, 237, 0.28); color: #c4b5fd; }
+.nexo-quick-actions .nexo-quick-action-card:nth-child(5n+1) { background: linear-gradient(160deg, rgba(124, 58, 237, 0.16), rgba(124, 58, 237, 0.04)); }
+.nexo-quick-actions .nexo-quick-action-card:nth-child(5n+1) .nexo-quick-action-icon { background: rgba(124, 58, 237, 0.28); color: #c4b5fd; }
 
-.nexo-quick-action-card[style*="--qa-index: 1"] { background: linear-gradient(160deg, rgba(45, 212, 191, 0.14), rgba(45, 212, 191, 0.03)); }
-.nexo-quick-action-card[style*="--qa-index: 1"] .nexo-quick-action-icon { background: rgba(45, 212, 191, 0.24); color: #5eead4; }
+.nexo-quick-actions .nexo-quick-action-card:nth-child(5n+2) { background: linear-gradient(160deg, rgba(45, 212, 191, 0.14), rgba(45, 212, 191, 0.03)); }
+.nexo-quick-actions .nexo-quick-action-card:nth-child(5n+2) .nexo-quick-action-icon { background: rgba(45, 212, 191, 0.24); color: #5eead4; }
 
-.nexo-quick-action-card[style*="--qa-index: 2"] { background: linear-gradient(160deg, rgba(236, 72, 153, 0.14), rgba(236, 72, 153, 0.03)); }
-.nexo-quick-action-card[style*="--qa-index: 2"] .nexo-quick-action-icon { background: rgba(236, 72, 153, 0.24); color: #f9a8d4; }
+.nexo-quick-actions .nexo-quick-action-card:nth-child(5n+3) { background: linear-gradient(160deg, rgba(236, 72, 153, 0.14), rgba(236, 72, 153, 0.03)); }
+.nexo-quick-actions .nexo-quick-action-card:nth-child(5n+3) .nexo-quick-action-icon { background: rgba(236, 72, 153, 0.24); color: #f9a8d4; }
 
-.nexo-quick-action-card[style*="--qa-index: 3"] { background: linear-gradient(160deg, rgba(250, 204, 21, 0.14), rgba(250, 204, 21, 0.03)); }
-.nexo-quick-action-card[style*="--qa-index: 3"] .nexo-quick-action-icon { background: rgba(250, 204, 21, 0.22); color: #fde68a; }
+.nexo-quick-actions .nexo-quick-action-card:nth-child(5n+4) { background: linear-gradient(160deg, rgba(250, 204, 21, 0.14), rgba(250, 204, 21, 0.03)); }
+.nexo-quick-actions .nexo-quick-action-card:nth-child(5n+4) .nexo-quick-action-icon { background: rgba(250, 204, 21, 0.22); color: #fde68a; }
 
-.nexo-quick-action-card[style*="--qa-index: 4"] { background: linear-gradient(160deg, rgba(96, 165, 250, 0.14), rgba(96, 165, 250, 0.03)); }
-.nexo-quick-action-card[style*="--qa-index: 4"] .nexo-quick-action-icon { background: rgba(96, 165, 250, 0.24); color: #93c5fd; }
+.nexo-quick-actions .nexo-quick-action-card:nth-child(5n+5) { background: linear-gradient(160deg, rgba(96, 165, 250, 0.14), rgba(96, 165, 250, 0.03)); }
+.nexo-quick-actions .nexo-quick-action-card:nth-child(5n+5) .nexo-quick-action-icon { background: rgba(96, 165, 250, 0.24); color: #93c5fd; }
 
 @media (max-width: 900px) {
   .nexo-quick-actions { grid-template-columns: repeat(2, 1fr); max-width: 640px; }
