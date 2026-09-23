@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, FileUser, Plus, X, Sparkles, Download, Save, Trash2, Loader2, Camera, Inbox, AlertCircle } from 'lucide-react';
 import { exportCvAsWord, exportCvAsPdf } from '../utils/cvPdfExport.js';
 import { API_BASE } from '../../config/api.js';
-import { CV_TEMPLATES, CV_FONT_OPTIONS } from './cvTemplates.js';
-import { CVTemplateGallery } from './CVTemplateGallery.jsx';
-import { CVLivePreview } from './CVLivePreview.jsx';
-import '../../styles/cv-preview.css';
+import { CV_TEMPLATES, CV_FONT_OPTIONS } from './tools/cvTemplates.js';
+import { CVTemplateGallery } from './tools/CVTemplateGallery.jsx';
+import { CVLivePreview } from './tools/CVLivePreview.jsx';
+import '../styles/cv-preview.css';
 
 const TOKEN_KEY = 'nexo_token';
 const LANG_KEY = 'nexo_lang';
@@ -144,8 +144,8 @@ export function CVBuilderPage() {
       .catch((err) => console.error('Delete all CVs error:', err));
   };
 
-  const handleExportWord = () => exportCvAsWord(cv, lang);
-  const handleExportPdf = () => exportCvAsPdf(cv, lang);
+  const handleExportWord = () => exportCvAsWord(cv, lang, selectedTemplate, accentOverride, selectedFont.stack);
+  const handleExportPdf = () => exportCvAsPdf(cv, lang, selectedTemplate, accentOverride, selectedFont.stack);
 
   return (
     <div className="nexo-tool-page">
