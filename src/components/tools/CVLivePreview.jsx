@@ -83,7 +83,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
           <div>
             <h2 style={{ color: '#fff', margin: 0 }}>{cv.fullName || 'اسمك الكامل'}</h2>
             <p style={{ color, margin: '4px 0 0', fontWeight: 600 }}>{cv.jobTitle}</p>
-            <div className="cv-preview-dark-contact">{[cv.email, cv.phone, cv.location].filter(Boolean).join(' · ')}</div>
+            <div className="cv-preview-dark-contact">{[cv.email, cv.phone, cv.location].filter(Boolean).map((v, i) => <bdi key={i}>{v}</bdi>).reduce((prev, curr) => [prev, ' · ', curr])}</div>
           </div>
         </div>
         <div className="cv-preview-dark-body">
