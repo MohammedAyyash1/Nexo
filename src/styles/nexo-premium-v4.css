@@ -3350,3 +3350,36 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
     gap: 8px;
   }
 }
+/* ==================================================== */
+/* ====  Right Tools Panel — أيقونات ملوّنة متنوّعة  ==== */
+/* ==================================================== */
+
+.nexo-tools-group .nexo-tool-item:nth-child(2) .nexo-tool-icon {
+  background: rgba(124, 58, 237, 0.22);
+  color: #c4b5fd;
+}
+.nexo-tools-group .nexo-tool-item:nth-child(3) .nexo-tool-icon {
+  background: rgba(45, 212, 191, 0.2);
+  color: #5eead4;
+}
+.nexo-tools-group .nexo-tool-item:nth-child(4) .nexo-tool-icon {
+  background: rgba(236, 72, 153, 0.2);
+  color: #f9a8d4;
+}
+.nexo-tools-group .nexo-tool-item:nth-child(5) .nexo-tool-icon {
+  background: rgba(250, 204, 21, 0.18);
+  color: #fde68a;
+}
+.nexo-tools-group .nexo-tool-item:nth-child(6) .nexo-tool-icon {
+  background: rgba(96, 165, 250, 0.2);
+  color: #93c5fd;
+}
+.nexo-tools-group .nexo-tool-item:nth-child(7) .nexo-tool-icon {
+  background: rgba(74, 222, 128, 0.18);
+  color: #86efac;
+}
+
+.nexo-tools-group .nexo-tool-item.active .nexo-tool-icon {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2)) !important;
+  color: #fff !important;
+}

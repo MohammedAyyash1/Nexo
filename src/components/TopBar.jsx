@@ -29,8 +29,6 @@ export function TopBar({
           <Menu size={18} />
         </button>
       )}
-      <span className="top-bar-title">{t.brand}</span>
-
       <div className={`topbar-v3-row ${mobileSearchOpen ? 'mobile-search-open' : ''}`}>
         {mobileSearchOpen && (
           <button
