@@ -3453,3 +3453,266 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
 @media (max-width: 1180px) {
   .stt-hero-art { display: none; }
 }
+/* ==================================================== */
+/* ======  Text to Speech — Premium Redesign (tts-*)  == */
+/* ==================================================== */
+
+/* خلفية خاصة بالصفحة — تدرج بنفسجي/أزرق أعمق وأغنى من القالب العام */
+.tts-page.nexo-tool-page {
+  background:
+    radial-gradient(ellipse 1000px 560px at 15% -10%, rgba(124, 58, 237, 0.32), transparent 60%),
+    radial-gradient(ellipse 800px 500px at 100% 10%, rgba(96, 165, 250, 0.16), transparent 55%),
+    radial-gradient(ellipse 700px 500px at 50% 100%, rgba(168, 85, 247, 0.14), transparent 60%),
+    var(--bg-page);
+}
+
+.tts-page.nexo-tool-page::before {
+  width: 380px;
+  height: 380px;
+  opacity: 0.85;
+}
+
+/* ===== رأس الصفحة ===== */
+.tts-hero-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tts-hero-text { flex: 1; min-width: 0; }
+
+.tts-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(var(--accent-rgb), 0.16);
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
+  color: var(--accent-light);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.tts-hero-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  box-shadow: 0 10px 28px rgba(var(--accent-1-rgb), 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ===== كرت الإدخال ===== */
+.tts-composer-card {
+  margin-bottom: 24px;
+}
+
+.tts-textarea-wrap {
+  margin-bottom: 16px;
+}
+
+.tts-textarea {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(var(--accent-rgb), 0.2);
+}
+
+.tts-controls-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.tts-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.tts-select-label {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.tts-generate-btn {
+  flex: 1;
+  min-width: 200px;
+  justify-content: center;
+  padding: 12px 22px;
+  font-size: 14px;
+}
+
+/* ===== كرت النتيجة ===== */
+.tts-result-card {
+  margin-bottom: 24px;
+}
+
+.tts-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+/* ===== مشغّل الصوت المخصص ===== */
+.tts-player {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.tts-player-sm {
+  padding: 0;
+  background: none;
+  border: none;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tts-player-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 6px 18px rgba(var(--accent-1-rgb), 0.4);
+  transition: transform 0.15s ease;
+}
+
+.tts-player-btn:hover { transform: scale(1.06); }
+
+.tts-player-sm .tts-player-btn {
+  width: 30px;
+  height: 30px;
+}
+
+.tts-player-time {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== موجات صوتية زخرفية (CSS بحت) ===== */
+.tts-waveform {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+}
+
+.tts-waveform-sm {
+  height: 22px;
+  gap: 1.5px;
+}
+
+.tts-waveform span {
+  flex: 1;
+  min-width: 2px;
+  max-width: 4px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--accent-2), var(--accent-1));
+  opacity: 0.35;
+  transition: opacity 0.2s ease;
+}
+
+.tts-waveform.is-playing span {
+  opacity: 1;
+  animation: ttsBarPulse 1s ease-in-out infinite;
+}
+
+@keyframes ttsBarPulse {
+  0%, 100% { transform: scaleY(0.5); }
+  50% { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tts-waveform.is-playing span { animation: none; }
+}
+
+/* ===== السجل ===== */
+.tts-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tts-history-item {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  transition: border-color 0.18s ease;
+}
+
+.tts-history-item:hover {
+  border-color: rgba(var(--accent-rgb), 0.25);
+}
+
+.tts-history-title {
+  font-size: 13px;
+  color: var(--text-primary);
+  margin: 0 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tts-history-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tts-history-meta {
+  flex-shrink: 0;
+}
+
+.tts-lang-chip {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.tts-history-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .tts-hero-header { flex-direction: row; align-items: center; }
+  .tts-hero-icon { width: 42px; height: 42px; }
+  .tts-controls-row { flex-direction: column; align-items: stretch; }
+  .tts-select-group { min-width: 0; }
+  .tts-generate-btn { min-width: 0; }
+  .tts-history-row { flex-wrap: wrap; }
+  .tts-lang-chip { order: 3; }
+}

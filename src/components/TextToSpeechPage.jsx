@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Download, Trash2, AlertCircle, Volume2, ArrowRight, Inbox } from 'lucide-react';
+import { Loader2, Download, Trash2, AlertCircle, Volume2, ArrowRight, Inbox, Play, Pause, Share2, Sparkles } from 'lucide-react';
 import { SettingsSelect } from './settings/SettingsSelect.jsx';
 import { API_BASE } from '../../config/api.js';
 
@@ -18,6 +18,62 @@ const VOICE_OPTIONS = {
   ar: [{ value: 'fahad', label: 'فهد' }, { value: 'noura', label: 'نورة' }],
   en: [{ value: 'troy', label: 'Troy' }],
 };
+
+// ===== شريط موجات زخرفي (CSS بحت، بدون تحليل صوت فعلي) — يتحرك أثناء التشغيل فقط =====
+function TTSWaveform({ playing, size = 'lg', barCount = 40 }) {
+  const bars = Array.from({ length: barCount }, (_, i) => {
+    const h = 30 + Math.abs(Math.sin(i * 0.7)) * 70;
+    return h;
+  });
+  return (
+    <div className={`tts-waveform ${size === 'sm' ? 'tts-waveform-sm' : ''} ${playing ? 'is-playing' : ''}`}>
+      {bars.map((h, i) => (
+        <span key={i} style={{ height: `${h}%`, animationDelay: `${(i % 8) * 0.06}s` }} />
+      ))}
+    </div>
+  );
+}
+
+function formatTime(sec) {
+  if (!sec || Number.isNaN(sec)) return '0:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+// ===== مشغل صوت مخصص (زر تشغيل + موجات + مدة) بدل عنصر audio الافتراضي =====
+function TTSPlayer({ src, size = 'lg' }) {
+  const audioRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  const toggle = () => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (playing) { el.pause(); } else { el.play().catch(() => {}); }
+  };
+
+  return (
+    <div className={`tts-player ${size === 'sm' ? 'tts-player-sm' : ''}`}>
+      <audio
+        ref={audioRef}
+        src={src}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
+        onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
+        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+        style={{ display: 'none' }}
+      />
+      <button type="button" className="tts-player-btn" onClick={toggle} aria-label={playing ? 'pause' : 'play'}>
+        {playing ? <Pause size={size === 'sm' ? 13 : 16} fill="currentColor" /> : <Play size={size === 'sm' ? 13 : 16} fill="currentColor" />}
+      </button>
+      <TTSWaveform playing={playing} size={size} />
+      <span className="tts-player-time">{formatTime(current)} / {formatTime(duration)}</span>
+    </div>
+  );
+}
 
 export function TextToSpeechPage() {
   const navigate = useNavigate();
@@ -76,6 +132,14 @@ export function TextToSpeechPage() {
       .finally(() => setGenerating(false));
   };
 
+  const handleShare = (item) => {
+    if (navigator.share && item?.audio_url) {
+      navigator.share({ title: 'Nexo — TTS', url: item.audio_url }).catch(() => {});
+    } else if (item?.audio_url) {
+      navigator.clipboard.writeText(item.audio_url);
+    }
+  };
+
   const handleDeleteAll = () => {
     if (!window.confirm(t('حذف كل السجل نهائيًا؟', 'Delete all history permanently?'))) return;
     fetch(`${BASE}/tts/jobs`, { method: 'DELETE', headers: authHeaders() })
@@ -93,65 +157,79 @@ export function TextToSpeechPage() {
       .catch((err) => console.error('Delete TTS error:', err));
   };
 
+  const voiceLabel = (item) => {
+    const opts = VOICE_OPTIONS[item.language] || [];
+    return opts.find((v) => v.value === item.voice)?.label || item.voice;
+  };
+
   return (
-    <div className="nexo-tool-page">
+    <div className="nexo-tool-page tts-page">
      <div className="nexo-tool-page-inner">
       <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
       </button>
 
-      <div className="nexo-tool-page-header">
-        <div className="nexo-tool-icon-hero"><Volume2 size={24} /></div>
-        <div>
+      <div className="tts-hero-header">
+        <div className="tts-hero-text">
+          <span className="tts-hero-badge"><Sparkles size={12} /> {t('صوت الذكاء الاصطناعي', 'AI Voice')}</span>
           <h1 className="nexo-tool-page-title">{t('تحويل النص إلى صوت', 'Text to Speech')}</h1>
           <p className="nexo-tool-page-desc">
-            {t('اكتب نصًا واختر صوتًا، وسيقوم Nexo بتوليد ملف صوتي حقيقي بالعربية أو الإنجليزية.', 'Write text and pick a voice — Nexo will generate a real audio file in Arabic or English.')}
+            {t('اكتب نصًا واختر اللغة وصوتًا طبيعيًا، ودع Nexo يحوّله إلى صوت واقعي فورًا.', 'Write text, pick a language and a natural voice, and let Nexo turn it into real speech instantly.')}
           </p>
         </div>
+        <div className="tts-hero-icon"><Volume2 size={22} /></div>
       </div>
 
-      <div className="nexo-card-luxe" style={{ marginBottom: 28 }}>
-        <span className="nexo-glow-orb nexo-glow-orb-purple" style={{ width: 200, height: 200, top: -60, insetInlineEnd: -40 }} />
+      <div className="nexo-card-luxe tts-composer-card">
+        <span className="nexo-glow-orb nexo-glow-orb-purple" style={{ width: 220, height: 220, top: -70, insetInlineEnd: -40 }} />
 
-        <textarea
-          className="nexo-textarea" dir="auto" rows={5} value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={t('اكتب النص هون...', 'Write your text here...')}
-          maxLength={MAX_TEXT_LENGTH}
-        />
-        <div className="nexo-char-count">{text.length}/{MAX_TEXT_LENGTH}</div>
+        <div className="tts-textarea-wrap">
+          <textarea
+            className="nexo-textarea tts-textarea" dir="auto" rows={5} value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={t('اكتب النص هون...', 'Write your text here...')}
+            maxLength={MAX_TEXT_LENGTH}
+          />
+          <div className="nexo-char-count">{text.length}/{MAX_TEXT_LENGTH}</div>
+        </div>
 
-        <div style={{ display: 'flex', gap: 20, marginTop: 14, flexWrap: 'wrap' }}>
-          <div className="nexo-settings-row" style={{ flex: 1, minWidth: 200 }}>
-            <span className="nexo-settings-row-label">{t('اللغة', 'Language')}</span>
+        <div className="tts-controls-row">
+          <div className="tts-select-group">
+            <span className="tts-select-label">{t('اللغة', 'Language')}</span>
             <SettingsSelect
               value={voiceLang} onChange={handleVoiceLangChange}
               options={[{ value: 'ar', label: t('عربي', 'Arabic') }, { value: 'en', label: t('إنجليزي', 'English') }]}
             />
           </div>
-          <div className="nexo-settings-row" style={{ flex: 1, minWidth: 200 }}>
-            <span className="nexo-settings-row-label">{t('الصوت', 'Voice')}</span>
+          <div className="tts-select-group">
+            <span className="tts-select-label">{t('الصوت', 'Voice')}</span>
             <SettingsSelect value={voice} onChange={setVoice} options={VOICE_OPTIONS[voiceLang]} />
           </div>
+          <button className="nexo-btn nexo-btn-primary tts-generate-btn" onClick={handleGenerate} disabled={generating}>
+            {generating ? <Loader2 size={14} className="nexo-spin" /> : <Sparkles size={14} />}
+            {generating ? t('جارِ التوليد...', 'Generating...') : t('توليد الصوت الآن', 'Generate Audio')}
+          </button>
         </div>
 
         {error && (
           <div className="nexo-inline-error"><AlertCircle size={14} /> {error}</div>
         )}
-
-        <button className="nexo-btn nexo-btn-primary" onClick={handleGenerate} disabled={generating} style={{ marginTop: 18, minWidth: 200 }}>
-          {generating && <Loader2 size={14} className="nexo-spin" />}
-          {generating ? t('جارِ التوليد...', 'Generating...') : t('توليد الصوت', 'Generate Audio')}
-        </button>
       </div>
 
       {currentResult && currentResult.audio_url && (
-        <div className="nexo-card" style={{ marginBottom: 28 }}>
-          <h4 className="nexo-card-row-title" style={{ marginBottom: 12 }}>{t('النتيجة', 'Result')}</h4>
-          <audio src={currentResult.audio_url} controls className="nexo-audio-player" />
-          <a href={currentResult.audio_url} download className="nexo-btn nexo-btn-secondary" style={{ marginTop: 14, textDecoration: 'none' }}>
-            <Download size={14} /> {t('تنزيل', 'Download')}
-          </a>
+        <div className="nexo-card tts-result-card">
+          <div className="tts-result-header">
+            <h4 className="nexo-card-row-title" style={{ margin: 0 }}>{t('النتيجة', 'Result')}</h4>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleShare(currentResult)} title={t('مشاركة', 'Share')}>
+                <Share2 size={15} />
+              </button>
+              <a href={currentResult.audio_url} download className="nexo-btn nexo-btn-ghost nexo-btn-icon" title={t('تنزيل', 'Download')}>
+                <Download size={15} />
+              </a>
+            </div>
+          </div>
+          <TTSPlayer src={currentResult.audio_url} size="lg" />
         </div>
       )}
 
@@ -184,18 +262,25 @@ export function TextToSpeechPage() {
           </div>
         </div>
       ) : (
-        <ul className="nexo-list">
+        <div className="tts-history-list">
           {history.map((item) => (
-            <li key={item.id} className="nexo-list-item nexo-list-item-stacked">
-              <p className="nexo-list-item-title" dir="auto" style={{ marginBottom: 8 }}>{item.input_text}</p>
+            <div key={item.id} className="tts-history-item">
+              <p className="tts-history-title" dir="auto">{item.input_text}</p>
+
               {item.status === 'completed' && item.audio_url ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
-                  <audio src={item.audio_url} controls className="nexo-audio-player" style={{ flex: 1, height: 34 }} />
-                  <a href={item.audio_url} download className="nexo-btn nexo-btn-ghost nexo-btn-icon" title={t('تنزيل', 'Download')}><Download size={14} /></a>
-                  <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleDelete(item.id)} title={t('حذف', 'Delete')}><Trash2 size={14} /></button>
+                <div className="tts-history-row">
+                  <TTSPlayer src={item.audio_url} size="sm" />
+                  <div className="tts-history-meta">
+                    <span className="tts-lang-chip">{item.language === 'ar' ? t('عربي', 'Arabic') : t('إنجليزي', 'English')} · {voiceLabel(item)}</span>
+                  </div>
+                  <div className="tts-history-actions">
+                    <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleShare(item)} title={t('مشاركة', 'Share')}><Share2 size={14} /></button>
+                    <a href={item.audio_url} download className="nexo-btn nexo-btn-ghost nexo-btn-icon" title={t('تنزيل', 'Download')}><Download size={14} /></a>
+                    <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleDelete(item.id)} title={t('حذف', 'Delete')}><Trash2 size={14} /></button>
+                  </div>
                 </div>
               ) : item.status === 'failed' ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <div className="tts-history-row">
                   <span className="nexo-badge nexo-badge-danger">{t('فشل', 'Failed')}: {item.error_message}</span>
                   <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleDelete(item.id)}><Trash2 size={14} /></button>
                 </div>
@@ -205,9 +290,9 @@ export function TextToSpeechPage() {
                   {t('جارِ المعالجة...', 'Processing...')}
                 </span>
               )}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
      </div>
     </div>
