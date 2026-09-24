@@ -7,36 +7,53 @@ import {
 } from '../services/ttsService.js';
 
 const router = express.Router();
-const MAX_TEXT_LENGTH = 1000;
+const MAX_TEXT_LENGTH = 200; // حد Groq/Orpheus الفعلي للنص المدخل - كان 1000 بالغلط سابقًا
 
 const VOICES = {
   ar: { model: 'canopylabs/orpheus-arabic-saudi', options: ['fahad', 'noura'] },
   en: { model: 'canopylabs/orpheus-v1-english', options: ['troy'] },
 };
 
+// كشف بسيط للغة الفعلية للنص (نسخة الباك إند من نفس فحص الفرونت إند، كحماية إضافية)
+function detectTextScript(str) {
+  const arabicChars = (str.match(/[\u0600-\u06FF]/g) || []).length;
+  const latinChars = (str.match(/[A-Za-z]/g) || []).length;
+  if (arabicChars === 0 && latinChars === 0) return null;
+  return arabicChars > latinChars ? 'ar' : 'en';
+}
+
 router.post('/tts/jobs', authMiddleware, async (req, res) => {
   try {
     const { text, language, voice } = req.body;
 
     if (!text || !text.trim()) return res.status(400).json({ error: 'النص مطلوب' });
-    if (text.length > MAX_TEXT_LENGTH) {
+    const trimmedText = text.trim();
+    if (trimmedText.length > MAX_TEXT_LENGTH) {
       return res.status(400).json({ error: `النص طويل جدًا (الحد الأقصى ${MAX_TEXT_LENGTH} حرف)` });
     }
     const lang = language === 'en' ? 'en' : 'ar';
     const voiceConfig = VOICES[lang];
     const selectedVoice = voiceConfig.options.includes(voice) ? voice : voiceConfig.options[0];
 
+    const detectedScript = detectTextScript(trimmedText);
+    if (detectedScript && detectedScript !== lang) {
+      return res.status(400).json({
+        error: 'النص المكتوب لا يبدو مطابقًا للغة المختارة، يرجى تغيير اللغة أو النص حتى لا يخرج الصوت مشوّهًا',
+        code: 'LANGUAGE_MISMATCH',
+      });
+    }
+
     const entitlement = await checkEntitlement(req.userId, 'text_to_speech');
     if (!entitlement.allowed) {
       return res.status(429).json({ error: 'وصلت للحد اليومي من توليد الصوت', code: 'QUOTA_EXCEEDED' });
     }
 
-    const record = await createTtsRecord({ userId: req.userId, inputText: text.trim(), voice: selectedVoice, language: lang });
+    const record = await createTtsRecord({ userId: req.userId, inputText: trimmedText, voice: selectedVoice, language: lang });
 
     const groqResponse = await fetch('https://api.groq.com/openai/v1/audio/speech', {
       method: 'POST',
       headers: { Authorization: `Bearer ${config.groqApiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: voiceConfig.model, input: text.trim(), voice: selectedVoice, response_format: 'wav' }),
+      body: JSON.stringify({ model: voiceConfig.model, input: trimmedText, voice: selectedVoice, response_format: 'wav' }),
     });
 
     if (!groqResponse.ok) {
@@ -85,17 +102,8 @@ router.delete('/tts/jobs', authMiddleware, async (req, res) => {
   }
 });
 
-router.delete('/tts/jobs', authMiddleware, async (req, res) => {
+router.delete('/tts/jobs/:id', authMiddleware, async (req, res) => {
   try {
-    const { deleteAllUserTtsGenerations } = await import('../services/ttsService.js');
-    await deleteAllUserTtsGenerations(req.userId);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.delete('/tts/jobs/:id', authMiddleware, async (req, res) => {  try {
     await deleteTtsGeneration(req.params.id, req.userId);
     res.json({ success: true });
   } catch (err) {
