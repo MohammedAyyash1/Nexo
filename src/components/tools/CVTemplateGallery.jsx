@@ -1,13 +1,10 @@
-import { Check } from 'lucide-react';
-import { CV_TEMPLATES, CV_FONT_OPTIONS, ACCENT_SWATCHES } from './cvTemplates.js';
-
+import { Check, Sparkles } from 'lucide-react';
 export function CVTemplateGallery({ lang, cv, selectedId, onSelect, accent, onAccentChange, fontId, onFontChange }) {
   const t = (ar, en) => (lang === 'en' ? en : ar);
 
   return (
     <div className="nexo-card cv-gallery-card">
-      <h4 className="nexo-card-row-title" style={{ marginBottom: 12 }}>{t('اختر قالب السيرة الذاتية', 'Choose a CV template')}</h4>
-
+<h4 className="nexo-card-row-title cv-section-title-icon" style={{ marginBottom: 12 }}><Sparkles size={15} /> {t('اختر قالب السيرة الذاتية', 'Choose a CV template')}</h4>
       <div className="cv-template-strip">
         {CV_TEMPLATES.map((tpl) => (
           <button

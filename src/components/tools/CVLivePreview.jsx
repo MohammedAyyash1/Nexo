@@ -115,7 +115,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
           <p style={{ color: 'rgba(255,255,255,0.9)', margin: '4px 0 0' }}>{cv.jobTitle}</p>
         </div>
         <div className="cv-preview-main" style={{ paddingTop: 18 }}>
-          <div className="cv-preview-contact-row">{[cv.email, cv.phone, cv.location].filter(Boolean).join('  •  ')}</div>
+          <div className="cv-preview-contact-row">{[cv.email, cv.phone, cv.location].filter(Boolean).map((v, i) => <bdi key={i}>{v}</bdi>).reduce((a, b) => [a, '  •  ', b])}</div>
           {cv.summary && <><SectionTitle>نبذة</SectionTitle><p className="cv-preview-text">{cv.summary}</p></>}
           {cv.experience.map((e, i) => (
             <div key={i} className="cv-preview-entry">
@@ -137,7 +137,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
         <div>
           <h2 style={{ margin: 0, color }}>{cv.fullName || 'اسمك الكامل'}</h2>
           <p style={{ margin: '4px 0 0', color: 'var(--text-secondary, #666)' }}>{cv.jobTitle}</p>
-          <div className="cv-preview-contact-row">{[cv.email, cv.phone, cv.location].filter(Boolean).join('  •  ')}</div>
+          <div className="cv-preview-contact-row">{[cv.email, cv.phone, cv.location].filter(Boolean).map((v, i) => <bdi key={i}>{v}</bdi>).reduce((a, b) => [a, '  •  ', b])}</div>
         </div>
       </div>
       {cv.summary && <><SectionTitle>نبذة</SectionTitle><p className="cv-preview-text">{cv.summary}</p></>}

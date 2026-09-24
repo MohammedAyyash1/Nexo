@@ -191,3 +191,48 @@
   box-shadow: 0 0 0 2px var(--text-primary), 0 0 12px rgba(var(--accent-1-rgb), 0.4);
   transform: scale(1.1);
 }
+/* ===== أيقونات عناوين الأقسام ===== */
+.cv-section-title-icon {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.cv-section-title-icon svg {
+  color: var(--accent-2);
+  flex-shrink: 0;
+}
+
+/* ===== خلفية طموحة خلف كامل صفحة CV Builder ===== */
+.cv-builder-ambient-bg {
+  position: relative;
+}
+.cv-builder-ambient-bg::before {
+  content: '';
+  position: fixed;
+  top: -10%; inset-inline-start: -5%;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(var(--accent-1-rgb), 0.14), transparent 70%);
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: 0;
+}
+.cv-builder-ambient-bg::after {
+  content: '';
+  position: fixed;
+  bottom: -15%; inset-inline-end: -8%;
+  width: 550px; height: 550px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.1), transparent 70%);
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: 0;
+}
+.cv-builder-ambient-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== بطاقة الگاليري: حدود متوهّجة خفيفة ===== */
+.cv-gallery-card {
+  background: linear-gradient(160deg, rgba(var(--accent-1-rgb), 0.06), var(--bg-panel) 40%) !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.15) !important;
+}

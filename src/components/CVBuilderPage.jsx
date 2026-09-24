@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, FileUser, Plus, X, Sparkles, Download, Save, Trash2, Loader2, Camera, Inbox, AlertCircle } from 'lucide-react';
+import { ArrowRight, FileUser, Plus, X, Sparkles, Download, Save, Trash2, Loader2, Camera, Inbox, AlertCircle, User, FileText, Briefcase, GraduationCap, Award, Languages } from 'lucide-react';
 import { exportCvAsWord, exportCvAsPdf } from '../utils/cvPdfExport.js';
 import { API_BASE } from '../../config/api.js';
 import { CV_TEMPLATES, CV_FONT_OPTIONS } from './tools/cvTemplates.js';
@@ -148,7 +148,7 @@ export function CVBuilderPage() {
   const handleExportPdf = () => exportCvAsPdf(cv, lang, selectedTemplate, accentOverride, selectedFont.stack);
 
   return (
-    <div className="nexo-tool-page">
+    <div className="nexo-tool-page cv-builder-ambient-bg">
      <div className="nexo-tool-page-inner" style={{ maxWidth: 1240 }}>
       <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
@@ -174,8 +174,7 @@ export function CVBuilderPage() {
         <div>
           {/* ===== المعلومات الأساسية ===== */}
           <div className="nexo-card" style={{ marginBottom: 20 }}>
-            <h4 className="nexo-card-row-title" style={{ marginBottom: 16 }}>{t('المعلومات الأساسية', 'Basic Info')}</h4>
-
+<h4 className="nexo-card-row-title cv-section-title-icon" style={{ marginBottom: 16 }}><User size={15} /> {t('المعلومات الأساسية', 'Basic Info')}</h4>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
               <label className="nexo-avatar-upload">
                 {cv.photoUrl ? (
@@ -203,8 +202,7 @@ export function CVBuilderPage() {
           {/* ===== نبذة مختصرة ===== */}
           <div className="nexo-card" style={{ marginBottom: 20 }}>
             <div className="nexo-card-row-header">
-              <h4 className="nexo-card-row-title" style={{ margin: 0 }}>{t('نبذة مختصرة', 'Summary')}</h4>
-              <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={handleEnhanceSummary} disabled={enhancing || !cv.summary.trim()}>
+<h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><FileText size={15} /> {t('نبذة مختصرة', 'Summary')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={handleEnhanceSummary} disabled={enhancing || !cv.summary.trim()}>
                 {enhancing ? <Loader2 size={13} className="nexo-spin" /> : <Sparkles size={13} />} {t('تحسين بالذكاء الاصطناعي', 'Enhance with AI')}
               </button>
             </div>
@@ -214,8 +212,7 @@ export function CVBuilderPage() {
           {/* ===== الخبرات العملية ===== */}
           <div className="nexo-card" style={{ marginBottom: 20 }}>
             <div className="nexo-card-row-header">
-              <h4 className="nexo-card-row-title" style={{ margin: 0 }}>{t('الخبرات العملية', 'Experience')}</h4>
-              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addExperience}><Plus size={15} /></button>
+<h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><Briefcase size={15} /> {t('الخبرات العملية', 'Experience')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addExperience}><Plus size={15} /></button>
             </div>
             {cv.experience.length === 0 && (
               <p className="nexo-list-item-sub" style={{ padding: '4px 2px' }}>{t('ما ضفت خبرات بعد — اضغط + لإضافة أول خبرة.', "You haven't added experience yet — click + to add one.")}</p>
@@ -238,8 +235,7 @@ export function CVBuilderPage() {
           {/* ===== التعليم ===== */}
           <div className="nexo-card" style={{ marginBottom: 20 }}>
             <div className="nexo-card-row-header">
-              <h4 className="nexo-card-row-title" style={{ margin: 0 }}>{t('التعليم', 'Education')}</h4>
-              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addEducation}><Plus size={15} /></button>
+<h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><GraduationCap size={15} /> {t('التعليم', 'Education')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addEducation}><Plus size={15} /></button>
             </div>
             {cv.education.length === 0 && (
               <p className="nexo-list-item-sub" style={{ padding: '4px 2px' }}>{t('ما ضفت مؤهلات تعليمية بعد.', 'No education added yet.')}</p>
@@ -257,8 +253,7 @@ export function CVBuilderPage() {
           {/* ===== المهارات واللغات ===== */}
           <div className="nexo-cv-half-row" style={{ display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
             <div className="nexo-card nexo-cv-half-card">
-              <h4 className="nexo-card-row-title" style={{ marginBottom: 12 }}>{t('المهارات', 'Skills')}</h4>
-              <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+<h4 className="nexo-card-row-title cv-section-title-icon" style={{ marginBottom: 12 }}><Award size={15} /> {t('المهارات', 'Skills')}</h4>              <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
                 <input className="nexo-input" dir="auto" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addSkill()} placeholder={t('اكتب مهارة واضغط Enter', 'Type a skill and press Enter')} />
                 <button className="nexo-btn nexo-btn-secondary nexo-btn-icon" onClick={addSkill}><Plus size={15} /></button>
               </div>
@@ -272,8 +267,7 @@ export function CVBuilderPage() {
             </div>
 
             <div className="nexo-card nexo-cv-half-card">
-              <h4 className="nexo-card-row-title" style={{ marginBottom: 12 }}>{t('اللغات', 'Languages')}</h4>
-              <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+<h4 className="nexo-card-row-title cv-section-title-icon" style={{ marginBottom: 12 }}><Languages size={15} /> {t('اللغات', 'Languages')}</h4>              <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
                 <input className="nexo-input" dir="auto" value={langInput} onChange={(e) => setLangInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addLanguage()} placeholder={t('اكتب لغة واضغط Enter', 'Type a language and press Enter')} />
                 <button className="nexo-btn nexo-btn-secondary nexo-btn-icon" onClick={addLanguage}><Plus size={15} /></button>
               </div>
