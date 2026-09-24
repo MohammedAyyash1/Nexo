@@ -3463,7 +3463,7 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
     radial-gradient(ellipse 1000px 560px at 15% -10%, rgba(124, 58, 237, 0.32), transparent 60%),
     radial-gradient(ellipse 800px 500px at 100% 10%, rgba(96, 165, 250, 0.16), transparent 55%),
     radial-gradient(ellipse 700px 500px at 50% 100%, rgba(168, 85, 247, 0.14), transparent 60%),
-    var(--bg-page);
+    var(--bg-page) !important;
 }
 
 .tts-page.nexo-tool-page::before {
