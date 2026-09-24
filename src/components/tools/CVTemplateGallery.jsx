@@ -1,5 +1,5 @@
 import { Check, Sparkles } from 'lucide-react';
-import { CV_TEMPLATES, ACCENT_SWATCHES } from './cvTemplates.js';
+import { CV_TEMPLATES, ACCENT_SWATCHES, CV_FONT_OPTIONS } from './cvTemplates.js';
 export function CVTemplateGallery({ lang, cv, selectedId, onSelect, accent, onAccentChange, fontId, onFontChange }) {
   const t = (ar, en) => (lang === 'en' ? en : ar);
 
