@@ -3715,4 +3715,112 @@ html[dir='ltr'] .nexo-tool-item:hover { transform: translateX(2px); }
   .tts-generate-btn { min-width: 0; }
   .tts-history-row { flex-wrap: wrap; }
   .tts-lang-chip { order: 3; }
+}/* ==================================================== */
+/* ===  Text to Speech — Rich Decorative Scene (tts-*) === */
+/* ==================================================== */
+/* مشهد زخرفي متعدد الطبقات (مو مجرد توهج لون واحد): كرات توهج متراكبة
+   بأعماق وألوان مختلفة + حلقات صوت متمددة + جزيئات عائمة + شبكة نقطية.
+   كله CSS بحت (نفس فلسفة orbit-* بصفحة الهبوط)، pointer-events: none،
+   خاص بهاي الصفحة فقط. */
+
+.tts-hero-art {
+  position: absolute;
+  inset-inline-end: 2%;
+  top: 110px;
+  width: 380px;
+  height: 380px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tts-hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(30px);
+}
+.tts-hero-orb-1 {
+  width: 220px; height: 220px;
+  top: -20px; inset-inline-end: -20px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.5), transparent 70%);
+}
+.tts-hero-orb-2 {
+  width: 180px; height: 180px;
+  bottom: 10px; inset-inline-start: 10px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.35), transparent 70%);
+}
+.tts-hero-orb-3 {
+  width: 150px; height: 150px;
+  top: 130px; inset-inline-start: 50px;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.32), transparent 70%);
+}
+
+.tts-hero-grid {
+  position: absolute;
+  inset: 40px;
+  border-radius: 50%;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+  background-size: 18px 18px;
+  -webkit-mask-image: radial-gradient(circle, #000 40%, transparent 75%);
+  mask-image: radial-gradient(circle, #000 40%, transparent 75%);
+}
+
+.tts-hero-speaker {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  box-shadow: 0 0 40px rgba(168, 85, 247, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  z-index: 2;
+}
+
+.tts-hero-rings { position: absolute; top: 50%; left: 50%; width: 0; height: 0; }
+.tts-hero-rings span {
+  position: absolute; top: 0; left: 0;
+  transform: translate(-50%, -50%);
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(168, 85, 247, 0.45);
+  animation: ttsRingPulse 3s ease-out infinite;
+}
+.tts-hero-rings span:nth-child(2) { animation-delay: 1s; }
+.tts-hero-rings span:nth-child(3) { animation-delay: 2s; }
+
+@keyframes ttsRingPulse {
+  0% { width: 100px; height: 100px; opacity: 0.7; }
+  100% { width: 320px; height: 320px; opacity: 0; }
+}
+
+.tts-hero-particles { position: absolute; inset: 0; }
+.tts-hero-particles span {
+  position: absolute;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
+  animation: ttsParticleFloat 5s ease-in-out infinite;
+}
+.tts-hero-particles span:nth-child(1) { top: 15%; inset-inline-start: 20%; animation-delay: 0s; }
+.tts-hero-particles span:nth-child(2) { top: 30%; inset-inline-end: 10%; animation-delay: 0.6s; background: #ec4899; box-shadow: 0 0 8px rgba(236, 72, 153, 0.8); }
+.tts-hero-particles span:nth-child(3) { top: 65%; inset-inline-start: 12%; animation-delay: 1.2s; }
+.tts-hero-particles span:nth-child(4) { top: 75%; inset-inline-end: 22%; animation-delay: 1.8s; background: #60a5fa; box-shadow: 0 0 8px rgba(96, 165, 250, 0.8); }
+.tts-hero-particles span:nth-child(5) { top: 45%; inset-inline-start: 4%; animation-delay: 2.4s; }
+.tts-hero-particles span:nth-child(6) { top: 8%; inset-inline-end: 30%; animation-delay: 3s; background: #ec4899; box-shadow: 0 0 8px rgba(236, 72, 153, 0.8); }
+
+@keyframes ttsParticleFloat {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(-14px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tts-hero-rings span,
+  .tts-hero-particles span { animation: none; opacity: 0.5; }
+}
+
+/* ما في مساحة فاضية كافية لهالمشهد تحت 1180px، فبيختفي والمحتوى يضل مركزي عادي */
+@media (max-width: 1180px) {
+  .tts-hero-art { display: none; }
 }

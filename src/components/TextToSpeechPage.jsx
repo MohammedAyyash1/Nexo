@@ -177,6 +177,17 @@ export function TextToSpeechPage() {
 
   return (
     <div className="nexo-tool-page tts-page">
+     <div className="tts-hero-art" aria-hidden="true">
+       <span className="tts-hero-orb tts-hero-orb-1" />
+       <span className="tts-hero-orb tts-hero-orb-2" />
+       <span className="tts-hero-orb tts-hero-orb-3" />
+       <div className="tts-hero-grid" />
+       <div className="tts-hero-rings"><span /><span /><span /></div>
+       <div className="tts-hero-particles">
+         {[0, 1, 2, 3, 4, 5].map((i) => <span key={i} />)}
+       </div>
+       <div className="tts-hero-speaker"><Volume2 size={38} /></div>
+     </div>
      <div className="nexo-tool-page-inner">
       <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
