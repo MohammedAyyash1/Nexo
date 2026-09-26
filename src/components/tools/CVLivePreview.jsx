@@ -5,7 +5,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   const hasContent = cv.fullName || cv.summary || cv.experience.length > 0;
 
   const SectionTitle = ({ children }) => (
-    <div style={{ fontSize: 11, fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 6, borderBottom: `1.5px solid ${color}33`, paddingBottom: 3 }}>
+    <div style={{ fontSize: 11.5, fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: 0.7, marginTop: 18, marginBottom: 8, borderBottom: `1.5px solid ${color}33`, paddingBottom: 4 }}>
       {children}
     </div>
   );
