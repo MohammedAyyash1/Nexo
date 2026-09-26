@@ -1,6 +1,10 @@
 /* ==================================================== */
 /* ================  CV Live Preview  ================= */
 /* ==================================================== */
+/* ملاحظة: المحتوى يُرسم بحجم منطقي ثابت (794×1123 = A4 بدقة 96dpi) داخل
+   .cv-page-scaler، وبعدين يُصغّر بصريًا بـtransform: scale لمطابقة عرض
+   العمود الفعلي. لهيك كل مقاسات الخط/الحشو هون أكبر من إحساسها المرئي
+   النهائي بكثير — هيك طبيعي ومقصود، لا تتفاجأ من الأرقام الكبيرة. */
 
 .cv-builder-layout {
   display: grid;
@@ -16,142 +20,189 @@
 .cv-preview-sticky {
   position: sticky;
   top: 20px;
-}
-
-.cv-preview-sticky {
   background: radial-gradient(ellipse 400px 300px at 50% 0%, rgba(var(--accent-1-rgb), 0.14), transparent 70%);
   border-radius: 20px;
   padding: 18px;
 }
 
-/* ===== صفحة A4 حقيقية ===== */
-/* نسبة 210:297 (A4) فعلية، مو صندوق بارتفاع عشوائي — العرض ثابت بعرض
-   العمود الجانبي (380px تقريبًا بعد الـpadding)، والارتفاع محسوب تلقائيًا
-   من النسبة. لو المحتوى تجاوز الارتفاع الطبيعي، الصندوق بيكبر بدل ما
-   يقص المحتوى (overflow: visible) — حل مؤقت لحد ما ننفذ Pagination
-   حقيقية بمرحلة قادمة، أهم من إخفاء أي بيانات عن المستخدم. */
+@media (max-width: 960px) {
+  .cv-preview-sticky { position: static; }
+}
+
+/* ===== حاوية التمرير الأفقي + رصّة الصفحات ===== */
+.cv-page-scroll { width: 100%; position: relative; }
+.cv-page-stack { display: flex; flex-direction: column; gap: 18px; }
+
+@media (max-width: 960px) {
+  .cv-page-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px; }
+  .cv-page-stack { width: 480px; }
+}
+
+.cv-page-count-badge {
+  position: absolute;
+  top: -10px;
+  inset-inline-end: 4px;
+  background: var(--accent-2, #a855f7);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  z-index: 2;
+}
+
+/* الإطار الفعلي بحجمه الحقيقي على الشاشة (بعد التصغير) — هون الظل والحواف،
+   بره منطقة الـtransform، حتى تضل واضحة وما تتأثر بمقياس التصغير */
+.cv-page-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08), 0 0 0 6px rgba(var(--accent-1-rgb), 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.cv-page-frame:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 36px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1), 0 0 0 6px rgba(var(--accent-1-rgb), 0.08);
+}
+
+.cv-page-scaler {
+  transform-origin: top left;
+  background: #fff;
+}
+
+/* ===== ممر القياس المخفي — موجود بالـLayout بس مو مرئي للمستخدم ===== */
+.cv-page-measure {
+  position: fixed;
+  top: 0;
+  inset-inline-start: -99999px;
+  visibility: hidden;
+  pointer-events: none;
+  color: #1a1a1a;
+}
+
+/* ===== الصفحة (الشكل المرئي داخل الـScaler) ===== */
 .cv-preview-page {
   background: #fff;
   color: #1a1a1a;
-  border-radius: 3px;
-  overflow: visible;
-  box-shadow: 0 30px 70px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08), 0 0 0 6px rgba(var(--accent-1-rgb), 0.05);
-  font-size: 12px;
-  line-height: 1.65;
-  aspect-ratio: 210 / 297;
-  width: 100%;
-  transform: scale(1);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.cv-preview-sticky:hover .cv-preview-page {
-  transform: translateY(-3px);
-  box-shadow: 0 36px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1), 0 0 0 6px rgba(var(--accent-1-rgb), 0.08);
+  width: 794px;
+  height: 1123px;
+  font-size: 26px;
+  line-height: 1.7;
+  box-sizing: border-box;
 }
 
 .cv-preview-empty {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 28px;
+  padding: 60px 48px;
   text-align: center;
   color: #94a3b8;
-  font-size: 13px;
+  font-size: 24px;
 }
 
-/* ===== تخطيط sidebar: عمود أضيق وأكثر توازنًا، محتوى موزّع بانتظام
-   عبر الارتفاع بدل ما ينكبس فوق ويترك فراغ ضخم تحت ===== */
-.cv-preview-sidebar-layout { display: flex; height: 100%; }
+/* ===== رأس صفحة متابعة (page 2+) — شريط رفيع بالاسم بدل تكرار الرأس الكامل ===== */
+.cv-page-continuation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 22px 46px;
+  border-bottom: 1.5px solid;
+  font-size: 22px;
+  font-weight: 600;
+}
+.cv-page-continuation-name { font-weight: 700; }
+
+/* ===== عناوين الأقسام ===== */
+.cv-page-section-title {
+  font-size: 24px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 14px;
+  border-bottom: 2px solid;
+  padding-bottom: 8px;
+}
+
+/* ===== تخطيط sidebar ===== */
+.cv-preview-sidebar-layout { display: flex; width: 100%; height: 100%; }
 
 .cv-preview-sidebar {
   width: 30%;
-  min-width: 96px;
-  max-width: 148px;
+  min-width: 200px;
+  max-width: 300px;
   flex-shrink: 0;
-  padding: 26px 14px;
+  padding: 54px 30px;
   color: #fff;
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 40px;
 }
+.cv-preview-sidebar-continuation { gap: 0; }
 
 .cv-preview-photo {
-  width: 58px; height: 58px; border-radius: 50%;
+  width: 122px; height: 122px; border-radius: 50%;
   object-fit: cover; margin: 0 auto; display: block;
-  border: 3px solid rgba(255,255,255,0.4);
+  border: 6px solid rgba(255,255,255,0.4);
 }
 
-.cv-preview-name-onaccent {
-  font-size: 14.5px;
-  font-weight: 700;
-  line-height: 1.35;
-  margin: 4px 0 2px;
-  word-break: break-word;
-}
-.cv-preview-title-onaccent {
-  font-size: 10.5px;
-  opacity: 0.9;
-  margin: 0;
-  line-height: 1.4;
-}
+.cv-preview-name-onaccent { font-size: 30px; font-weight: 700; line-height: 1.3; margin: 10px 0 4px; word-break: break-word; }
+.cv-preview-title-onaccent { font-size: 22px; opacity: 0.9; margin: 0; line-height: 1.4; }
 .cv-preview-contact-onaccent {
-  font-size: 9.5px;
-  opacity: 0.88;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  word-break: break-word;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255,255,255,0.22);
+  font-size: 20px; opacity: 0.88; display: flex; flex-direction: column; gap: 10px;
+  word-break: break-word; padding-top: 24px; border-top: 1.5px solid rgba(255,255,255,0.22);
 }
 .cv-preview-onaccent-label {
-  font-size: 9.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.85;
-  margin-bottom: 8px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255,255,255,0.22);
+  font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  opacity: 0.85; margin-bottom: 14px; padding-top: 24px; border-top: 1.5px solid rgba(255,255,255,0.22);
 }
-.cv-preview-onaccent-chip {
-  font-size: 9.5px;
-  opacity: 0.95;
-  padding: 3px 0;
-  line-height: 1.4;
-}
+.cv-preview-onaccent-chip { font-size: 20px; opacity: 0.95; padding: 5px 0; line-height: 1.4; }
 
-.cv-preview-main { flex: 1; padding: 28px 24px; min-width: 0; }
+.cv-preview-main { flex: 1; min-width: 0; padding: 54px 46px; }
 
-.cv-preview-entry { margin-bottom: 15px; }
-.cv-preview-entry-head { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; color: #111; font-weight: 600; }
-.cv-preview-entry-sub { font-size: 11px; color: #555; margin: 2px 0 5px; font-style: italic; }
-.cv-preview-text { font-size: 11.5px; color: #333; margin: 0 0 10px; white-space: pre-wrap; line-height: 1.75; }
+.cv-page-entry { margin-bottom: 4px; }
+.cv-page-entry-head { display: flex; justify-content: space-between; gap: 14px; font-size: 26px; color: #111; font-weight: 700; }
+.cv-page-entry-sub { font-size: 22px; color: #555; margin: 4px 0 8px; font-style: italic; }
+.cv-page-text { font-size: 24px; color: #333; margin: 0; white-space: pre-wrap; line-height: 1.75; }
+
+.cv-page-chip-row { display: flex; flex-wrap: wrap; gap: 12px; }
+.cv-page-chip { font-size: 20px; border: 1.5px solid; border-radius: 30px; padding: 6px 18px; }
+.cv-page-ats-chip { font-size: 20px; border: 1.5px solid #ccc; color: #333; border-radius: 5px; padding: 5px 14px; }
+
+.cv-page-contact-row, .cv-page-ats-contact { font-size: 22px; color: #64748b; }
+.cv-page-contact-dot { margin: 0 8px; }
 
 /* ===== تخطيط dark ===== */
-.cv-preview-dark-layout { background: #0f0f16; color: #e5e5e5; display: flex; flex-direction: column; height: 100%; }
-.cv-preview-dark-header { display: flex; align-items: center; gap: 16px; padding: 26px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-.cv-preview-dark-header .cv-preview-photo { width: 64px; height: 64px; }
-.cv-preview-dark-contact { font-size: 10.5px; color: #9ca3af; margin-top: 6px; line-height: 1.6; }
-.cv-preview-dark-body { padding: 22px 24px; flex: 1; }
-.cv-preview-text-dark { font-size: 11.5px; color: #c8c8c8; margin: 0 0 10px; white-space: pre-wrap; line-height: 1.75; }
-.cv-preview-dark-chip { font-size: 10px; border: 1px solid; border-radius: 20px; padding: 3px 11px; }
+.cv-preview-dark-layout { background: #0f0f16; color: #e5e5e5; display: flex; flex-direction: column; }
+.cv-preview-dark-header { display: flex; align-items: center; gap: 28px; padding: 54px 46px 40px; border-bottom: 1.5px solid rgba(255,255,255,0.08); }
+.cv-preview-dark-header .cv-preview-photo { border: 5px solid; }
+.cv-preview-dark-contact { color: #9ca3af; margin-top: 10px; }
+.cv-preview-dark-body { padding: 40px 46px; flex: 1; }
+.cv-preview-dark-body .cv-page-text { color: #c8c8c8; }
+.cv-preview-dark-body .cv-page-entry-head { color: #fff; }
 
 /* ===== تخطيط gradient ===== */
-.cv-preview-gradient-header { padding: 30px 24px 26px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.cv-preview-gradient-header .cv-preview-photo { border: 3px solid rgba(255,255,255,0.5); width: 64px; height: 64px; }
-.cv-preview-gradient-header h2 { font-size: 17px; }
-.cv-preview-contact-row { font-size: 10.5px; color: #64748b; margin-bottom: 14px; text-align: center; line-height: 1.6; }
+.cv-preview-gradient-header { padding: 60px 46px 48px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.cv-preview-gradient-header .cv-preview-photo { border: 5px solid rgba(255,255,255,0.5); margin-bottom: 14px; }
+.cv-preview-gradient-header h2 { font-size: 34px; }
+.cv-page-gradient-contact-wrap { padding: 26px 46px 0; text-align: center; }
 
 /* ===== تخطيط classic ===== */
-.cv-preview-classic-header { display: flex; align-items: center; gap: 16px; padding: 26px 24px 18px; border-bottom: 2px solid; }
-.cv-preview-classic-header h2 { font-size: 18px; }
-.cv-preview-photo-round { border-radius: 50%; width: 58px; height: 58px; object-fit: cover; }
-.cv-preview-classic-chip { font-size: 10px; border: 1px solid; border-radius: 20px; padding: 3px 11px; }
-.cv-preview-page:not(.cv-preview-sidebar-layout):not(.cv-preview-dark-layout) { padding: 0 24px 24px; display: flex; flex-direction: column; height: 100%; }
-.cv-preview-page:not(.cv-preview-sidebar-layout):not(.cv-preview-dark-layout) .cv-preview-classic-header,
-.cv-preview-page:not(.cv-preview-sidebar-layout):not(.cv-preview-dark-layout) .cv-preview-gradient-header { margin: 0 -24px 16px; }
+.cv-preview-classic-header { display: flex; align-items: center; gap: 28px; padding: 54px 46px 32px; border-bottom: 3px solid; }
+.cv-preview-classic-header h2 { font-size: 36px; }
+.cv-preview-photo-round { border-radius: 50%; width: 122px; height: 122px; object-fit: cover; }
+.cv-preview-classic-chip { font-size: 20px; border: 1.5px solid; border-radius: 30px; padding: 5px 18px; }
+
+/* ===== تخطيط ATS: بسيط قدر الإمكان، أبيض/أسود، بدون صورة ===== */
+.cv-page-ats-layout { background: #fff; }
+.cv-page-ats-header { padding: 54px 46px 30px; border-bottom: 2px solid #111827; }
+.cv-page-ats-header h2 { font-size: 38px; margin: 0 0 6px; color: #111827; font-weight: 800; }
+.cv-page-ats-header p { font-size: 24px; margin: 0 0 14px; color: #374151; }
+
+/* ===== محتوى الصفحات غير الـsidebar (main/ats يشتركوا بنفس الحشو) ===== */
+.cv-preview-page:not(.cv-preview-sidebar-layout):not(.cv-preview-dark-layout) .cv-preview-main,
+.cv-page-ats-layout .cv-preview-main { padding: 40px 46px; }
 
 /* ===== شريط اختيار القوالب ===== */
 .cv-gallery-card { margin-bottom: 20px; }
@@ -218,6 +269,11 @@
 .cv-template-thumb-gradient { background: linear-gradient(140deg, var(--tpl-accent), rgba(255,255,255,0.94) 75%); }
 .cv-template-thumb-gradient::before { background: #fff; }
 
+.cv-template-thumb-ats { background: #fff; box-shadow: inset 0 0 0 1.5px #d1d5db; }
+.cv-template-thumb-ats::before { background: #111827; border-radius: 2px; width: 18px; height: 6px; }
+.cv-template-thumb-ats .cv-template-thumb-bar { background: #6b7280; }
+.cv-template-thumb-ats .cv-template-thumb-bar.short { background: #9ca3af; }
+
 .cv-template-thumb-name { font-size: 10px; color: var(--text-secondary); display: block; text-align: center; }
 
 .cv-template-thumb-check {
@@ -249,47 +305,27 @@
   box-shadow: 0 0 0 2px var(--text-primary), 0 0 12px rgba(var(--accent-1-rgb), 0.4);
   transform: scale(1.1);
 }
-/* ===== أيقونات عناوين الأقسام ===== */
-.cv-section-title-icon {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.cv-section-title-icon svg {
-  color: var(--accent-2);
-  flex-shrink: 0;
-}
+
+/* ===== أيقونات عناوين الأقسام (بمحرر النموذج، مش بمعاينة الصفحة) ===== */
+.cv-section-title-icon { display: flex; align-items: center; gap: 7px; }
+.cv-section-title-icon svg { color: var(--accent-2); flex-shrink: 0; }
 
 /* ===== خلفية طموحة خلف كامل صفحة CV Builder ===== */
-.cv-builder-ambient-bg {
-  position: relative;
-}
+.cv-builder-ambient-bg { position: relative; }
 .cv-builder-ambient-bg::before {
-  content: '';
-  position: fixed;
-  top: -10%; inset-inline-start: -5%;
+  content: ''; position: fixed; top: -10%; inset-inline-start: -5%;
   width: 500px; height: 500px;
   background: radial-gradient(circle, rgba(var(--accent-1-rgb), 0.14), transparent 70%);
-  filter: blur(10px);
-  pointer-events: none;
-  z-index: 0;
+  filter: blur(10px); pointer-events: none; z-index: 0;
 }
 .cv-builder-ambient-bg::after {
-  content: '';
-  position: fixed;
-  bottom: -15%; inset-inline-end: -8%;
+  content: ''; position: fixed; bottom: -15%; inset-inline-end: -8%;
   width: 550px; height: 550px;
   background: radial-gradient(circle, rgba(236, 72, 153, 0.1), transparent 70%);
-  filter: blur(10px);
-  pointer-events: none;
-  z-index: 0;
+  filter: blur(10px); pointer-events: none; z-index: 0;
 }
-.cv-builder-ambient-bg > * {
-  position: relative;
-  z-index: 1;
-}
+.cv-builder-ambient-bg > * { position: relative; z-index: 1; }
 
-/* ===== بطاقة الگاليري: حدود متوهّجة خفيفة ===== */
 .cv-gallery-card {
   background: linear-gradient(160deg, rgba(var(--accent-1-rgb), 0.06), var(--bg-panel) 40%) !important;
   border: 1px solid rgba(var(--accent-rgb), 0.15) !important;

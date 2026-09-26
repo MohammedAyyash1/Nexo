@@ -6,6 +6,7 @@ export const CV_TEMPLATES = [
   { id: 'creative-gradient', nameAr: 'تدرّج إبداعي', nameEn: 'Creative Gradient', layout: 'gradient', accent: '#ec4899' },
   { id: 'classic-elegant', nameAr: 'كلاسيكي أنيق', nameEn: 'Classic Elegant', layout: 'classic', accent: '#92400e' },
   { id: 'simple-blue', nameAr: 'أزرق بسيط', nameEn: 'Simple Blue', layout: 'sidebar', accent: '#2563eb' },
+  { id: 'ats-friendly', nameAr: 'متوافق مع ATS', nameEn: 'ATS Friendly', layout: 'ats', accent: '#1f2937' },
 ];
 
 export const CV_FONT_OPTIONS = [

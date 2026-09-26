@@ -31,17 +31,22 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
     </div>
   `).join('');
 
+  // ===== أنماط طباعة حقيقية: صفحة A4 بهوامش احترافية + منع قطع عنصر
+  // (خبرة/تعليم) بمنتصفه بين صفحتين. هاي القواعد يعتمد عليها المتصفح
+  // نفسه أثناء window.print() لتوزيع المحتوى الطويل تلقائيًا على أكثر
+  // من صفحة A4 حقيقية، بدون أي حساب يدوي منّا هون. =====
   const baseStyle = `
     * { box-sizing: border-box; }
     html, body { margin: 0; width: 100%; }
     body { font-family: ${font}; color: #1f2937; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    @page { margin: 0; size: A4; }
-    .exp-item, .edu-item { margin-bottom: 16px; }
+    @page { size: A4; margin: 16mm 14mm; }
+    .exp-item, .edu-item { margin-bottom: 16px; break-inside: avoid; page-break-inside: avoid; }
     .exp-header { display: flex; justify-content: space-between; align-items: baseline; }
     .exp-role { font-weight: 600; font-size: 14px; color: #111827; }
     .exp-period { font-size: 11.5px; color: #9ca3af; }
     .exp-desc { font-size: 13px; color: #4b5563; line-height: 1.7; margin: 0; }
     .summary { font-size: 13.5px; line-height: 1.8; color: #374151; }
+    .main-title { break-after: avoid; page-break-after: avoid; }
   `;
 
   // ===== sidebar =====
@@ -81,14 +86,15 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
           </div>
         </div>
         <div style="padding:30px 40px;">
-          ${cv.summary ? `<div style="font-size:14px;font-weight:700;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin:0 0 10px;">${t('نبذة مختصرة', 'Summary')}</div><p style="font-size:13.5px;line-height:1.8;color:#c8c8c8;">${esc(cv.summary)}</p>` : ''}
-          ${(cv.experience || []).length ? `<div style="font-size:14px;font-weight:700;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin:24px 0 10px;">${t('الخبرات العملية', 'Experience')}</div>` : ''}
+          ${cv.summary ? `<div class="main-title" style="font-size:14px;font-weight:700;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin:0 0 10px;">${t('نبذة مختصرة', 'Summary')}</div><p style="font-size:13.5px;line-height:1.8;color:#c8c8c8;">${esc(cv.summary)}</p>` : ''}
+          ${(cv.experience || []).length ? `<div class="main-title" style="font-size:14px;font-weight:700;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin:24px 0 10px;">${t('الخبرات العملية', 'Experience')}</div>` : ''}
           ${(cv.experience || []).map((e) => `
-            <div style="margin-bottom:16px;">
+            <div class="exp-item" style="margin-bottom:16px;">
               <div style="display:flex;justify-content:space-between;"><strong style="color:#fff;">${esc(e.role)}</strong><span style="color:${ACCENT};font-size:12px;">${esc(e.period)}</span></div>
               <div style="color:${ACCENT};font-size:12.5px;margin:2px 0 6px;">${esc(e.company)}</div>
               ${e.description ? `<p style="font-size:13px;color:#c8c8c8;line-height:1.7;margin:0;">${esc(e.description)}</p>` : ''}
             </div>`).join('')}
+          ${(cv.education || []).length ? `<div class="main-title" style="font-size:14px;font-weight:700;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin:24px 0 10px;">${t('التعليم', 'Education')}</div>${eduHtml}` : ''}
           ${cv.skills?.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;">${(cv.skills || []).map((s) => `<span style="font-size:11px;border:1px solid ${ACCENT};color:${ACCENT};border-radius:20px;padding:3px 12px;">${esc(s)}</span>`).join('')}</div>` : ''}
         </div>
       </div>`;
@@ -106,10 +112,28 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
         </div>
         <div style="padding:30px 40px;">
           <div style="text-align:center;font-size:12px;color:#64748b;margin-bottom:20px;">${[cv.email, cv.phone, cv.location].filter(Boolean).map(esc).join('  &bull;  ')}</div>
-          ${cv.summary ? `<div style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:0 0 12px;">${t('نبذة مختصرة', 'Summary')}</div><p class="summary">${esc(cv.summary)}</p>` : ''}
-          ${expHtml ? `<div style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:24px 0 12px;">${t('الخبرات العملية', 'Experience')}</div>${expHtml}` : ''}
-          ${eduHtml ? `<div style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:24px 0 12px;">${t('التعليم', 'Education')}</div>${eduHtml}` : ''}
+          ${cv.summary ? `<div class="main-title" style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:0 0 12px;">${t('نبذة مختصرة', 'Summary')}</div><p class="summary">${esc(cv.summary)}</p>` : ''}
+          ${expHtml ? `<div class="main-title" style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:24px 0 12px;">${t('الخبرات العملية', 'Experience')}</div>${expHtml}` : ''}
+          ${eduHtml ? `<div class="main-title" style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:24px 0 12px;">${t('التعليم', 'Education')}</div>${eduHtml}` : ''}
         </div>
+      </div>`;
+    return `<html dir="${dir}"><head><meta charset="utf-8" /><title>${esc(cv.fullName)}</title><style>${baseStyle}</style></head><body>${body}</body></html>`;
+  }
+
+  // ===== ats: بسيط جدًا، أبيض/أسود، بدون صورة، آمن لقارئات ATS =====
+  if (layout === 'ats') {
+    const body = `
+      <div style="padding:40px;color:#111827;">
+        <div style="border-bottom:2px solid #111827;padding-bottom:16px;margin-bottom:20px;">
+          <div style="font-size:26px;font-weight:800;margin:0 0 4px;">${esc(cv.fullName)}</div>
+          <div style="font-size:14px;color:#374151;margin-bottom:8px;">${esc(cv.jobTitle)}</div>
+          <div style="font-size:12px;color:#4b5563;">${[cv.email, cv.phone, cv.location].filter(Boolean).map(esc).join('  |  ')}</div>
+        </div>
+        ${cv.summary ? `<div class="main-title" style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px;">${t('نبذة', 'Profile')}</div><p class="summary" style="color:#1f2937;">${esc(cv.summary)}</p>` : ''}
+        ${expHtml ? `<div class="main-title" style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin:22px 0 10px;">${t('الخبرات العملية', 'Experience')}</div>${expHtml.replace(/color:#111827/g, 'color:#111827').replace(/color:#4b5563/g, 'color:#374151')}` : ''}
+        ${eduHtml ? `<div class="main-title" style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin:22px 0 10px;">${t('التعليم', 'Education')}</div>${eduHtml}` : ''}
+        ${cv.skills?.length ? `<div class="main-title" style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin:22px 0 8px;">${t('المهارات', 'Skills')}</div><div style="font-size:13px;color:#374151;">${(cv.skills || []).map(esc).join(', ')}</div>` : ''}
+        ${cv.languages?.length ? `<div class="main-title" style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;">${t('اللغات', 'Languages')}</div><div style="font-size:13px;color:#374151;">${(cv.languages || []).map(esc).join(', ')}</div>` : ''}
       </div>`;
     return `<html dir="${dir}"><head><meta charset="utf-8" /><title>${esc(cv.fullName)}</title><style>${baseStyle}</style></head><body>${body}</body></html>`;
   }
@@ -125,9 +149,9 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
           <div style="font-size:12px;color:#9ca3af;margin-top:6px;">${[cv.email, cv.phone, cv.location].filter(Boolean).map(esc).join('  &bull;  ')}</div>
         </div>
       </div>
-      ${cv.summary ? `<div style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:0 0 12px;">${t('نبذة مختصرة', 'Summary')}</div><p class="summary">${esc(cv.summary)}</p>` : ''}
-      ${expHtml ? `<div style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:24px 0 12px;">${t('الخبرات العملية', 'Experience')}</div>${expHtml}` : ''}
-      ${eduHtml ? `<div style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:24px 0 12px;">${t('التعليم', 'Education')}</div>${eduHtml}` : ''}
+      ${cv.summary ? `<div class="main-title" style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:0 0 12px;">${t('نبذة مختصرة', 'Summary')}</div><p class="summary">${esc(cv.summary)}</p>` : ''}
+      ${expHtml ? `<div class="main-title" style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:24px 0 12px;">${t('الخبرات العملية', 'Experience')}</div>${expHtml}` : ''}
+      ${eduHtml ? `<div class="main-title" style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:24px 0 12px;">${t('التعليم', 'Education')}</div>${eduHtml}` : ''}
       ${(cv.skills?.length || cv.languages?.length) ? `<div style="display:flex;gap:30px;margin-top:16px;">
         ${cv.skills?.length ? `<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:${ACCENT};margin-bottom:8px;">${t('المهارات', 'Skills')}</div><div style="display:flex;flex-wrap:wrap;gap:6px;">${(cv.skills || []).map((s) => `<span style="font-size:11px;border:1px solid ${ACCENT};color:${ACCENT};border-radius:20px;padding:3px 12px;">${esc(s)}</span>`).join('')}</div></div>` : ''}
         ${cv.languages?.length ? `<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:${ACCENT};margin-bottom:8px;">${t('اللغات', 'Languages')}</div><div style="display:flex;flex-wrap:wrap;gap:6px;">${(cv.languages || []).map((l) => `<span style="font-size:11px;border:1px solid ${ACCENT};color:${ACCENT};border-radius:20px;padding:3px 12px;">${esc(l)}</span>`).join('')}</div></div>` : ''}
