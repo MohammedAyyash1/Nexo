@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, FileUser, Plus, X, Sparkles, Download, Save, Trash2, Loader2, Camera, Inbox, AlertCircle, User, FileText, Briefcase, GraduationCap, Award, Languages, Globe, Linkedin, FolderKanban, BadgeCheck } from 'lucide-react';
+import { ArrowRight, FileUser, Plus, X, Sparkles, Download, Save, Trash2, Loader2, Camera, Inbox, AlertCircle, User, FileText, Briefcase, GraduationCap, Award, Languages, FolderKanban, BadgeCheck } from 'lucide-react';
 import { exportCvAsWord, exportCvAsPdf } from '../utils/cvPdfExport.js';
 import { API_BASE } from '../../config/api.js';
 import { CV_TEMPLATES, CV_FONT_OPTIONS } from './tools/cvTemplates.js';

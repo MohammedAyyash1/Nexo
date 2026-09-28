@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Mail, Phone, MapPin, Globe, Linkedin } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe, Link2 } from 'lucide-react';
 import { paginateBlocks } from './cvPagination.js';
 
 // ===== أبعاد A4 منطقية =====
@@ -14,7 +14,7 @@ function getContactFields(cv) {
     cv.phone && { Icon: Phone, label: 'الهاتف', value: cv.phone },
     cv.location && { Icon: MapPin, label: 'الموقع', value: cv.location },
     cv.website && { Icon: Globe, label: 'الموقع الإلكتروني', value: cv.website },
-    cv.linkedin && { Icon: Linkedin, label: 'LinkedIn', value: cv.linkedin },
+    cv.linkedin && { Icon: Link2, label: 'LinkedIn', value: cv.linkedin },
   ].filter(Boolean);
 }
 
@@ -257,8 +257,12 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
     return (
       <div className="cv-page-scroll" ref={scrollRef}>
         <div className="cv-page-stack">
-          <div className="cv-preview-page cv-preview-empty" style={{ '--cv-accent': color, fontFamily: fontStack }}>
-            <p>عبّي البيانات على اليسار وشوف سيرتك الذاتية تتكوّن هون مباشرة.</p>
+          <div className="cv-page-frame" style={{ width: A4_W * scale, height: A4_H * scale }}>
+            <div className="cv-page-scaler" style={{ width: A4_W, height: A4_H, transform: `scale(${scale})` }}>
+              <div className="cv-preview-page cv-preview-empty" style={{ '--cv-accent': color, fontFamily: fontStack, fontSize: 34 }}>
+                <p>عبّي البيانات على اليسار وشوف سيرتك الذاتية تتكوّن هون مباشرة.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

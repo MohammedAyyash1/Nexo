@@ -6,6 +6,8 @@ import { Logo } from './Logo.jsx';
 import { Sidebar, TOOL_GROUPS } from './Sidebar.jsx';
 import { RightToolsPanel } from './RightToolsPanel.jsx';
 import { QuickActions } from './QuickActions.jsx';
+import { WelcomeHero } from './WelcomeHero.jsx';
+import { FeaturedExperiences } from './FeaturedExperiences.jsx';
 import '../styles/premium-theme.css';
 import '../styles/nexo-premium-v4.css';
 import { TopBar } from './TopBar.jsx';
@@ -850,15 +852,10 @@ const handleToggleSpeak = (text, index) => {
 
         {!hasMessages ? (
           <div className="welcome-v3">
-            <div className="welcome-v3-greeting">
-              <div className="welcome-v3-badge"><Logo size={22} /></div>
-              <h1 style={{ marginTop: 14 }}>
-                {lang === 'en' ? <>Welcome to <span className="gradient-text">Nexo</span> 👋</> : <>مرحباً بك في <span className="gradient-text">Nexo</span> 👋</>}
-              </h1>
-              <p className="welcome-v3-sub">{t.welcomeHeading}</p>
-            </div>
+            <WelcomeHero lang={lang} subtitle={t.welcomeHeading} />
             <InputBar welcome {...inputBarProps} />
             <QuickActions lang={lang} onAction={handleQuickAction} />
+            <FeaturedExperiences lang={lang} />
 
             {chats.length > 0 && (
               <div className="nexo-recent-chats-section">
