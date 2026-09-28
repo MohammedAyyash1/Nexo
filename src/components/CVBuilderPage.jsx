@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, FileUser, Plus, X, Sparkles, Download, Save, Trash2, Loader2, Camera, Inbox, AlertCircle, User, FileText, Briefcase, GraduationCap, Award, Languages } from 'lucide-react';
+import { ArrowRight, FileUser, Plus, X, Sparkles, Download, Save, Trash2, Loader2, Camera, Inbox, AlertCircle, User, FileText, Briefcase, GraduationCap, Award, Languages, Globe, Linkedin, FolderKanban, BadgeCheck } from 'lucide-react';
 import { exportCvAsWord, exportCvAsPdf } from '../utils/cvPdfExport.js';
 import { API_BASE } from '../../config/api.js';
 import { CV_TEMPLATES, CV_FONT_OPTIONS } from './tools/cvTemplates.js';
@@ -18,8 +18,8 @@ function loadLang() {
 }
 
 const EMPTY_CV = {
-  fullName: '', jobTitle: '', email: '', phone: '', location: '', summary: '',
-  experience: [], education: [], skills: [], languages: [], photoUrl: '',
+  fullName: '', jobTitle: '', email: '', phone: '', location: '', website: '', linkedin: '', summary: '',
+  experience: [], education: [], skills: [], languages: [], projects: [], certifications: [], photoUrl: '',
 };
 
 export function CVBuilderPage() {
@@ -40,7 +40,7 @@ export function CVBuilderPage() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [historyError, setHistoryError] = useState(false);
 
-  // ===== حالة التصميم/التخصيص (جديد) - لا يؤثر على شكل البيانات المحفوظة بالـBackend =====
+  // ===== حالة التصميم/التخصيص - لا يؤثر على شكل البيانات المحفوظة بالـBackend =====
   const [templateId, setTemplateId] = useState(CV_TEMPLATES[0].id);
   const [accentOverride, setAccentOverride] = useState(null);
   const [fontId, setFontId] = useState('sans');
@@ -58,6 +58,10 @@ export function CVBuilderPage() {
   };
 
   useEffect(() => { loadHistory(); }, []);
+
+  // ملفات محفوظة قديمة ما فيها الحقول الجديدة (projects/certifications/website/linkedin) —
+  // نضمن وجودها كمصفوفات/نصوص فاضية بدل undefined حتى ما ينكسر أي .map أو .length
+  const normalizeCv = (data) => ({ ...EMPTY_CV, ...data });
 
   const updateField = (key, value) => setCv((c) => ({ ...c, [key]: value }));
   const handlePhotoUpload = (e) => {
@@ -79,6 +83,14 @@ export function CVBuilderPage() {
   const addEducation = () => setCv((c) => ({ ...c, education: [...c.education, { degree: '', institution: '', period: '' }] }));
   const updateEducation = (i, key, value) => setCv((c) => ({ ...c, education: c.education.map((e, idx) => (idx === i ? { ...e, [key]: value } : e)) }));
   const removeEducation = (i) => setCv((c) => ({ ...c, education: c.education.filter((_, idx) => idx !== i) }));
+
+  const addProject = () => setCv((c) => ({ ...c, projects: [...c.projects, { name: '', description: '', link: '' }] }));
+  const updateProject = (i, key, value) => setCv((c) => ({ ...c, projects: c.projects.map((p, idx) => (idx === i ? { ...p, [key]: value } : p)) }));
+  const removeProject = (i) => setCv((c) => ({ ...c, projects: c.projects.filter((_, idx) => idx !== i) }));
+
+  const addCertification = () => setCv((c) => ({ ...c, certifications: [...c.certifications, { name: '', issuer: '', year: '' }] }));
+  const updateCertification = (i, key, value) => setCv((c) => ({ ...c, certifications: c.certifications.map((cert, idx) => (idx === i ? { ...cert, [key]: value } : cert)) }));
+  const removeCertification = (i) => setCv((c) => ({ ...c, certifications: c.certifications.filter((_, idx) => idx !== i) }));
 
   const addSkill = () => {
     if (!skillInput.trim()) return;
@@ -123,7 +135,7 @@ export function CVBuilderPage() {
   };
 
   const handleLoad = (item) => {
-    setCv(item.data);
+    setCv(normalizeCv(item.data));
     setCurrentCvId(item.id);
   };
 
@@ -197,6 +209,10 @@ export function CVBuilderPage() {
               <input className="nexo-input" dir="auto" placeholder={t('الهاتف', 'Phone')} value={cv.phone} onChange={(e) => updateField('phone', e.target.value)} />
               <input className="nexo-input" dir="auto" placeholder={t('المدينة/البلد', 'City/Country')} value={cv.location} onChange={(e) => updateField('location', e.target.value)} />
             </div>
+            <div className="nexo-form-row" style={{ marginTop: 10 }}>
+              <input className="nexo-input" dir="auto" placeholder={t('الموقع الإلكتروني (اختياري)', 'Website (optional)')} value={cv.website} onChange={(e) => updateField('website', e.target.value)} />
+              <input className="nexo-input" dir="auto" placeholder={t('رابط LinkedIn (اختياري)', 'LinkedIn URL (optional)')} value={cv.linkedin} onChange={(e) => updateField('linkedin', e.target.value)} />
+            </div>
           </div>
 
           {/* ===== نبذة مختصرة ===== */}
@@ -246,6 +262,46 @@ export function CVBuilderPage() {
                 <input className="nexo-input" dir="auto" placeholder={t('الجامعة/المعهد', 'Institution')} value={edu.institution} onChange={(e) => updateEducation(i, 'institution', e.target.value)} />
                 <input className="nexo-input" dir="auto" placeholder={t('السنة', 'Year')} value={edu.period} onChange={(e) => updateEducation(i, 'period', e.target.value)} />
                 <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => removeEducation(i)}><X size={13} /></button>
+              </div>
+            ))}
+          </div>
+
+          {/* ===== المشاريع (جديد) ===== */}
+          <div className="nexo-card" style={{ marginBottom: 20 }}>
+            <div className="nexo-card-row-header">
+<h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><FolderKanban size={15} /> {t('المشاريع', 'Projects')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addProject}><Plus size={15} /></button>
+            </div>
+            {cv.projects.length === 0 && (
+              <p className="nexo-list-item-sub" style={{ padding: '4px 2px' }}>{t('ما ضفت مشاريع بعد — اختياري، بس بيغني سيرتك الذاتية.', "You haven't added projects yet — optional, but enriches your CV.")}</p>
+            )}
+            {cv.projects.map((p, i) => (
+              <div key={i} className="nexo-subcard">
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+                  <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => removeProject(i)}><X size={13} /></button>
+                </div>
+                <div className="nexo-form-row">
+                  <input className="nexo-input" dir="auto" placeholder={t('اسم المشروع', 'Project name')} value={p.name} onChange={(e) => updateProject(i, 'name', e.target.value)} />
+                  <input className="nexo-input" dir="auto" placeholder={t('رابط (اختياري)', 'Link (optional)')} value={p.link} onChange={(e) => updateProject(i, 'link', e.target.value)} />
+                </div>
+                <textarea className="nexo-textarea" dir="auto" rows={2} style={{ marginTop: 10 }} placeholder={t('وصف مختصر للمشروع ودورك فيه', 'Brief description of the project and your role')} value={p.description} onChange={(e) => updateProject(i, 'description', e.target.value)} />
+              </div>
+            ))}
+          </div>
+
+          {/* ===== الشهادات والدورات (جديد) ===== */}
+          <div className="nexo-card" style={{ marginBottom: 20 }}>
+            <div className="nexo-card-row-header">
+<h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><BadgeCheck size={15} /> {t('الشهادات والدورات', 'Certifications')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addCertification}><Plus size={15} /></button>
+            </div>
+            {cv.certifications.length === 0 && (
+              <p className="nexo-list-item-sub" style={{ padding: '4px 2px' }}>{t('ما ضفت شهادات بعد.', 'No certifications added yet.')}</p>
+            )}
+            {cv.certifications.map((cert, i) => (
+              <div key={i} className="nexo-form-row" style={{ marginBottom: 10, alignItems: 'center' }}>
+                <input className="nexo-input" dir="auto" placeholder={t('اسم الشهادة/الدورة', 'Certification name')} value={cert.name} onChange={(e) => updateCertification(i, 'name', e.target.value)} />
+                <input className="nexo-input" dir="auto" placeholder={t('الجهة المانحة', 'Issuer')} value={cert.issuer} onChange={(e) => updateCertification(i, 'issuer', e.target.value)} />
+                <input className="nexo-input" dir="auto" placeholder={t('السنة', 'Year')} value={cert.year} onChange={(e) => updateCertification(i, 'year', e.target.value)} />
+                <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => removeCertification(i)}><X size={13} /></button>
               </div>
             ))}
           </div>
@@ -341,7 +397,7 @@ export function CVBuilderPage() {
           )}
         </div>
 
-        {/* ===== العارض الحي (جديد) ===== */}
+        {/* ===== العارض الحي ===== */}
         <div className="cv-preview-sticky">
           <CVLivePreview cv={cv} template={selectedTemplate} accent={accentOverride} fontStack={selectedFont.stack} />
         </div>

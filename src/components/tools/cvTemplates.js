@@ -1,4 +1,6 @@
 // كتالوج قوالب CV — كل قالب: هوية لونية + تخطيط. إضافة قالب جديد = عنصر جديد بالمصفوفة فقط
+// pro: true = قالب Nexo Pro. حاليًا متاح للجميع مؤقتًا (بانتظار ربط نظام الصلاحيات
+// الحقيقي بالباك إند)، بس معروض بشارة PRO بالگاليري تحضيرًا لذلك.
 export const CV_TEMPLATES = [
   { id: 'modern-purple', nameAr: 'أرجواني عصري', nameEn: 'Modern Purple', layout: 'sidebar', accent: '#7c3aed' },
   { id: 'clean-minimal', nameAr: 'مينيمال نظيف', nameEn: 'Clean Minimal', layout: 'classic', accent: '#475569' },
@@ -7,6 +9,7 @@ export const CV_TEMPLATES = [
   { id: 'classic-elegant', nameAr: 'كلاسيكي أنيق', nameEn: 'Classic Elegant', layout: 'classic', accent: '#92400e' },
   { id: 'simple-blue', nameAr: 'أزرق بسيط', nameEn: 'Simple Blue', layout: 'sidebar', accent: '#2563eb' },
   { id: 'ats-friendly', nameAr: 'متوافق مع ATS', nameEn: 'ATS Friendly', layout: 'ats', accent: '#1f2937' },
+  { id: 'pro-aurora', nameAr: 'PRO — أورورا', nameEn: 'PRO — Aurora', layout: 'aurora', accent: '#7c3aed', pro: true },
 ];
 
 export const CV_FONT_OPTIONS = [

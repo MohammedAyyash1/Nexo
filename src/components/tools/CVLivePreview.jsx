@@ -1,23 +1,54 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Mail, Phone, MapPin, Globe, Linkedin } from 'lucide-react';
 import { paginateBlocks } from './cvPagination.js';
 
-// ===== أبعاد A4 منطقية (تُرسم بهاد الحجم دايمًا، وبعدين تُصغّر بصريًا
-// لتناسب عرض عمود المعاينة الفعلي عبر transform: scale) =====
+// ===== أبعاد A4 منطقية =====
 const A4_W = 794;
 const A4_H = 1123;
 const PAGE_PAD = 46;
 const CONT_HEADER_H = 74;
 
-function ContactLine({ cv, className = 'cv-page-contact-row' }) {
-  const items = [cv.email, cv.phone, cv.location].filter(Boolean);
-  if (!items.length) return null;
+function getContactFields(cv) {
+  return [
+    cv.email && { Icon: Mail, label: 'البريد الإلكتروني', value: cv.email },
+    cv.phone && { Icon: Phone, label: 'الهاتف', value: cv.phone },
+    cv.location && { Icon: MapPin, label: 'الموقع', value: cv.location },
+    cv.website && { Icon: Globe, label: 'الموقع الإلكتروني', value: cv.website },
+    cv.linkedin && { Icon: Linkedin, label: 'LinkedIn', value: cv.linkedin },
+  ].filter(Boolean);
+}
+
+function ContactRow({ cv, light, iconColor }) {
+  const fields = getContactFields(cv);
+  if (!fields.length) return null;
   return (
-    <div className={className}>
-      {items.map((v, i) => (
-        <span key={i}>
-          {i > 0 && <span className="cv-page-contact-dot">•</span>}
-          <bdi>{v}</bdi>
-        </span>
+    <div className={`cv-page-contact-grid ${light ? 'cv-page-contact-grid-light' : 'cv-page-contact-grid-dark'}`}>
+      {fields.map((f, i) => (
+        <div key={i} className="cv-page-contact-cell">
+          <f.Icon size={22} className="cv-page-contact-icon" style={iconColor ? { color: iconColor } : undefined} />
+          <div>
+            <div className="cv-page-contact-label">{f.label}</div>
+            <div className="cv-page-contact-value" dir="auto">{f.value}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ContactStack({ cv }) {
+  const fields = getContactFields(cv);
+  if (!fields.length) return null;
+  return (
+    <div className="cv-preview-contact-onaccent">
+      {fields.map((f, i) => (
+        <div key={i} className="cv-page-contact-item">
+          <f.Icon size={24} className="cv-page-contact-icon" />
+          <div>
+            <div className="cv-page-contact-label">{f.label}</div>
+            <div className="cv-page-contact-value" dir="auto">{f.value}</div>
+          </div>
+        </div>
       ))}
     </div>
   );
@@ -29,17 +60,15 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   const titleColor = layout === 'ats' ? '#111827' : color;
   const hasContent = cv.fullName || cv.summary || cv.experience.length > 0;
   const hasSidebar = layout === 'sidebar';
+  const isTimeline = layout === 'aurora';
 
-  // ===== قياس عرض عمود المعاينة الفعلي وحساب نسبة التصغير =====
   const scrollRef = useRef(null);
   const [scale, setScale] = useState(0.48);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return undefined;
-    const update = () => {
-      if (el.clientWidth > 0) setScale(el.clientWidth / A4_W);
-    };
+    const update = () => { if (el.clientWidth > 0) setScale(el.clientWidth / A4_W); };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
@@ -52,7 +81,12 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
     </div>
   );
 
-  // ===== بناء كتل المحتوى الرئيسي (بترتيب ثابت، كل كتلة توزّع لحالها بالصفحات) =====
+  const EntryWrap = ({ children }) => (
+    isTimeline
+      ? <div className="cv-page-timeline-item" style={{ borderInlineStartColor: color }}><span className="cv-page-timeline-dot" style={{ background: color }} />{children}</div>
+      : children
+  );
+
   const buildBlocks = () => {
     const blocks = [];
 
@@ -74,11 +108,13 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
         blocks.push({
           key: `exp-${i}`,
           node: (
-            <div className="cv-page-entry">
-              <div className="cv-page-entry-head"><strong>{e.role}</strong><span>{e.period}</span></div>
-              <div className="cv-page-entry-sub">{e.company}</div>
-              {e.description && <p className="cv-page-text">{e.description}</p>}
-            </div>
+            <EntryWrap>
+              <div className="cv-page-entry">
+                <div className="cv-page-entry-head"><strong>{e.role}</strong><span>{e.period}</span></div>
+                <div className="cv-page-entry-sub">{e.company}</div>
+                {e.description && <p className="cv-page-text">{e.description}</p>}
+              </div>
+            </EntryWrap>
           ),
         });
       });
@@ -90,17 +126,55 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
         blocks.push({
           key: `edu-${i}`,
           node: (
-            <div className="cv-page-entry">
-              <div className="cv-page-entry-head"><strong>{e.degree}</strong><span>{e.period}</span></div>
-              <div className="cv-page-entry-sub">{e.institution}</div>
-            </div>
+            <EntryWrap>
+              <div className="cv-page-entry">
+                <div className="cv-page-entry-head"><strong>{e.degree}</strong><span>{e.period}</span></div>
+                <div className="cv-page-entry-sub">{e.institution}</div>
+              </div>
+            </EntryWrap>
           ),
         });
       });
     }
 
-    // المهارات/اللغات بالمحتوى الرئيسي للقوالب اللي مالها Sidebar جانبي (classic/ats)
-    if ((layout === 'classic' || layout === 'ats') && (cv.skills.length > 0 || cv.languages.length > 0)) {
+    if (cv.projects && cv.projects.length > 0) {
+      blocks.push({ key: 'proj-title', node: <SectionTitle>{layout === 'ats' ? 'Projects' : 'المشاريع'}</SectionTitle> });
+      cv.projects.forEach((p, i) => {
+        blocks.push({
+          key: `proj-${i}`,
+          node: (
+            <EntryWrap>
+              <div className="cv-page-entry">
+                <div className="cv-page-entry-head">
+                  <strong>{p.name}</strong>
+                  {p.link && <span className="cv-page-entry-link" style={{ color: layout === 'ats' ? '#374151' : color }} dir="ltr">{p.link}</span>}
+                </div>
+                {p.description && <p className="cv-page-text">{p.description}</p>}
+              </div>
+            </EntryWrap>
+          ),
+        });
+      });
+    }
+
+    if (cv.certifications && cv.certifications.length > 0) {
+      blocks.push({ key: 'cert-title', node: <SectionTitle>{layout === 'ats' ? 'Certifications' : 'الشهادات والدورات'}</SectionTitle> });
+      cv.certifications.forEach((c, i) => {
+        blocks.push({
+          key: `cert-${i}`,
+          node: (
+            <EntryWrap>
+              <div className="cv-page-entry">
+                <div className="cv-page-entry-head"><strong>{c.name}</strong><span>{c.year}</span></div>
+                <div className="cv-page-entry-sub">{c.issuer}</div>
+              </div>
+            </EntryWrap>
+          ),
+        });
+      });
+    }
+
+    if ((layout === 'classic' || layout === 'ats' || layout === 'aurora') && (cv.skills.length > 0 || cv.languages.length > 0)) {
       blocks.push({
         key: 'skills-langs',
         node: (
@@ -134,7 +208,6 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
       });
     }
 
-    // المهارات بالمحتوى الرئيسي للقوالب اللي عندها Sidebar/Header بس ما فيها مكان جانبي للمهارات (dark/gradient)
     if ((layout === 'dark' || layout === 'gradient') && cv.skills.length > 0) {
       blocks.push({
         key: 'skills-chips',
@@ -153,8 +226,6 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
 
   const blocks = hasContent ? buildBlocks() : [];
 
-  // ===== Pass قياس مخفي: نرندر كل الكتل بعرض العمود الحقيقي المنطقي،
-  // بعدين نقرأ ارتفاعها الفعلي من الـDOM قبل ما نوزّعها على صفحات =====
   const measureRef = useRef(null);
   const [heights, setHeights] = useState([]);
   const mainColWidth = hasSidebar ? A4_W * 0.7 - PAGE_PAD * 2 : A4_W - PAGE_PAD * 2;
@@ -167,11 +238,12 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentSignature]);
 
-  const firstPageHeaderH = hasSidebar ? 0 // الـSidebar جنب المحتوى مو فوقه، ما بياخد ارتفاع من المحتوى الرئيسي
-    : layout === 'dark' ? 220
-    : layout === 'gradient' ? 260
-    : layout === 'ats' ? 200
-    : 220; // classic
+  const firstPageHeaderH = hasSidebar ? 0
+    : layout === 'dark' ? 260
+    : layout === 'gradient' ? 300
+    : layout === 'ats' ? 240
+    : layout === 'aurora' ? 340
+    : 260; // classic
 
   const firstPageCapacity = A4_H - PAGE_PAD * 2 - firstPageHeaderH;
   const nextPageCapacity = A4_H - PAGE_PAD * 2 - CONT_HEADER_H;
@@ -213,7 +285,18 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
         <div className="cv-page-ats-header">
           <h2>{cv.fullName || 'اسمك الكامل'}</h2>
           <p>{cv.jobTitle}</p>
-          <ContactLine cv={cv} className="cv-page-ats-contact" />
+          <ContactRow cv={cv} light={false} iconColor="#374151" />
+        </div>
+      );
+    }
+    if (layout === 'aurora') {
+      return (
+        <div className="cv-page-aurora-header" style={{ background: `linear-gradient(120deg, ${color} 0%, #ec4899 100%)` }}>
+          <div className="cv-page-aurora-mesh" />
+          {cv.photoUrl && <img src={cv.photoUrl} alt="" className="cv-page-aurora-photo" />}
+          <h2>{cv.fullName || 'اسمك الكامل'}</h2>
+          <span className="cv-page-aurora-title-pill">{cv.jobTitle}</span>
+          <ContactRow cv={cv} light iconColor="rgba(255,255,255,0.9)" />
         </div>
       );
     }
@@ -224,7 +307,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
           <div>
             <h2 style={{ color: '#fff', margin: 0 }}>{cv.fullName || 'اسمك الكامل'}</h2>
             <p style={{ color, margin: '6px 0 0', fontWeight: 600 }}>{cv.jobTitle}</p>
-            <ContactLine cv={cv} className="cv-preview-dark-contact" />
+            <ContactRow cv={cv} light iconColor={color} />
           </div>
         </div>
       );
@@ -237,7 +320,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
             <h2 style={{ color: '#fff', margin: 0 }}>{cv.fullName || 'اسمك الكامل'}</h2>
             <p style={{ color: 'rgba(255,255,255,0.9)', margin: '6px 0 0' }}>{cv.jobTitle}</p>
           </div>
-          <div className="cv-page-gradient-contact-wrap"><ContactLine cv={cv} /></div>
+          <div className="cv-page-gradient-contact-wrap"><ContactRow cv={cv} light={false} iconColor={color} /></div>
         </>
       );
     }
@@ -248,7 +331,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
         <div>
           <h2 style={{ margin: 0, color }}>{cv.fullName || 'اسمك الكامل'}</h2>
           <p style={{ margin: '6px 0 0', color: '#666' }}>{cv.jobTitle}</p>
-          <ContactLine cv={cv} />
+          <ContactRow cv={cv} light={false} iconColor={color} />
         </div>
       </div>
     );
@@ -261,13 +344,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
         <h2 className="cv-preview-name-onaccent">{cv.fullName || 'اسمك الكامل'}</h2>
         <p className="cv-preview-title-onaccent">{cv.jobTitle}</p>
       </div>
-      {(cv.email || cv.phone || cv.location) && (
-        <div className="cv-preview-contact-onaccent">
-          {cv.email && <div>{cv.email}</div>}
-          {cv.phone && <div>{cv.phone}</div>}
-          {cv.location && <div>{cv.location}</div>}
-        </div>
-      )}
+      <ContactStack cv={cv} />
       {cv.skills.length > 0 && (
         <div>
           <div className="cv-preview-onaccent-label">المهارات</div>
@@ -297,7 +374,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
       );
     }
     return (
-      <div key={pageIndex} className={`cv-preview-page ${layout === 'dark' ? 'cv-preview-dark-layout' : ''} ${layout === 'ats' ? 'cv-page-ats-layout' : ''}`} style={style}>
+      <div key={pageIndex} className={`cv-preview-page ${layout === 'dark' ? 'cv-preview-dark-layout' : ''} ${layout === 'ats' ? 'cv-page-ats-layout' : ''} ${isTimeline ? 'cv-page-timeline-layout' : ''}`} style={style}>
         {renderPageHeader(isFirst)}
         <div className={layout === 'dark' ? 'cv-preview-dark-body' : 'cv-preview-main'}>
           {renderMainBlocks(group)}
@@ -308,8 +385,6 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
 
   return (
     <div className="cv-page-scroll" ref={scrollRef}>
-      {/* ممر قياس مخفي: بيرندر كل الكتل بعرض العمود الحقيقي حتى نقيس ارتفاعها
-          الفعلي قبل ما نوزّعها على صفحات. مخفي بصريًا بس محسوب بالـLayout. */}
       <div ref={measureRef} className="cv-page-measure" style={{ width: mainColWidth, ...style }}>
         {blocks.map((b) => <div key={b.key} style={{ marginBottom: 18 }}>{b.node}</div>)}
       </div>

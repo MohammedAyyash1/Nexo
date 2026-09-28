@@ -1,4 +1,4 @@
-import { Check, Sparkles } from 'lucide-react';
+import { Check, Sparkles, Crown } from 'lucide-react';
 import { CV_TEMPLATES, ACCENT_SWATCHES, CV_FONT_OPTIONS } from './cvTemplates.js';
 export function CVTemplateGallery({ lang, cv, selectedId, onSelect, accent, onAccentChange, fontId, onFontChange }) {
   const t = (ar, en) => (lang === 'en' ? en : ar);
@@ -13,6 +13,11 @@ export function CVTemplateGallery({ lang, cv, selectedId, onSelect, accent, onAc
             className={`cv-template-thumb ${selectedId === tpl.id ? 'active' : ''}`}
             onClick={() => onSelect(tpl.id)}
           >
+            {tpl.pro && (
+              <span className="cv-template-pro-badge" title={t('قالب Nexo Pro', 'Nexo Pro template')}>
+                <Crown size={9} /> PRO
+              </span>
+            )}
             <div className={`cv-template-thumb-mock cv-template-thumb-${tpl.layout}`} style={{ '--tpl-accent': tpl.accent }}>
               <span className="cv-template-thumb-bar" />
               <span className="cv-template-thumb-bar short" />

@@ -329,4 +329,230 @@
 .cv-gallery-card {
   background: linear-gradient(160deg, rgba(var(--accent-1-rgb), 0.06), var(--bg-panel) 40%) !important;
   border: 1px solid rgba(var(--accent-rgb), 0.15) !important;
+}/* ==================================================== */
+/* ====  Contact Data Labels (icon + label + value)  === */
+/* ==================================================== */
+/* يستبدل عرض معلومات التواصل كنص عاري بشكل مختصر واضح — أيقونة صغيرة
+   ثم تسمية مصغّرة فوق القيمة الفعلية. مستخدم بكل القوالب (Sidebar عمودي،
+   Header أفقي). مقاسات منطقية (تُصغّر مع باقي الصفحة عبر transform). */
+
+/* ===== نسخة عمودية (داخل Sidebar) ===== */
+.cv-page-contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  text-align: start;
 }
+.cv-page-contact-item .cv-page-contact-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+.cv-page-contact-item .cv-page-contact-label {
+  font-size: 15px;
+  opacity: 0.75;
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+.cv-page-contact-item .cv-page-contact-value {
+  font-size: 20px;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+/* ===== نسخة أفقية (رأس الصفحات: classic/dark/gradient/ats) ===== */
+.cv-page-contact-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px;
+  margin-top: 10px;
+}
+.cv-page-contact-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.cv-page-contact-cell .cv-page-contact-icon { flex-shrink: 0; margin-top: 2px; }
+.cv-page-contact-cell .cv-page-contact-label {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+.cv-page-contact-cell .cv-page-contact-value {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+/* الوضع الفاتح (خلفية بيضاء - classic/ats/gradient تحت الرأس الملوّن) */
+.cv-page-contact-grid-dark .cv-page-contact-label { color: #9ca3af; }
+.cv-page-contact-grid-dark .cv-page-contact-value { color: #1f2937; }
+
+/* الوضع الغامق (فوق خلفية داكنة/ملوّنة - dark header) */
+.cv-page-contact-grid-light .cv-page-contact-label { color: rgba(255,255,255,0.6); }
+.cv-page-contact-grid-light .cv-page-contact-value { color: #fff; }
+/* ==================================================== */
+/* ====  Contact Data Labels (icon + label + value)  === */
+/* ==================================================== */
+/* يستبدل عرض معلومات التواصل كنص عاري بشكل مختصر واضح — أيقونة صغيرة
+   ثم تسمية مصغّرة فوق القيمة الفعلية. مستخدم بكل القوالب (Sidebar عمودي،
+   Header أفقي). مقاسات منطقية (تُصغّر مع باقي الصفحة عبر transform). */
+
+/* ===== نسخة عمودية (داخل Sidebar) ===== */
+.cv-page-contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  text-align: start;
+}
+.cv-page-contact-item .cv-page-contact-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+.cv-page-contact-item .cv-page-contact-label {
+  font-size: 15px;
+  opacity: 0.75;
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+.cv-page-contact-item .cv-page-contact-value {
+  font-size: 20px;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+/* ===== نسخة أفقية (رأس الصفحات: classic/dark/gradient/ats) ===== */
+.cv-page-contact-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px;
+  margin-top: 10px;
+}
+.cv-page-contact-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.cv-page-contact-cell .cv-page-contact-icon { flex-shrink: 0; margin-top: 2px; }
+.cv-page-contact-cell .cv-page-contact-label {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+.cv-page-contact-cell .cv-page-contact-value {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+/* الوضع الفاتح (خلفية بيضاء - classic/ats/gradient تحت الرأس الملوّن) */
+.cv-page-contact-grid-dark .cv-page-contact-label { color: #9ca3af; }
+.cv-page-contact-grid-dark .cv-page-contact-value { color: #1f2937; }
+
+/* الوضع الغامق (فوق خلفية داكنة/ملوّنة - dark header) */
+.cv-page-contact-grid-light .cv-page-contact-label { color: rgba(255,255,255,0.6); }
+.cv-page-contact-grid-light .cv-page-contact-value { color: #fff; }
+/* ==================================================== */
+/* ======  Aurora (Pro) + Timeline + PRO badge  ======= */
+/* ==================================================== */
+
+/* ===== رأس Aurora: كتلة تدرّج جريئة بعرض الصفحة كاملة، الاسم بخط كبير جدًا ===== */
+.cv-page-aurora-header {
+  position: relative;
+  overflow: hidden;
+  padding: 62px 46px 44px;
+  color: #fff;
+}
+.cv-page-aurora-mesh {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle 240px at 88% 12%, rgba(255,255,255,0.22), transparent 70%),
+    radial-gradient(circle 200px at 8% 100%, rgba(255,255,255,0.14), transparent 70%);
+  pointer-events: none;
+}
+.cv-page-aurora-header > * { position: relative; }
+.cv-page-aurora-photo {
+  width: 124px; height: 124px; border-radius: 50%;
+  object-fit: cover; border: 5px solid rgba(255,255,255,0.55);
+  margin-bottom: 20px; display: block;
+}
+.cv-page-aurora-header h2 {
+  font-size: 54px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 14px;
+  letter-spacing: -0.5px;
+  word-break: break-word;
+}
+.cv-page-aurora-title-pill {
+  display: inline-block;
+  font-size: 22px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  padding: 7px 22px;
+  border-radius: 40px;
+  margin-bottom: 8px;
+}
+
+/* ===== Timeline: خط عمودي بنقطة لكل عنصر خبرة/تعليم/مشروع ===== */
+.cv-page-timeline-layout .cv-preview-main { padding-top: 34px; }
+.cv-page-timeline-item {
+  position: relative;
+  border-inline-start: 3px solid;
+  padding-inline-start: 26px;
+  margin-bottom: 10px;
+}
+.cv-page-timeline-dot {
+  position: absolute;
+  inset-inline-start: -11px;
+  top: 8px;
+  width: 19px; height: 19px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  box-sizing: border-box;
+}
+
+/* رابط المشروع بجانب اسمه */
+.cv-page-entry-link { font-size: 19px; font-weight: 500; direction: ltr; word-break: break-all; }
+
+/* ===== شارة PRO على بطاقة القالب بالگاليري (بصرية فقط، الضغط يختار القالب عادي) ===== */
+.cv-template-pro-badge {
+  position: absolute;
+  top: 5px;
+  inset-inline-start: 5px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  color: #fff;
+  background: linear-gradient(135deg, #f59e0b, #ec4899);
+  padding: 2px 6px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
+}
+
+/* ===== مصغّر قالب Aurora ===== */
+.cv-template-thumb-aurora {
+  background: #fff;
+}
+.cv-template-thumb-aurora::before {
+  content: '';
+  position: absolute;
+  top: 0; inset-inline: 0;
+  width: auto; height: 24px;
+  border-radius: 0;
+  background: linear-gradient(120deg, var(--tpl-accent), #ec4899);
+}
+.cv-template-thumb-aurora .cv-template-thumb-bar:first-child { margin-top: 20px; }
