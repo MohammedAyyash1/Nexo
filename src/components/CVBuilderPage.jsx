@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, FileUser, Plus, X, Sparkles, Download, Save, Trash2, Loader2, Camera, Inbox, AlertCircle, User, FileText, Briefcase, GraduationCap, Award, Languages, FolderKanban, BadgeCheck } from 'lucide-react';
+import { ArrowRight, FileUser, Plus, X, Sparkles, Download, Save, Trash2, Loader2, Camera, Inbox, AlertCircle, User, FileText, Briefcase, GraduationCap, Award, Languages, FolderKanban, BadgeCheck, CheckCircle2 } from 'lucide-react';
 import { exportCvAsWord, exportCvAsPdf } from '../utils/cvPdfExport.js';
 import { API_BASE } from '../../config/api.js';
 import { CV_TEMPLATES, CV_FONT_OPTIONS } from './tools/cvTemplates.js';
@@ -22,6 +22,66 @@ const EMPTY_CV = {
   experience: [], education: [], skills: [], languages: [], projects: [], certifications: [], photoUrl: '',
 };
 
+// مشهد خلفي زخرفي بحت (كرات توهج + أوراق سيرة مصغّرة عائمة + أيقونات) — pointer-events: none بالكامل
+function CvAmbientScene() {
+  const miniSheet = (variant, lines) => (
+    <div className={`cv-mini-sheet ${variant || ''}`}>
+      <div className="cv-mini-head"><span className="cv-mini-avatar" /><div className="cv-mini-headlines"><span /><span /></div></div>
+      {lines.map((w, i) => <span key={i} className={`cv-mini-line ${w}`} />)}
+      <span className="cv-mini-tag" />
+    </div>
+  );
+  return (
+    <div className="cv-scene" aria-hidden="true">
+      <div className="cv-scene-grid" />
+      <span className="cv-scene-blob cv-scene-blob-1" />
+      <span className="cv-scene-blob cv-scene-blob-2" />
+      <span className="cv-scene-blob cv-scene-blob-3" />
+      <span className="cv-scene-blob cv-scene-blob-4" />
+      <div className="cv-scene-sheet cv-scene-sheet-a">{miniSheet('', ['w90', 'w80', 'w70'])}</div>
+      <div className="cv-scene-sheet cv-scene-sheet-b">{miniSheet('cv-mini-sheet-dark', ['w80', 'w55'])}</div>
+      <div className="cv-scene-sheet cv-scene-sheet-c">{miniSheet('cv-mini-sheet-pink', ['w90', 'w70'])}</div>
+      <span className="cv-scene-float cv-scene-float-1"><Briefcase size={18} /></span>
+      <span className="cv-scene-float cv-scene-float-2"><GraduationCap size={18} /></span>
+      <span className="cv-scene-float cv-scene-float-3"><Award size={18} /></span>
+      <span className="cv-scene-float cv-scene-float-4"><FileText size={18} /></span>
+      <span className="cv-scene-float cv-scene-float-5"><Sparkles size={18} /></span>
+    </div>
+  );
+}
+
+function CvHeroBanner({ t }) {
+  const miniSheet = (variant, lines) => (
+    <div className={`cv-mini-sheet ${variant || ''}`}>
+      <div className="cv-mini-head"><span className="cv-mini-avatar" /><div className="cv-mini-headlines"><span /><span /></div></div>
+      {lines.map((w, i) => <span key={i} className={`cv-mini-line ${w}`} />)}
+      <span className="cv-mini-tag" />
+    </div>
+  );
+  return (
+    <div className="cv-hero-banner">
+      <div className="cv-hero-copy">
+        <span className="cv-hero-kicker"><Sparkles size={12} /> {t('منشئ سيرة ذاتية احترافي', 'Professional CV Builder')}</span>
+        <h2>{t('سيرة ذاتية تفتح لك الأبواب', 'A CV that opens doors')}</h2>
+        <p>{t('اختر قالبًا، عبّي بياناتك، ونزّل سيرة PDF احترافية جاهزة للتقديم مباشرة — من الكمبيوتر أو الجوال.', 'Pick a template, fill your info, and download a professional PDF ready to submit — from desktop or mobile.')}</p>
+        <div className="cv-hero-points">
+          <span><CheckCircle2 size={13} /> {t('تصاميم متعددة', 'Multiple designs')}</span>
+          <span><CheckCircle2 size={13} /> {t('صفحات A4 حقيقية', 'Real A4 pages')}</span>
+          <span><CheckCircle2 size={13} /> {t('حفظ سهل على الجوال', 'Easy mobile saving')}</span>
+        </div>
+      </div>
+      <div className="cv-hero-art">
+        <div className="cv-hero-art-s2">{miniSheet('cv-mini-sheet-dark', ['w80', 'w55'])}</div>
+        <div className="cv-hero-art-s1">{miniSheet('', ['w90', 'w70'])}</div>
+        <div className="cv-hero-art-s3">{miniSheet('cv-mini-sheet-pink', ['w80', 'w70'])}</div>
+        <span className="cv-hero-chip cv-hero-chip-a">PDF</span>
+        <span className="cv-hero-chip cv-hero-chip-b">A4</span>
+        <span className="cv-hero-chip cv-hero-chip-c">PRO</span>
+      </div>
+    </div>
+  );
+}
+
 export function CVBuilderPage() {
   const navigate = useNavigate();
   const lang = loadLang();
@@ -39,6 +99,23 @@ export function CVBuilderPage() {
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [historyError, setHistoryError] = useState(false);
+
+  // ===== حالة الحفظ + إشعار بسيط (جديد) =====
+  const [saveStatus, setSaveStatus] = useState('idle'); // idle | dirty | saving | saved | error
+  const [toast, setToast] = useState('');
+  const isFirstRender = useRef(true);
+  const skipDirtyRef = useRef(false);
+
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
+    if (skipDirtyRef.current) { skipDirtyRef.current = false; return; }
+    setSaveStatus('dirty');
+  }, [cv]);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2500);
+  };
 
   // ===== حالة التصميم/التخصيص - لا يؤثر على شكل البيانات المحفوظة بالـBackend =====
   const [templateId, setTemplateId] = useState(CV_TEMPLATES[0].id);
@@ -118,6 +195,7 @@ export function CVBuilderPage() {
 
   const handleSave = () => {
     setSaving(true);
+    setSaveStatus('saving');
     const payload = { title: cv.fullName || t('سيرتي الذاتية', 'My CV'), data: cv };
     const request = currentCvId
       ? fetch(`${BASE}/cv/${currentCvId}`, { method: 'PATCH', headers: authHeadersJson(), body: JSON.stringify(payload) })
@@ -128,15 +206,19 @@ export function CVBuilderPage() {
       .then((data) => {
         const saved = data.cv;
         setCurrentCvId(saved.id);
+        setSaveStatus('saved');
+        showToast(t('تم حفظ سيرتك الذاتية بنجاح', 'Your CV was saved successfully'));
         loadHistory();
       })
-      .catch((err) => console.error('Save CV error:', err))
+      .catch((err) => { console.error('Save CV error:', err); setSaveStatus('error'); })
       .finally(() => setSaving(false));
   };
 
   const handleLoad = (item) => {
+    skipDirtyRef.current = true;
     setCv(normalizeCv(item.data));
     setCurrentCvId(item.id);
+    setSaveStatus('saved');
   };
 
   const handleDelete = (id) => {
@@ -144,7 +226,12 @@ export function CVBuilderPage() {
     fetch(`${BASE}/cv/${id}`, { method: 'DELETE', headers: authHeaders() })
       .then(() => {
         setHistory((prev) => prev.filter((h) => h.id !== id));
-        if (currentCvId === id) { setCv(EMPTY_CV); setCurrentCvId(null); }
+        if (currentCvId === id) {
+          skipDirtyRef.current = true;
+          setCv(EMPTY_CV);
+          setCurrentCvId(null);
+          setSaveStatus('idle');
+        }
       })
       .catch((err) => console.error('Delete CV error:', err));
   };
@@ -152,15 +239,36 @@ export function CVBuilderPage() {
   const handleDeleteAll = () => {
     if (!window.confirm(t('حذف كل السير الذاتية نهائيًا؟', 'Delete all CVs permanently?'))) return;
     fetch(`${BASE}/cv`, { method: 'DELETE', headers: authHeaders() })
-      .then(() => { setHistory([]); setCv(EMPTY_CV); setCurrentCvId(null); })
+      .then(() => {
+        setHistory([]);
+        skipDirtyRef.current = true;
+        setCv(EMPTY_CV);
+        setCurrentCvId(null);
+        setSaveStatus('idle');
+      })
       .catch((err) => console.error('Delete all CVs error:', err));
   };
 
-  const handleExportWord = () => exportCvAsWord(cv, lang, selectedTemplate, accentOverride, selectedFont.stack);
-  const handleExportPdf = () => exportCvAsPdf(cv, lang, selectedTemplate, accentOverride, selectedFont.stack);
+  const handleExportWord = () => {
+    exportCvAsWord(cv, lang, selectedTemplate, accentOverride, selectedFont.stack);
+    showToast(t('جارِ تنزيل ملف Word...', 'Downloading Word file...'));
+  };
+  const handleExportPdf = () => {
+    exportCvAsPdf(cv, lang, selectedTemplate, accentOverride, selectedFont.stack);
+    showToast(t('افتحت شاشة الطباعة — اختر "حفظ كـ PDF"', 'Print screen opened — choose "Save as PDF"'));
+  };
+
+  const saveStatusNode = () => {
+    if (saveStatus === 'saving') return <span className="cv-save-status cv-save-status-saving"><Loader2 size={12} className="nexo-spin" /> {t('جارِ الحفظ...', 'Saving...')}</span>;
+    if (saveStatus === 'saved') return <span className="cv-save-status cv-save-status-saved"><CheckCircle2 size={12} /> {t('تم الحفظ', 'Saved')}</span>;
+    if (saveStatus === 'dirty') return <span className="cv-save-status cv-save-status-dirty">{t('تغييرات غير محفوظة', 'Unsaved changes')}</span>;
+    if (saveStatus === 'error') return <span className="cv-save-status cv-save-status-error"><AlertCircle size={12} /> {t('فشل الحفظ', 'Save failed')}</span>;
+    return null;
+  };
 
   return (
     <div className="nexo-tool-page cv-builder-ambient-bg">
+      <CvAmbientScene />
      <div className="nexo-tool-page-inner" style={{ maxWidth: 1240 }}>
       <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
@@ -175,6 +283,8 @@ export function CVBuilderPage() {
           </p>
         </div>
       </div>
+
+      <CvHeroBanner t={t} />
 
       <CVTemplateGallery
         lang={lang} cv={cv} selectedId={templateId} onSelect={setTemplateId}
@@ -266,7 +376,7 @@ export function CVBuilderPage() {
             ))}
           </div>
 
-          {/* ===== المشاريع (جديد) ===== */}
+          {/* ===== المشاريع ===== */}
           <div className="nexo-card" style={{ marginBottom: 20 }}>
             <div className="nexo-card-row-header">
 <h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><FolderKanban size={15} /> {t('المشاريع', 'Projects')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addProject}><Plus size={15} /></button>
@@ -288,7 +398,7 @@ export function CVBuilderPage() {
             ))}
           </div>
 
-          {/* ===== الشهادات والدورات (جديد) ===== */}
+          {/* ===== الشهادات والدورات ===== */}
           <div className="nexo-card" style={{ marginBottom: 20 }}>
             <div className="nexo-card-row-header">
 <h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><BadgeCheck size={15} /> {t('الشهادات والدورات', 'Certifications')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addCertification}><Plus size={15} /></button>
@@ -337,7 +447,8 @@ export function CVBuilderPage() {
             </div>
           </div>
 
-          {/* ===== أزرار الحفظ والتصدير ===== */}
+          {/* ===== حالة الحفظ + أزرار الحفظ والتصدير (ديسكتوب) ===== */}
+          <div className="cv-actions-row" style={{ marginBottom: 12 }}>{saveStatusNode()}</div>
           <div style={{ display: 'flex', gap: 10, marginBottom: 32, flexWrap: 'wrap' }}>
             <button className="nexo-btn nexo-btn-primary" onClick={handleSave} disabled={saving} style={{ flex: 1, minWidth: 140 }}>
               {saving ? <Loader2 size={14} className="nexo-spin" /> : <Save size={14} />} {saving ? t('جارِ الحفظ...', 'Saving...') : t('حفظ', 'Save')}
@@ -403,6 +514,18 @@ export function CVBuilderPage() {
         </div>
       </div>
      </div>
+
+      {/* ===== شريط إجراءات ثابت للموبايل — بديهي وسهل بدل ما يدوّر المستخدم فوق وتحت ===== */}
+      <div className="cv-mobile-actionbar">
+        <button className="nexo-btn nexo-btn-primary" onClick={handleSave} disabled={saving}>
+          {saving ? <Loader2 size={16} className="nexo-spin" /> : <Save size={16} />}
+          {t('حفظ', 'Save')}
+        </button>
+        <button className="nexo-btn nexo-btn-secondary" onClick={handleExportPdf}><Download size={16} />PDF</button>
+        <button className="nexo-btn nexo-btn-secondary" onClick={handleExportWord}><Download size={16} />Word</button>
+      </div>
+
+      {toast && <div className="cv-toast">{toast}</div>}
     </div>
   );
 }

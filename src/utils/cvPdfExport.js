@@ -9,7 +9,6 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
   const layout = template?.layout || 'sidebar';
   const font = fontStack || "'Segoe UI', Tahoma, Arial, sans-serif";
 
-  // ===== حقول التواصل بتسمية واضحة (Label صغير + القيمة) =====
   const contactFields = [
     cv.email && [t('البريد الإلكتروني', 'Email'), cv.email],
     cv.phone && [t('الهاتف', 'Phone'), cv.phone],
@@ -68,10 +67,10 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
       <div class="exp-company">${esc(c.issuer)}</div>
     </div>`).join('');
 
-  // عنوان قسم بنمط حسب القالب
   const sec = (title, marginTop = '24px') => `<div class="main-title" style="font-size:15px;font-weight:700;color:${ACCENT};border-bottom:2px solid ${ACCENT}22;padding-bottom:6px;margin:${marginTop} 0 12px;">${title}</div>`;
   const secDark = (title, marginTop = '24px') => `<div class="main-title" style="font-size:14px;font-weight:700;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;margin:${marginTop} 0 10px;">${title}</div>`;
   const secAts = (title, marginTop = '22px') => `<div class="main-title" style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin:${marginTop} 0 10px;color:#111827;">${title}</div>`;
+  const secExec = (title, marginTop = '22px') => `<div class="main-title" style="font-size:14px;font-weight:700;color:#1f2937;border-inline-start:5px solid ${ACCENT};padding:4px 12px;margin:${marginTop} 0 12px;letter-spacing:0.5px;">${title}</div>`;
 
   const T = {
     summary: t('نبذة مختصرة', 'Summary'),
@@ -83,7 +82,6 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
     langs: t('اللغات', 'Languages'),
   };
 
-  // ===== أنماط طباعة حقيقية: A4 + هوامش + منع قطع العناصر بين الصفحات =====
   const baseStyle = `
     * { box-sizing: border-box; }
     html, body { margin: 0; width: 100%; }
@@ -103,7 +101,6 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
 
   const wrap = (body) => `<html dir="${dir}"><head><meta charset="utf-8" /><title>${esc(cv.fullName)}</title><style>${baseStyle}</style></head><body style="--acc:${ACCENT};">${body}</body></html>`;
 
-  // ===== sidebar =====
   if (layout === 'sidebar') {
     const sideLabel = (txt) => `<div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;opacity:0.85;margin:26px 0 10px;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:6px;">${txt}</div>`;
     return wrap(`
@@ -126,7 +123,28 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
       </div>`);
   }
 
-  // ===== dark =====
+  if (layout === 'horizon') {
+    return wrap(`
+      <div style="display:flex;width:100%;min-height:100vh;">
+        <div style="width:30%;background:#f8fafc;border-inline-end:6px solid ${ACCENT};padding:40px 24px;">
+          ${cv.photoUrl ? `<img src="${esc(cv.photoUrl)}" style="width:96px;height:96px;border-radius:18px;object-fit:cover;border:4px solid ${ACCENT};display:block;margin:0 auto 22px;" />` : `<div style="width:96px;height:96px;border-radius:18px;background:${ACCENT};color:#fff;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:800;margin:0 auto 22px;">${esc((cv.fullName || 'N')[0])}</div>`}
+          ${contactStack('#6b7280', '#111827')}
+          ${cv.skills?.length ? `<div style="margin-top:24px;font-size:13px;font-weight:800;letter-spacing:0.5px;color:${ACCENT};margin-bottom:10px;">${T.skills}</div><div style="display:flex;flex-wrap:wrap;gap:6px;">${(cv.skills || []).map((s) => `<span style="font-size:11px;font-weight:600;background:${ACCENT}1a;color:${ACCENT};border-radius:20px;padding:3px 11px;">${esc(s)}</span>`).join('')}</div>` : ''}
+          ${cv.languages?.length ? `<div style="margin-top:22px;font-size:13px;font-weight:800;letter-spacing:0.5px;color:${ACCENT};margin-bottom:8px;">${T.langs}</div><div style="font-size:13px;color:#374151;">${(cv.languages || []).map(esc).join('<br/>')}</div>` : ''}
+        </div>
+        <div style="flex:1;padding:40px 36px;background:#fff;">
+          <div style="font-size:30px;font-weight:800;margin:0 0 6px;color:#111827;">${esc(cv.fullName)}</div>
+          <div style="font-size:16px;font-weight:600;color:${ACCENT};margin-bottom:14px;">${esc(cv.jobTitle)}</div>
+          <span style="display:block;width:60px;height:4px;background:${ACCENT};border-radius:2px;margin-bottom:20px;"></span>
+          ${cv.summary ? sec(T.summary, '0') + `<p class="summary">${esc(cv.summary)}</p>` : ''}
+          ${expHtml ? sec(T.exp) + expHtml : ''}
+          ${eduHtml ? sec(T.edu) + eduHtml : ''}
+          ${projHtml ? sec(T.proj) + projHtml : ''}
+          ${certHtml ? sec(T.cert) + certHtml : ''}
+        </div>
+      </div>`);
+  }
+
   if (layout === 'dark') {
     return wrap(`
       <div style="background:#0f0f16;color:#e5e5e5;min-height:100vh;padding:0;">
@@ -140,7 +158,7 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
         </div>
         <div style="padding:30px 40px;">
           ${cv.summary ? secDark(T.summary, '0') + `<p style="font-size:13.5px;line-height:1.8;color:#c8c8c8;">${esc(cv.summary)}</p>` : ''}
-          ${expHtml ? secDark(T.exp) + expHtml.replace(/color: #111827/g, '').replace(/class="exp-role"/g, 'class="exp-role" style="color:#fff;"').replace(/class="exp-desc"/g, 'class="exp-desc" style="color:#c8c8c8;"') : ''}
+          ${expHtml ? secDark(T.exp) + expHtml.replace(/class="exp-role"/g, 'class="exp-role" style="color:#fff;"').replace(/class="exp-desc"/g, 'class="exp-desc" style="color:#c8c8c8;"') : ''}
           ${eduHtml ? secDark(T.edu) + eduHtml.replace(/class="exp-role"/g, 'class="exp-role" style="color:#fff;"') : ''}
           ${projHtml ? secDark(T.proj) + projHtml.replace(/class="exp-role"/g, 'class="exp-role" style="color:#fff;"').replace(/class="exp-desc"/g, 'class="exp-desc" style="color:#c8c8c8;"') : ''}
           ${certHtml ? secDark(T.cert) + certHtml.replace(/class="exp-role"/g, 'class="exp-role" style="color:#fff;"') : ''}
@@ -150,7 +168,6 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
       </div>`);
   }
 
-  // ===== gradient =====
   if (layout === 'gradient') {
     return wrap(`
       <div style="min-height:100vh;">
@@ -172,7 +189,6 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
       </div>`);
   }
 
-  // ===== aurora (Pro): رأس تدرّج جريء + Timeline =====
   if (layout === 'aurora') {
     return wrap(`
       <div style="min-height:100vh;">
@@ -194,7 +210,30 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
       </div>`);
   }
 
-  // ===== ats: بسيط جدًا، أبيض/أسود، بدون صورة، آمن لقارئات ATS =====
+  if (layout === 'executive') {
+    return wrap(`
+      <div style="min-height:100vh;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;background:${ACCENT};color:#fff;padding:40px 40px 32px;border-bottom:7px solid #e8c766;">
+          <div style="flex:1;">
+            <span style="display:block;width:70px;height:4px;background:#e8c766;border-radius:2px;margin-bottom:10px;"></span>
+            <div style="font-size:32px;font-weight:800;margin:0 0 6px;">${esc(cv.fullName)}</div>
+            <div style="font-size:16px;opacity:0.92;letter-spacing:0.3px;margin-bottom:8px;">${esc(cv.jobTitle)}</div>
+            ${contactRow('#d1d5db', '#fff').replace(/color:#d1d5db/g, 'color:#e8c766')}
+          </div>
+          ${cv.photoUrl ? `<img src="${esc(cv.photoUrl)}" style="width:96px;height:96px;border-radius:12px;object-fit:cover;border:4px solid #e8c766;flex-shrink:0;" />` : ''}
+        </div>
+        <div style="padding:32px 40px;">
+          ${cv.summary ? secExec(T.summary, '0') + `<p class="summary">${esc(cv.summary)}</p>` : ''}
+          ${expHtml ? secExec(T.exp) + expHtml : ''}
+          ${eduHtml ? secExec(T.edu) + eduHtml : ''}
+          ${projHtml ? secExec(T.proj) + projHtml : ''}
+          ${certHtml ? secExec(T.cert) + certHtml : ''}
+          ${cv.skills?.length ? secExec(T.skills) + `<div style="display:flex;flex-wrap:wrap;gap:6px;">${(cv.skills || []).map((s) => `<span style="font-size:11px;border:1px solid ${ACCENT};color:${ACCENT};border-radius:4px;padding:3px 12px;">${esc(s)}</span>`).join('')}</div>` : ''}
+          ${cv.languages?.length ? secExec(T.langs) + `<div style="font-size:13px;color:#4b5563;">${(cv.languages || []).map(esc).join(' · ')}</div>` : ''}
+        </div>
+      </div>`);
+  }
+
   if (layout === 'ats') {
     return wrap(`
       <div style="padding:40px;color:#111827;">
@@ -213,7 +252,6 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
       </div>`);
   }
 
-  // ===== classic (الافتراضي) =====
   return wrap(`
     <div style="padding:40px;">
       <div style="display:flex;align-items:center;gap:18px;border-bottom:3px solid ${ACCENT};padding-bottom:18px;margin-bottom:20px;">
@@ -236,32 +274,66 @@ function buildCvHtml(cv, lang, template, accent, fontStack) {
     </div>`);
 }
 
+// ===== تصدير PDF عبر iframe مخفي + print() بدل نافذة منبثقة =====
+// السبب: window.open() بيصير Popup غالبًا محظور من متصفحات الجوال (Chrome/Safari
+// Mobile)، خصوصًا داخل متصفحات داخل تطبيقات تانية. الـiframe المخفي ما بيحتاج
+// أي إذن Popup، وبيفتح شاشة الطباعة بنفس التبويب، ومن فيها المستخدم يقدر
+// يختار "حفظ كـPDF" (أندرويد) أو "حفظ إلى الملفات" من قائمة المشاركة (آيفون).
 export function exportCvAsPdf(cv, lang, template, accent, fontStack) {
-  const printWindow = window.open('', '_blank', 'width=900,height=1000');
-  if (!printWindow) {
-    alert(lang === 'en' ? 'Please allow popups to export as PDF.' : 'الرجاء السماح بالنوافذ المنبثقة لتصدير PDF.');
+  const html = buildCvHtml(cv, lang, template, accent, fontStack);
+
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.inset = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  iframe.style.opacity = '0';
+  iframe.style.pointerEvents = 'none';
+  document.body.appendChild(iframe);
+
+  const cleanup = () => {
+    setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 1500);
+  };
+
+  let doc;
+  try {
+    doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+  } catch (err) {
+    console.error('CV PDF iframe error:', err);
+    cleanup();
+    alert(lang === 'en' ? 'Could not prepare the PDF. Please try the Word download instead.' : 'تعذّر تجهيز PDF. جرّب تنزيل Word بدلًا منه.');
     return;
   }
-  printWindow.document.write(buildCvHtml(cv, lang, template, accent, fontStack));
-  printWindow.document.close();
 
   const waitForImages = () => {
-    const images = Array.from(printWindow.document.images);
+    const images = Array.from(doc.images);
     if (images.length === 0) return Promise.resolve();
     return Promise.all(
-      images.map((img) => img.complete ? Promise.resolve() : new Promise((resolve) => {
+      images.map((img) => (img.complete ? Promise.resolve() : new Promise((resolve) => {
         img.onload = resolve;
         img.onerror = resolve;
-      }))
+      })))
     );
   };
 
-  printWindow.onload = () => {
+  const triggerPrint = () => {
     waitForImages().then(() => {
-      printWindow.focus();
-      printWindow.print();
+      try {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+      } catch (err) {
+        console.error('CV PDF print error:', err);
+      }
+      cleanup();
     });
   };
+
+  if (doc.readyState === 'complete') triggerPrint();
+  else iframe.onload = triggerPrint;
 }
 
 export function exportCvAsWord(cv, lang, template, accent, fontStack) {

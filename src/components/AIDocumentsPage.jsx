@@ -207,6 +207,12 @@ export function AIDocumentsPage() {
 
   return (
     <div className="nexo-tool-page doc-analysis-page">
+     <div className="doc-ambient" aria-hidden="true">
+       <span className="doc-ambient-glow doc-ambient-glow-1" />
+       <span className="doc-ambient-glow doc-ambient-glow-2" />
+       <span className="doc-ambient-page doc-ambient-page-1" />
+       <span className="doc-ambient-page doc-ambient-page-2" />
+     </div>
      <div className="nexo-tool-page-inner doc-analysis-inner">
       <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
@@ -247,8 +253,8 @@ export function AIDocumentsPage() {
               <div className="doc-file-card">
                 <div className="doc-file-icon" style={{ background: fm.bg, color: fm.color }}><FIcon size={20} /></div>
                 <div className="doc-file-info">
-                  <div className="doc-file-name" dir="auto">{file.name}</div>
-                  <div className="doc-file-sub">{fm.label} · {formatBytes(file.size)}</div>
+                  <div className="doc-file-name" dir="auto" style={{ unicodeBidi: 'plaintext' }}>{file.name}</div>
+                  <div className="doc-file-sub" dir="ltr">{fm.label} · {formatBytes(file.size)}</div>
                 </div>
                 <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={removeSelectedFile} title={t('إزالة', 'Remove')} aria-label={t('إزالة الملف', 'Remove file')}>
                   <X size={15} />
@@ -278,11 +284,11 @@ export function AIDocumentsPage() {
             <div className="doc-header-left">
               <div className="doc-file-icon lg" style={{ background: meta.bg, color: meta.color }}><MetaIcon size={22} /></div>
               <div className="doc-header-texts">
-                <h4 className="doc-header-title" dir="auto">{currentResult.file_name}</h4>
+                <h4 className="doc-header-title" dir="auto" style={{ unicodeBidi: 'plaintext' }}>{currentResult.file_name}</h4>
                 <div className="doc-header-meta">
                   <span className="nexo-badge nexo-badge-success"><Check size={11} /> {t('تم التحليل', 'Analyzed')}</span>
-                  {analyzedMeta?.size ? <span className="doc-meta-chip">{formatBytes(analyzedMeta.size)}</span> : null}
-                  <span className="doc-meta-chip">{meta.label}</span>
+                  {analyzedMeta?.size ? <span className="doc-meta-chip" dir="ltr">{formatBytes(analyzedMeta.size)}</span> : null}
+                  <span className="doc-meta-chip" dir="ltr">{meta.label}</span>
                 </div>
               </div>
             </div>
@@ -342,7 +348,7 @@ export function AIDocumentsPage() {
 
           <div className="nexo-card doc-result-card">
             {activeTab === 'overview' && (
-              <div className="doc-markdown" dir="auto">
+              <div className="doc-markdown" dir="rtl">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{overviewSection ? (overviewSection.body || currentResult.summary_text) : currentResult.summary_text}</ReactMarkdown>
               </div>
             )}
@@ -359,7 +365,7 @@ export function AIDocumentsPage() {
             )}
 
             {activeTab === 'full' && (
-              <div className="doc-markdown" dir="auto">
+              <div className="doc-markdown" dir="rtl">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{currentResult.summary_text}</ReactMarkdown>
               </div>
             )}
@@ -432,7 +438,7 @@ export function AIDocumentsPage() {
                   <HIcon size={16} />
                 </div>
                 <div className="nexo-list-item-main" onClick={() => item.status === 'completed' && openHistoryItem(item)} style={{ cursor: item.status === 'completed' ? 'pointer' : 'default' }}>
-                  <div className="nexo-list-item-title" dir="auto">{item.file_name}</div>
+                  <div className="nexo-list-item-title" dir="auto" style={{ unicodeBidi: 'plaintext' }}>{item.file_name}</div>
                   {item.status === 'failed' ? (
                     <span className="nexo-badge nexo-badge-danger">{t('فشل', 'Failed')}: {item.error_message}</span>
                   ) : (

@@ -2,11 +2,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Mail, Phone, MapPin, Globe, Link2 } from 'lucide-react';
 import { paginateBlocks } from './cvPagination.js';
 
-// ===== أبعاد A4 منطقية =====
 const A4_W = 794;
 const A4_H = 1123;
 const PAGE_PAD = 46;
 const CONT_HEADER_H = 74;
+const BLOCK_GAP = 18; // نفس القيمة المستخدمة كـmarginBottom بين الكتل بالعرض الفعلي والقياس
 
 function getContactFields(cv) {
   return [
@@ -18,11 +18,11 @@ function getContactFields(cv) {
   ].filter(Boolean);
 }
 
-function ContactRow({ cv, light, iconColor }) {
+function ContactRow({ cv, light, iconColor, pills }) {
   const fields = getContactFields(cv);
   if (!fields.length) return null;
   return (
-    <div className={`cv-page-contact-grid ${light ? 'cv-page-contact-grid-light' : 'cv-page-contact-grid-dark'}`}>
+    <div className={`cv-page-contact-grid ${light ? 'cv-page-contact-grid-light' : 'cv-page-contact-grid-dark'} ${pills ? 'cv-page-contact-pills' : ''}`}>
       {fields.map((f, i) => (
         <div key={i} className="cv-page-contact-cell">
           <f.Icon size={22} className="cv-page-contact-icon" style={iconColor ? { color: iconColor } : undefined} />
@@ -54,12 +54,30 @@ function ContactStack({ cv }) {
   );
 }
 
+function HorizonContact({ cv, color }) {
+  const fields = getContactFields(cv);
+  if (!fields.length) return null;
+  return (
+    <div className="cv-page-horizon-contact">
+      {fields.map((f, i) => (
+        <div key={i} className="cv-page-contact-item">
+          <f.Icon size={22} className="cv-page-contact-icon" style={{ color }} />
+          <div>
+            <div className="cv-page-contact-label">{f.label}</div>
+            <div className="cv-page-contact-value" dir="auto">{f.value}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function CVLivePreview({ cv, template, accent, fontStack }) {
   const color = accent || template.accent;
   const layout = template.layout;
-  const titleColor = layout === 'ats' ? '#111827' : color;
+  const titleColor = layout === 'ats' ? '#111827' : layout === 'executive' ? '#1f2937' : color;
   const hasContent = cv.fullName || cv.summary || cv.experience.length > 0;
-  const hasSidebar = layout === 'sidebar';
+  const hasSidebar = layout === 'sidebar' || layout === 'horizon';
   const isTimeline = layout === 'aurora';
 
   const scrollRef = useRef(null);
@@ -75,8 +93,16 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
     return () => ro.disconnect();
   }, []);
 
+  const sectionTitleVariant = layout === 'aurora' ? 'cv-page-section-title-aurora'
+    : layout === 'horizon' ? 'cv-page-section-title-horizon'
+    : layout === 'executive' ? 'cv-page-section-title-exec'
+    : '';
+
   const SectionTitle = ({ children }) => (
-    <div className="cv-page-section-title" style={{ color: titleColor, borderBottomColor: `${titleColor}33` }}>
+    <div
+      className={`cv-page-section-title ${sectionTitleVariant}`}
+      style={{ color: titleColor, borderBottomColor: `${titleColor}33`, borderInlineStartColor: titleColor }}
+    >
       {children}
     </div>
   );
@@ -174,7 +200,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
       });
     }
 
-    if ((layout === 'classic' || layout === 'ats' || layout === 'aurora') && (cv.skills.length > 0 || cv.languages.length > 0)) {
+    if ((layout === 'classic' || layout === 'ats' || layout === 'aurora' || layout === 'executive') && (cv.skills.length > 0 || cv.languages.length > 0)) {
       blocks.push({
         key: 'skills-langs',
         node: (
@@ -234,7 +260,10 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   useLayoutEffect(() => {
     if (!measureRef.current || blocks.length === 0) { setHeights([]); return; }
     const kids = Array.from(measureRef.current.children);
-    setHeights(kids.map((k) => k.getBoundingClientRect().height));
+    // + BLOCK_GAP: getBoundingClientRect لا يحسب الـmargin الخارجي، فلو ما ضفناه
+    // يدويًا هون رح نقيس كل كتلة أصغر من مساحتها الحقيقية على الصفحة،
+    // وبالتالي نحشر كتل أكتر من اللازم بالصفحة الوحدة وينقص أو ينقطع آخر عنصر فيها.
+    setHeights(kids.map((k) => k.getBoundingClientRect().height + BLOCK_GAP));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentSignature]);
 
@@ -243,6 +272,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
     : layout === 'gradient' ? 300
     : layout === 'ats' ? 240
     : layout === 'aurora' ? 340
+    : layout === 'executive' ? 320
     : 260; // classic
 
   const firstPageCapacity = A4_H - PAGE_PAD * 2 - firstPageHeaderH;
@@ -272,18 +302,17 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   const style = { '--cv-accent': color, fontFamily: fontStack };
 
   const renderMainBlocks = (indices) => indices.map((i) => (
-    <div key={blocks[i].key} style={{ marginBottom: 18 }}>{blocks[i].node}</div>
+    <div key={blocks[i].key} style={{ marginBottom: BLOCK_GAP }}>{blocks[i].node}</div>
   ));
 
-  const renderPageHeader = (isFirst) => {
-    if (!isFirst) {
-      return (
-        <div className="cv-page-continuation-header" style={{ borderBottomColor: `${titleColor}33`, color: titleColor }}>
-          <span className="cv-page-continuation-name">{cv.fullName}</span>
-          <span style={{ color: titleColor, opacity: 0.75 }}>{cv.jobTitle}</span>
-        </div>
-      );
-    }
+  const renderContinuationHeader = () => (
+    <div className="cv-page-continuation-header" style={{ borderBottomColor: `${titleColor}33`, color: titleColor }}>
+      <span className="cv-page-continuation-name">{cv.fullName}</span>
+      <span style={{ color: titleColor, opacity: 0.75 }}>{cv.jobTitle}</span>
+    </div>
+  );
+
+  const renderFirstPageHeader = () => {
     if (layout === 'ats') {
       return (
         <div className="cv-page-ats-header">
@@ -296,11 +325,35 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
     if (layout === 'aurora') {
       return (
         <div className="cv-page-aurora-header" style={{ background: `linear-gradient(120deg, ${color} 0%, #ec4899 100%)` }}>
+          <span className="cv-page-aurora-ring cv-page-aurora-ring-1" />
+          <span className="cv-page-aurora-ring cv-page-aurora-ring-2" />
           <div className="cv-page-aurora-mesh" />
           {cv.photoUrl && <img src={cv.photoUrl} alt="" className="cv-page-aurora-photo" />}
           <h2>{cv.fullName || 'اسمك الكامل'}</h2>
           <span className="cv-page-aurora-title-pill">{cv.jobTitle}</span>
-          <ContactRow cv={cv} light iconColor="rgba(255,255,255,0.9)" />
+          <ContactRow cv={cv} light pills iconColor="rgba(255,255,255,0.9)" />
+        </div>
+      );
+    }
+    if (layout === 'horizon') {
+      return (
+        <div className="cv-page-horizon-header">
+          <h2>{cv.fullName || 'اسمك الكامل'}</h2>
+          <p style={{ color }}>{cv.jobTitle}</p>
+          <span className="cv-page-horizon-rule" style={{ background: color }} />
+        </div>
+      );
+    }
+    if (layout === 'executive') {
+      return (
+        <div className="cv-page-exec-header" style={{ background: color }}>
+          <div className="cv-page-exec-header-text">
+            <span className="cv-page-exec-gold" />
+            <h2>{cv.fullName || 'اسمك الكامل'}</h2>
+            <p>{cv.jobTitle}</p>
+            <ContactRow cv={cv} light iconColor="#e8c766" />
+          </div>
+          {cv.photoUrl && <img src={cv.photoUrl} alt="" className="cv-page-exec-photo" />}
         </div>
       );
     }
@@ -341,45 +394,81 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
     );
   };
 
-  const renderSidebar = () => (
-    <aside className="cv-preview-sidebar" style={{ background: color }}>
-      {cv.photoUrl && <img src={cv.photoUrl} alt="" className="cv-preview-photo" />}
-      <div>
-        <h2 className="cv-preview-name-onaccent">{cv.fullName || 'اسمك الكامل'}</h2>
-        <p className="cv-preview-title-onaccent">{cv.jobTitle}</p>
-      </div>
-      <ContactStack cv={cv} />
-      {cv.skills.length > 0 && (
+  const renderSidebar = () => {
+    if (layout === 'horizon') {
+      return (
+        <aside className="cv-preview-sidebar cv-page-horizon-side" style={{ borderInlineEndColor: color, background: '#f8fafc' }}>
+          {cv.photoUrl
+            ? <img src={cv.photoUrl} alt="" className="cv-page-horizon-photo" style={{ borderColor: color }} />
+            : <div className="cv-page-horizon-monogram" style={{ background: color }}>{(cv.fullName || 'N')[0]}</div>}
+          <HorizonContact cv={cv} color={color} />
+          {cv.skills.length > 0 && (
+            <div>
+              <div className="cv-page-horizon-label" style={{ color }}>المهارات</div>
+              <div className="cv-page-horizon-chips">
+                {cv.skills.map((s, i) => <span key={i} className="cv-page-horizon-chip" style={{ background: `${color}1a`, color }}>{s}</span>)}
+              </div>
+            </div>
+          )}
+          {cv.languages.length > 0 && (
+            <div>
+              <div className="cv-page-horizon-label" style={{ color }}>اللغات</div>
+              {cv.languages.map((l, i) => <div key={i} className="cv-page-horizon-lang">{l}</div>)}
+            </div>
+          )}
+        </aside>
+      );
+    }
+    return (
+      <aside className="cv-preview-sidebar" style={{ background: color }}>
+        {cv.photoUrl && <img src={cv.photoUrl} alt="" className="cv-preview-photo" />}
         <div>
-          <div className="cv-preview-onaccent-label">المهارات</div>
-          {cv.skills.map((s, i) => <div key={i} className="cv-preview-onaccent-chip">{s}</div>)}
+          <h2 className="cv-preview-name-onaccent">{cv.fullName || 'اسمك الكامل'}</h2>
+          <p className="cv-preview-title-onaccent">{cv.jobTitle}</p>
         </div>
-      )}
-      {cv.languages.length > 0 && (
-        <div>
-          <div className="cv-preview-onaccent-label">اللغات</div>
-          {cv.languages.map((l, i) => <div key={i} className="cv-preview-onaccent-chip">{l}</div>)}
-        </div>
-      )}
-    </aside>
+        <ContactStack cv={cv} />
+        {cv.skills.length > 0 && (
+          <div>
+            <div className="cv-preview-onaccent-label">المهارات</div>
+            {cv.skills.map((s, i) => <div key={i} className="cv-preview-onaccent-chip">{s}</div>)}
+          </div>
+        )}
+        {cv.languages.length > 0 && (
+          <div>
+            <div className="cv-preview-onaccent-label">اللغات</div>
+            {cv.languages.map((l, i) => <div key={i} className="cv-preview-onaccent-chip">{l}</div>)}
+          </div>
+        )}
+      </aside>
+    );
+  };
+
+  const renderSidebarContinuation = () => (
+    layout === 'horizon'
+      ? <div className="cv-preview-sidebar cv-page-horizon-side" style={{ borderInlineEndColor: color, background: '#f8fafc' }} />
+      : <div className="cv-preview-sidebar" style={{ background: color }} />
   );
 
   const pages = pageGroups.map((group, pageIndex) => {
     const isFirst = pageIndex === 0;
     if (hasSidebar) {
+      // ملاحظة: بنسخة سابقة كنا نستدعي رأس صفحة كامل جوا main حتى بالصفحة
+      // الأولى، وهاد كان يكرر الاسم/الصورة مرتين (مرة بالـSidebar ومرة بالمحتوى).
+      // الصفحة الأولى بتخطيطات الـSidebar ما إلها رأس منفصل بالمحتوى (كل هوية
+      // المستخدم بالـSidebar نفسه)، عدا horizon يلي إله سطر اسم صغير إضافي بالمحتوى.
       return (
         <div key={pageIndex} className="cv-preview-page cv-preview-sidebar-layout" style={style}>
-          {isFirst ? renderSidebar() : <div className="cv-preview-sidebar cv-preview-sidebar-continuation" style={{ background: color }} />}
+          {isFirst ? renderSidebar() : renderSidebarContinuation()}
           <main className="cv-preview-main">
-            {renderPageHeader(isFirst)}
+            {isFirst ? (layout === 'horizon' && renderFirstPageHeader()) : renderContinuationHeader()}
             {renderMainBlocks(group)}
           </main>
         </div>
       );
     }
     return (
-      <div key={pageIndex} className={`cv-preview-page ${layout === 'dark' ? 'cv-preview-dark-layout' : ''} ${layout === 'ats' ? 'cv-page-ats-layout' : ''} ${isTimeline ? 'cv-page-timeline-layout' : ''}`} style={style}>
-        {renderPageHeader(isFirst)}
+      <div key={pageIndex} className={`cv-preview-page ${layout === 'dark' ? 'cv-preview-dark-layout' : ''} ${layout === 'ats' ? 'cv-page-ats-layout' : ''} ${isTimeline ? 'cv-page-timeline-layout' : ''} ${layout === 'executive' ? 'cv-page-exec-layout' : ''}`} style={style}>
+        {isFirst ? renderFirstPageHeader() : renderContinuationHeader()}
         <div className={layout === 'dark' ? 'cv-preview-dark-body' : 'cv-preview-main'}>
           {renderMainBlocks(group)}
         </div>
@@ -390,7 +479,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   return (
     <div className="cv-page-scroll" ref={scrollRef}>
       <div ref={measureRef} className="cv-page-measure" style={{ width: mainColWidth, ...style }}>
-        {blocks.map((b) => <div key={b.key} style={{ marginBottom: 18 }}>{b.node}</div>)}
+        {blocks.map((b) => <div key={b.key} style={{ marginBottom: BLOCK_GAP }}>{b.node}</div>)}
       </div>
 
       {pageGroups.length > 1 && (

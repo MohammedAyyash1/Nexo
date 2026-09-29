@@ -10,6 +10,8 @@ export const CV_TEMPLATES = [
   { id: 'simple-blue', nameAr: 'أزرق بسيط', nameEn: 'Simple Blue', layout: 'sidebar', accent: '#2563eb' },
   { id: 'ats-friendly', nameAr: 'متوافق مع ATS', nameEn: 'ATS Friendly', layout: 'ats', accent: '#1f2937' },
   { id: 'pro-aurora', nameAr: 'PRO — أورورا', nameEn: 'PRO — Aurora', layout: 'aurora', accent: '#7c3aed', pro: true },
+  { id: 'pro-horizon', nameAr: 'PRO — هورايزون', nameEn: 'PRO — Horizon', layout: 'horizon', accent: '#0ea5e9', pro: true },
+  { id: 'pro-executive', nameAr: 'PRO — إكزكتيف', nameEn: 'PRO — Executive', layout: 'executive', accent: '#1e3a5f', pro: true },
 ];
 
 export const CV_FONT_OPTIONS = [
@@ -17,4 +19,4 @@ export const CV_FONT_OPTIONS = [
   { id: 'serif', nameAr: 'كلاسيكي', nameEn: 'Classic', stack: "Georgia, 'Times New Roman', serif" },
 ];
 
-export const ACCENT_SWATCHES = ['#7c3aed', '#2563eb', '#0ea5e9', '#16a34a', '#ec4899', '#92400e', '#475569', '#dc2626'];
+export const ACCENT_SWATCHES = ['#7c3aed', '#2563eb', '#0ea5e9', '#16a34a', '#ec4899', '#92400e', '#475569', '#dc2626'];س

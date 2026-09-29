@@ -4786,23 +4786,28 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
 .doc-result-card { margin-bottom: 28px; }
 
 .doc-markdown { font-size: 14.5px; line-height: 1.9; color: var(--text-primary); }
+.doc-markdown h1, .doc-markdown h2, .doc-markdown h3,
+.doc-markdown p, .doc-markdown li, .doc-markdown th, .doc-markdown td, .doc-markdown blockquote {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
 .doc-markdown h1, .doc-markdown h2, .doc-markdown h3 { color: var(--text-primary); font-weight: 700; margin: 22px 0 10px; line-height: 1.5; }
 .doc-markdown h1:first-child, .doc-markdown h2:first-child, .doc-markdown h3:first-child { margin-top: 0; }
 .doc-markdown h1 { font-size: 19px; }
 .doc-markdown h2 { font-size: 17px; }
 .doc-markdown h3 { font-size: 14.5px; color: var(--accent-light); text-transform: uppercase; letter-spacing: 0.3px; }
 .doc-markdown p { margin: 0 0 14px; color: var(--text-secondary); }
-.doc-markdown strong { color: var(--text-primary); font-weight: 700; }
+.doc-markdown strong { color: var(--text-primary); font-weight: 700; unicode-bidi: plaintext; }
 .doc-markdown ul, .doc-markdown ol { margin: 0 0 14px; padding-inline-start: 22px; display: flex; flex-direction: column; gap: 8px; }
 .doc-markdown li { color: var(--text-secondary); line-height: 1.75; }
 .doc-markdown blockquote {
   margin: 0 0 14px; padding: 10px 16px; border-inline-start: 3px solid rgba(var(--accent-rgb), 0.5);
   background: rgba(var(--accent-rgb), 0.06); border-radius: var(--radius-sm); color: var(--text-secondary);
 }
-.doc-markdown table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; display: block; overflow-x: auto; }
-.doc-markdown th, .doc-markdown td { padding: 8px 12px; border: 1px solid var(--border-subtle); text-align: start; }
+.doc-markdown table { width: 100%; border-collapse: collapse; margin: 0 0 16px; font-size: 13px; display: block; overflow-x: auto; direction: rtl; }
+.doc-markdown th, .doc-markdown td { padding: 8px 12px; border: 1px solid var(--border-subtle); }
 .doc-markdown th { color: var(--text-primary); background: var(--bg-input-2); }
-.doc-markdown code { background: var(--bg-input-2); padding: 2px 6px; border-radius: 5px; font-size: 13px; }
+.doc-markdown code { background: var(--bg-input-2); padding: 2px 6px; border-radius: 5px; font-size: 13px; direction: ltr; unicode-bidi: embed; display: inline-block; }
 
 .doc-keypoints { display: flex; flex-direction: column; gap: 10px; }
 .doc-keypoint-card {
@@ -4829,3 +4834,115 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
   .doc-result-tabs { max-width: 100%; overflow-x: auto; }
   .doc-markdown table { font-size: 12px; }
 }
+/* ==================================================== */
+/* ==  AI Documents — Premium Ambient Background  ====== */
+/* ==================================================== */
+
+.doc-analysis-page.nexo-tool-page {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 1000px 600px at 12% -8%, rgba(124, 58, 237, 0.22), transparent 62%),
+    radial-gradient(ellipse 760px 520px at 100% 15%, rgba(236, 72, 153, 0.14), transparent 58%),
+    radial-gradient(ellipse 700px 500px at 40% 100%, rgba(96, 165, 250, 0.1), transparent 60%),
+    var(--bg-page);
+  overflow: hidden;
+}
+
+/* طبقة الشبكة التقنية الخفيفة جدًا */
+.doc-analysis-page.nexo-tool-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 42px 42px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 85%);
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 85%);
+  pointer-events: none;
+  width: 300px; height: 300px; /* يبطل التعريف العام القديم للـ::before من nexo-tool-page */
+  width: auto; height: auto;
+  filter: none;
+  background-color: transparent;
+  border-radius: 0;
+  top: 0; inset-inline-end: 0;
+}
+
+/* حاوية طبقات الزخرفة — فوق الشبكة، تحت المحتوى، بدون أي تأثير على الضغط */
+.doc-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.doc-ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+}
+.doc-ambient-glow-1 {
+  width: 460px; height: 460px;
+  top: -140px; inset-inline-start: -100px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.28), transparent 70%);
+  animation: docGlowDrift 18s ease-in-out infinite;
+}
+.doc-ambient-glow-2 {
+  width: 380px; height: 380px;
+  top: 220px; inset-inline-end: -120px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.2), transparent 70%);
+  animation: docGlowDrift 22s ease-in-out infinite reverse;
+}
+
+/* صفحات مستند تجريدية شفافة جدًا، مائلة قليلًا — مرتبطة بمفهوم "تحليل مستندات" */
+.doc-ambient-page {
+  position: absolute;
+  width: 150px;
+  height: 200px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+}
+.doc-ambient-page::before,
+.doc-ambient-page::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: 18px;
+  inset-inline-end: 18px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.doc-ambient-page::before { top: 24px; }
+.doc-ambient-page::after { top: 40px; width: 60%; }
+
+.doc-ambient-page-1 { top: 60px; inset-inline-end: 6%; transform: rotate(9deg); animation: docPageFloat 14s ease-in-out infinite; }
+.doc-ambient-page-2 { top: 130px; inset-inline-end: 13%; transform: rotate(-6deg) scale(0.85); opacity: 0.7; animation: docPageFloat 16s 1s ease-in-out infinite; }
+
+@keyframes docGlowDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(24px, -18px) scale(1.06); }
+}
+@keyframes docPageFloat {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 9deg)); }
+  50% { transform: translateY(-10px) rotate(var(--r, 9deg)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doc-ambient-glow-1, .doc-ambient-glow-2, .doc-ambient-page-1, .doc-ambient-page-2 { animation: none; }
+}
+
+/* الطبقات الزخرفية تختفي على الموبايل — تخفيف كما طُلب صراحة */
+@media (max-width: 900px) {
+  .doc-ambient-page-1, .doc-ambient-page-2 { display: none; }
+}
+@media (max-width: 640px) {
+  .doc-ambient-glow-1, .doc-ambient-glow-2 { filter: blur(40px); opacity: 0.7; }
+}
+
+/* المحتوى فوق كل شي دايمًا */
+.doc-analysis-inner { position: relative; z-index: 1; }
