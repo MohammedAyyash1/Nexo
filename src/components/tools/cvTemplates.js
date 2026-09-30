@@ -19,4 +19,4 @@ export const CV_FONT_OPTIONS = [
   { id: 'serif', nameAr: 'كلاسيكي', nameEn: 'Classic', stack: "Georgia, 'Times New Roman', serif" },
 ];
 
-export const ACCENT_SWATCHES = ['#7c3aed', '#2563eb', '#0ea5e9', '#16a34a', '#ec4899', '#92400e', '#475569', '#dc2626'];س
+export const ACCENT_SWATCHES = ['#7c3aed', '#2563eb', '#0ea5e9', '#16a34a', '#ec4899', '#92400e', '#475569', '#dc2626'];
