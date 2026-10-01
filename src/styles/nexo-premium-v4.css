@@ -4860,39 +4860,44 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
 
 .doc-hero-art-img {
   position: absolute;
-  top: 0;
-  inset-inline-end: -4%;
-  width: 62%;
-  max-width: 900px;
+  top: 50%;
+  inset-inline-end: -6%;
+  transform: translateY(-50%);
+  width: 58%;
+  max-width: 820px;
   height: auto;
-  opacity: 0.9;
-  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 96%),
-                       linear-gradient(to left, #000 78%, transparent 100%);
+  opacity: 0.85;
+  -webkit-mask-image:
+    radial-gradient(ellipse 75% 85% at 62% 50%, #000 55%, transparent 92%),
+    linear-gradient(to inline-start, #000 55%, transparent 96%);
   -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to bottom, #000 62%, transparent 96%),
-              linear-gradient(to left, #000 78%, transparent 100%);
+  mask-image:
+    radial-gradient(ellipse 75% 85% at 62% 50%, #000 55%, transparent 92%),
+    linear-gradient(to left, #000 55%, transparent 96%);
   mask-composite: intersect;
   animation: docHeroFloat 14s ease-in-out infinite;
 }
 
 html[dir='rtl'] .doc-hero-art-img {
-  inset-inline-end: -4%;
-  transform: scaleX(-1);
-  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 96%),
-                       linear-gradient(to right, #000 78%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 62%, transparent 96%),
-              linear-gradient(to right, #000 78%, transparent 100%);
+  transform: translateY(-50%) scaleX(-1);
+  -webkit-mask-image:
+    radial-gradient(ellipse 75% 85% at 62% 50%, #000 55%, transparent 92%),
+    linear-gradient(to left, #000 55%, transparent 96%);
+  mask-image:
+    radial-gradient(ellipse 75% 85% at 62% 50%, #000 55%, transparent 92%),
+    linear-gradient(to left, #000 55%, transparent 96%);
 }
 
 /* توهج خلف الصورة يربطها بهوية Nexo اللونية */
 .doc-hero-glow {
   position: absolute;
-  top: -10%;
-  inset-inline-end: 0;
-  width: 55%;
-  height: 70%;
-  background: radial-gradient(ellipse 60% 60% at 70% 30%, rgba(124, 58, 237, 0.3), transparent 70%);
-  filter: blur(40px);
+  top: 50%;
+  inset-inline-end: -5%;
+  transform: translateY(-50%);
+  width: 50%;
+  height: 80%;
+  background: radial-gradient(ellipse 65% 65% at 60% 50%, rgba(124, 58, 237, 0.28), transparent 72%);
+  filter: blur(44px);
   animation: docHeroGlow 16s ease-in-out infinite;
 }
 
@@ -4901,14 +4906,15 @@ html[dir='rtl'] .doc-hero-art-img {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to bottom, rgba(7, 5, 13, 0.2), var(--bg-page) 88%),
-    linear-gradient(to inline-end, var(--bg-page) 8%, rgba(7, 5, 13, 0.35) 38%, transparent 62%);
+    linear-gradient(to bottom, var(--bg-page) 0%, transparent 18%, transparent 78%, var(--bg-page) 100%),
+    linear-gradient(to inline-end, var(--bg-page) 4%, rgba(7, 5, 13, 0.3) 34%, transparent 58%);
 }
 
 @keyframes docHeroFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(-50%); }
+  50% { transform: translateY(calc(-50% - 10px)); }
 }
+
 @keyframes docHeroGlow {
   0%, 100% { opacity: 0.8; }
   50% { opacity: 1; }
@@ -4920,23 +4926,28 @@ html[dir='rtl'] .doc-hero-art-img {
 
 /* ---------- Tablet: الصورة أصغر وأهدأ ---------- */
 @media (max-width: 1024px) {
-  .doc-hero-art-img { width: 78%; opacity: 0.55; top: -2%; }
-  .doc-hero-glow { width: 70%; opacity: 0.7; }
+  .doc-hero-art-img { width: 72%; opacity: 0.5; inset-inline-end: -10%; }
+  .doc-hero-glow { width: 62%; opacity: 0.6; }
 }
 
 /* ---------- Mobile: الصورة خلف الـHero فقط، خفيفة جدًا، بدون أي تأثير على التفاعل ---------- */
 @media (max-width: 640px) {
-  .doc-hero-art { inset: 0 0 auto 0; height: 300px; }
+  .doc-hero-art { inset: 0 0 auto 0; height: 220px; overflow: hidden; }
   .doc-hero-art-img {
-    width: 100%;
+    top: 0;
+    inset-inline-end: -20%;
+    transform: none;
+    width: 130%;
     max-width: none;
-    inset-inline-end: 0;
-    opacity: 0.28;
-    top: -6%;
+    opacity: 0.22;
+    animation: none;
+    -webkit-mask-image: radial-gradient(ellipse 80% 90% at 70% 30%, #000 45%, transparent 90%);
+    mask-image: radial-gradient(ellipse 80% 90% at 70% 30%, #000 45%, transparent 90%);
   }
-  .doc-hero-glow { width: 100%; height: 100%; opacity: 0.5; }
+  html[dir='rtl'] .doc-hero-art-img { transform: scaleX(-1); }
+  .doc-hero-glow { width: 100%; height: 100%; top: 0; transform: none; opacity: 0.4; }
   .doc-hero-scrim {
-    background: linear-gradient(to bottom, rgba(7, 5, 13, 0.1), var(--bg-page) 70%);
+    background: linear-gradient(to bottom, transparent 0%, var(--bg-page) 85%);
   }
 }
 
