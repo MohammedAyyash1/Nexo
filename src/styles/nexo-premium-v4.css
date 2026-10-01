@@ -4838,111 +4838,107 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
 /* ==  AI Documents — Premium Ambient Background  ====== */
 /* ==================================================== */
 
+
+/* ==================================================== */
+/* ==  AI Documents — Hero Artwork Background (real)  == */
+/* ==================================================== */
+
 .doc-analysis-page.nexo-tool-page {
   position: relative;
   isolation: isolate;
+  background: var(--bg-page);
+  overflow: hidden;
+}
+
+.doc-hero-art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.doc-hero-art-img {
+  position: absolute;
+  top: 0;
+  inset-inline-end: -4%;
+  width: 62%;
+  max-width: 900px;
+  height: auto;
+  opacity: 0.9;
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 96%),
+                       linear-gradient(to left, #000 78%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 96%),
+              linear-gradient(to left, #000 78%, transparent 100%);
+  mask-composite: intersect;
+  animation: docHeroFloat 14s ease-in-out infinite;
+}
+
+html[dir='rtl'] .doc-hero-art-img {
+  inset-inline-end: -4%;
+  transform: scaleX(-1);
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 96%),
+                       linear-gradient(to right, #000 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 96%),
+              linear-gradient(to right, #000 78%, transparent 100%);
+}
+
+/* توهج خلف الصورة يربطها بهوية Nexo اللونية */
+.doc-hero-glow {
+  position: absolute;
+  top: -10%;
+  inset-inline-end: 0;
+  width: 55%;
+  height: 70%;
+  background: radial-gradient(ellipse 60% 60% at 70% 30%, rgba(124, 58, 237, 0.3), transparent 70%);
+  filter: blur(40px);
+  animation: docHeroGlow 16s ease-in-out infinite;
+}
+
+/* تعتيم تدريجي فوق الصورة من جهة المحتوى، يضمن قراءة ممتازة دائمًا */
+.doc-hero-scrim {
+  position: absolute;
+  inset: 0;
   background:
-    radial-gradient(ellipse 1000px 600px at 12% -8%, rgba(124, 58, 237, 0.22), transparent 62%),
-    radial-gradient(ellipse 760px 520px at 100% 15%, rgba(236, 72, 153, 0.14), transparent 58%),
-    radial-gradient(ellipse 700px 500px at 40% 100%, rgba(96, 165, 250, 0.1), transparent 60%),
-    var(--bg-page);
-  overflow: hidden;
+    linear-gradient(to bottom, rgba(7, 5, 13, 0.2), var(--bg-page) 88%),
+    linear-gradient(to inline-end, var(--bg-page) 8%, rgba(7, 5, 13, 0.35) 38%, transparent 62%);
 }
 
-/* طبقة الشبكة التقنية الخفيفة جدًا */
-.doc-analysis-page.nexo-tool-page::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 42px 42px;
-  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 85%);
-  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 85%);
-  pointer-events: none;
-  width: 300px; height: 300px; /* يبطل التعريف العام القديم للـ::before من nexo-tool-page */
-  width: auto; height: auto;
-  filter: none;
-  background-color: transparent;
-  border-radius: 0;
-  top: 0; inset-inline-end: 0;
+@keyframes docHeroFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
-
-/* حاوية طبقات الزخرفة — فوق الشبكة، تحت المحتوى، بدون أي تأثير على الضغط */
-.doc-ambient {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.doc-ambient-glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-}
-.doc-ambient-glow-1 {
-  width: 460px; height: 460px;
-  top: -140px; inset-inline-start: -100px;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.28), transparent 70%);
-  animation: docGlowDrift 18s ease-in-out infinite;
-}
-.doc-ambient-glow-2 {
-  width: 380px; height: 380px;
-  top: 220px; inset-inline-end: -120px;
-  background: radial-gradient(circle, rgba(236, 72, 153, 0.2), transparent 70%);
-  animation: docGlowDrift 22s ease-in-out infinite reverse;
-}
-
-/* صفحات مستند تجريدية شفافة جدًا، مائلة قليلًا — مرتبطة بمفهوم "تحليل مستندات" */
-.doc-ambient-page {
-  position: absolute;
-  width: 150px;
-  height: 200px;
-  border-radius: 12px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
-}
-.doc-ambient-page::before,
-.doc-ambient-page::after {
-  content: '';
-  position: absolute;
-  inset-inline-start: 18px;
-  inset-inline-end: 18px;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.05);
-}
-.doc-ambient-page::before { top: 24px; }
-.doc-ambient-page::after { top: 40px; width: 60%; }
-
-.doc-ambient-page-1 { top: 60px; inset-inline-end: 6%; transform: rotate(9deg); animation: docPageFloat 14s ease-in-out infinite; }
-.doc-ambient-page-2 { top: 130px; inset-inline-end: 13%; transform: rotate(-6deg) scale(0.85); opacity: 0.7; animation: docPageFloat 16s 1s ease-in-out infinite; }
-
-@keyframes docGlowDrift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(24px, -18px) scale(1.06); }
-}
-@keyframes docPageFloat {
-  0%, 100% { transform: translateY(0) rotate(var(--r, 9deg)); }
-  50% { transform: translateY(-10px) rotate(var(--r, 9deg)); }
+@keyframes docHeroGlow {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .doc-ambient-glow-1, .doc-ambient-glow-2, .doc-ambient-page-1, .doc-ambient-page-2 { animation: none; }
+  .doc-hero-art-img, .doc-hero-glow { animation: none; }
 }
 
-/* الطبقات الزخرفية تختفي على الموبايل — تخفيف كما طُلب صراحة */
-@media (max-width: 900px) {
-  .doc-ambient-page-1, .doc-ambient-page-2 { display: none; }
+/* ---------- Tablet: الصورة أصغر وأهدأ ---------- */
+@media (max-width: 1024px) {
+  .doc-hero-art-img { width: 78%; opacity: 0.55; top: -2%; }
+  .doc-hero-glow { width: 70%; opacity: 0.7; }
 }
+
+/* ---------- Mobile: الصورة خلف الـHero فقط، خفيفة جدًا، بدون أي تأثير على التفاعل ---------- */
 @media (max-width: 640px) {
-  .doc-ambient-glow-1, .doc-ambient-glow-2 { filter: blur(40px); opacity: 0.7; }
+  .doc-hero-art { inset: 0 0 auto 0; height: 300px; }
+  .doc-hero-art-img {
+    width: 100%;
+    max-width: none;
+    inset-inline-end: 0;
+    opacity: 0.28;
+    top: -6%;
+  }
+  .doc-hero-glow { width: 100%; height: 100%; opacity: 0.5; }
+  .doc-hero-scrim {
+    background: linear-gradient(to bottom, rgba(7, 5, 13, 0.1), var(--bg-page) 70%);
+  }
 }
 
-/* المحتوى فوق كل شي دايمًا */
+/* المحتوى دايمًا فوق طبقة الخلفية */
 .doc-analysis-inner { position: relative; z-index: 1; }
