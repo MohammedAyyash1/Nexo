@@ -996,3 +996,49 @@
   border-bottom: 3px solid #e8c766;
 }
 .cv-template-thumb-executive .cv-template-thumb-bar:first-child { margin-top: 22px; }
+/* ==================================================== */
+/* ====  One-Page-First: متغيّرات ضغط آمن وتدريجي  ===== */
+/* ==================================================== */
+/* --cv-font-scale و --cv-line-scale توّرثان (Inherit) من العنصر اللي
+   محدّدة عليه (.cv-preview-page / ممر القياس)، وتُستخدم هون كـcalc() فوق
+   القيم الأصلية تمامًا. القيمة الافتراضية 1 (أي بدون أي تغيير) لو ما
+   كانت العنصر الأب محدّدها، فهاد التعديل آمن 100% وما بأثر على أي مكان
+   تاني لسا ما استخدم هالمتغيّرات. */
+
+.cv-preview-page {
+  font-size: calc(26px * var(--cv-font-scale, 1));
+  line-height: calc(1.7 * var(--cv-line-scale, 1));
+}
+
+.cv-page-text {
+  font-size: calc(24px * var(--cv-font-scale, 1));
+  line-height: calc(1.75 * var(--cv-line-scale, 1));
+}
+
+.cv-page-entry-head {
+  font-size: calc(26px * var(--cv-font-scale, 1));
+}
+
+.cv-page-entry-sub {
+  font-size: calc(22px * var(--cv-font-scale, 1));
+}
+
+.cv-page-section-title {
+  font-size: calc(24px * var(--cv-font-scale, 1));
+}
+
+.cv-page-chip,
+.cv-page-ats-chip {
+  font-size: calc(20px * var(--cv-font-scale, 1));
+}
+
+.cv-page-contact-value {
+  font-size: calc(20px * var(--cv-font-scale, 1));
+}
+
+.cv-page-contact-label {
+  font-size: calc(14px * var(--cv-font-scale, 1));
+}
+
+/* صفوف المحتوى تاخذ تباعدها الفعلي من marginBottom اللي بنحطه مباشرة عبر
+   الـJS (level.gap)، فما في داعي لتعديل أي margin ثابت هون. */

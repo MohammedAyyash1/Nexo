@@ -5,8 +5,18 @@ import { paginateBlocks } from './cvPagination.js';
 const A4_W = 794;
 const A4_H = 1123;
 const PAGE_PAD = 46;
-const CONT_HEADER_H = 74;
-const BLOCK_GAP = 18; // نفس القيمة المستخدمة كـmarginBottom بين الكتل بالعرض الفعلي والقياس
+
+// ===== سلّم ضغط آمن وتدريجي — One-Page-First =====
+// كل مستوى بيتم اختباره بقياس حقيقي فعلي بالمتصفح (مو تخمين)، وما بننتقل
+// للمستوى التالي إلا لو المستوى الحالي فعليًا ما كفى. النص ما بينزل تحت 92%
+// من حجمه الأصلي أبدًا (يضل مقروء).
+const COMPRESSION_LEVELS = [
+  { gap: 18, fontScale: 1, lineScale: 1 },    // 0: طبيعي
+  { gap: 13, fontScale: 1, lineScale: 1 },    // 1: تقليل المسافات بين العناصر
+  { gap: 9, fontScale: 1, lineScale: 1 },     // 2: تقليل أكبر للمسافات/الأقسام
+  { gap: 9, fontScale: 1, lineScale: 0.94 },  // 3: تقليل بسيط لتباعد الأسطر
+  { gap: 8, fontScale: 0.92, lineScale: 0.9 }, // 4: أقصى ضغط آمن (نص أصغر 8% بس)
+];
 
 function getContactFields(cv) {
   return [
@@ -79,6 +89,8 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   const hasContent = cv.fullName || cv.summary || cv.experience.length > 0;
   const hasSidebar = layout === 'sidebar' || layout === 'horizon';
   const isTimeline = layout === 'aurora';
+  // الرأس الوحيد اللي بياخذ مساحة من ارتفاع المحتوى الرئيسي (وليس من الـSidebar)
+  const hasMainHeader = !hasSidebar || layout === 'horizon';
 
   const scrollRef = useRef(null);
   const [scale, setScale] = useState(0.48);
@@ -252,36 +264,55 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
 
   const blocks = hasContent ? buildBlocks() : [];
 
+  // ===== محرك القياس الحقيقي + الضغط التدريجي (One-Page-First) =====
   const measureRef = useRef(null);
-  const [heights, setHeights] = useState([]);
+  const headerMeasureRef = useRef(null);
+  const contHeaderMeasureRef = useRef(null);
+
+  const [compressionLevel, setCompressionLevel] = useState(0);
+  const [measured, setMeasured] = useState(null); // { blockHeights, headerH, contHeaderH }
+
+  const level = COMPRESSION_LEVELS[compressionLevel];
   const mainColWidth = hasSidebar ? A4_W * 0.7 - PAGE_PAD * 2 : A4_W - PAGE_PAD * 2;
+  const headerMeasureWidth = hasSidebar ? mainColWidth : A4_W; // رؤوس القوالب بدون Sidebar تمتد بعرض الصفحة كاملة
   const contentSignature = JSON.stringify({ cv, layout, fontStack, color });
 
-  useLayoutEffect(() => {
-    if (!measureRef.current || blocks.length === 0) { setHeights([]); return; }
-    const kids = Array.from(measureRef.current.children);
-    // + BLOCK_GAP: getBoundingClientRect لا يحسب الـmargin الخارجي، فلو ما ضفناه
-    // يدويًا هون رح نقيس كل كتلة أصغر من مساحتها الحقيقية على الصفحة،
-    // وبالتالي نحشر كتل أكتر من اللازم بالصفحة الوحدة وينقص أو ينقطع آخر عنصر فيها.
-    setHeights(kids.map((k) => k.getBoundingClientRect().height + BLOCK_GAP));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // أي تغيير حقيقي بالمحتوى/القالب → نعيد المحاولة من مستوى الضغط صفر (One-Page-First دايمًا أولوية)
+  useEffect(() => {
+    setCompressionLevel(0);
+    setMeasured(null);
   }, [contentSignature]);
 
-  const firstPageHeaderH = hasSidebar ? 0
-    : layout === 'dark' ? 260
-    : layout === 'gradient' ? 300
-    : layout === 'ats' ? 240
-    : layout === 'aurora' ? 340
-    : layout === 'executive' ? 320
-    : 260; // classic
+  const measureStyle = {
+    '--cv-accent': color,
+    '--cv-font-scale': level.fontScale,
+    '--cv-line-scale': level.lineScale,
+    fontFamily: fontStack,
+  };
 
-  const firstPageCapacity = A4_H - PAGE_PAD * 2 - firstPageHeaderH;
-  const nextPageCapacity = A4_H - PAGE_PAD * 2 - CONT_HEADER_H;
+  useLayoutEffect(() => {
+    if (blocks.length === 0) { setMeasured({ blockHeights: [], headerH: 0, contHeaderH: 0 }); return; }
+    if (!measureRef.current) return;
 
-  const heightsReady = heights.length === blocks.length && blocks.length > 0;
-  const pageGroups = heightsReady
-    ? paginateBlocks(heights, nextPageCapacity, firstPageCapacity)
-    : blocks.length > 0 ? [blocks.map((_, i) => i)] : [[]];
+    const kids = Array.from(measureRef.current.children);
+    const blockHeights = kids.map((k) => k.getBoundingClientRect().height);
+    const headerH = hasMainHeader && headerMeasureRef.current ? headerMeasureRef.current.getBoundingClientRect().height : 0;
+    const contHeaderH = contHeaderMeasureRef.current ? contHeaderMeasureRef.current.getBoundingClientRect().height : 0;
+
+    const available = A4_H - PAGE_PAD * 2;
+    const firstCapacity = available - headerH;
+    // مجموع ارتفاع المحتوى الحقيقي + الفجوات بين العناصر فقط (بدون فجوة زايدة بعد آخر عنصر)
+    const totalWithGaps = blockHeights.reduce((s, h) => s + h, 0) + Math.max(0, blockHeights.length - 1) * level.gap;
+
+    if (totalWithGaps > firstCapacity && compressionLevel < COMPRESSION_LEVELS.length - 1) {
+      // ما كفت صفحة وحدة بهالمستوى من الضغط — جرّب المستوى الأشد بعده (وبيعاد قياس حقيقي جديد بنفس الـEffect)
+      setCompressionLevel((l) => l + 1);
+      return;
+    }
+
+    setMeasured({ blockHeights, headerH, contHeaderH });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contentSignature, compressionLevel]);
 
   if (!hasContent) {
     return (
@@ -299,10 +330,10 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
     );
   }
 
-  const style = { '--cv-accent': color, fontFamily: fontStack };
+  const style = { '--cv-accent': color, '--cv-font-scale': level.fontScale, '--cv-line-scale': level.lineScale, fontFamily: fontStack };
 
   const renderMainBlocks = (indices) => indices.map((i) => (
-    <div key={blocks[i].key} style={{ marginBottom: BLOCK_GAP }}>{blocks[i].node}</div>
+    <div key={blocks[i].key} style={{ marginBottom: level.gap }}>{blocks[i].node}</div>
   ));
 
   const renderContinuationHeader = () => (
@@ -449,13 +480,20 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
       : <div className="cv-preview-sidebar" style={{ background: color }} />
   );
 
+  // لسا عم نقيس (أو بنعيد القياس بمستوى ضغط جديد) — نعرض الصفحة بمستوى الضغط الحالي كتخمين مبدئي
+  // لحد ما يجهز القياس الحقيقي، حتى ما تومض الشاشة فاضية. ما في خطر هون لأنه useLayoutEffect
+  // بيصحح القرار قبل أي Paint فعلي يشوفه المستخدم.
+  const ready = measured !== null && measured.blockHeights.length === blocks.length;
+  const effFirstCapacity = ready ? (A4_H - PAGE_PAD * 2 - measured.headerH) : (A4_H - PAGE_PAD * 2);
+  const effNextCapacity = ready ? (A4_H - PAGE_PAD * 2 - measured.contHeaderH) : (A4_H - PAGE_PAD * 2 - 74);
+
+  const pageGroups = ready
+    ? paginateBlocks(measured.blockHeights.map((h) => h + level.gap), effNextCapacity, effFirstCapacity)
+    : blocks.length > 0 ? [blocks.map((_, i) => i)] : [[]];
+
   const pages = pageGroups.map((group, pageIndex) => {
     const isFirst = pageIndex === 0;
     if (hasSidebar) {
-      // ملاحظة: بنسخة سابقة كنا نستدعي رأس صفحة كامل جوا main حتى بالصفحة
-      // الأولى، وهاد كان يكرر الاسم/الصورة مرتين (مرة بالـSidebar ومرة بالمحتوى).
-      // الصفحة الأولى بتخطيطات الـSidebar ما إلها رأس منفصل بالمحتوى (كل هوية
-      // المستخدم بالـSidebar نفسه)، عدا horizon يلي إله سطر اسم صغير إضافي بالمحتوى.
       return (
         <div key={pageIndex} className="cv-preview-page cv-preview-sidebar-layout" style={style}>
           {isFirst ? renderSidebar() : renderSidebarContinuation()}
@@ -478,8 +516,20 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
 
   return (
     <div className="cv-page-scroll" ref={scrollRef}>
-      <div ref={measureRef} className="cv-page-measure" style={{ width: mainColWidth, ...style }}>
-        {blocks.map((b) => <div key={b.key} style={{ marginBottom: BLOCK_GAP }}>{b.node}</div>)}
+      {/* ممرات القياس المخفية: نفس الأنماط بالضبط (نفس مستوى الضغط الحالي) حتى يكون
+          القياس صحيح 100% بدل تخمين. */}
+      <div style={{ position: 'fixed', top: 0, insetInlineStart: -99999, visibility: 'hidden', pointerEvents: 'none' }}>
+        {hasMainHeader && (
+          <div ref={headerMeasureRef} style={{ width: headerMeasureWidth, ...measureStyle }}>
+            {renderFirstPageHeader()}
+          </div>
+        )}
+        <div ref={contHeaderMeasureRef} style={{ width: hasSidebar ? mainColWidth : A4_W, ...measureStyle }}>
+          {renderContinuationHeader()}
+        </div>
+        <div ref={measureRef} style={{ width: mainColWidth, ...measureStyle }}>
+          {blocks.map((b) => <div key={b.key} style={{ marginBottom: level.gap }}>{b.node}</div>)}
+        </div>
       </div>
 
       {pageGroups.length > 1 && (

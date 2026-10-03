@@ -4846,80 +4846,31 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
 .doc-analysis-page.nexo-tool-page {
   position: relative;
   isolation: isolate;
-  background: var(--bg-page);
-  overflow: hidden;
+  background-image: url('/assets/doc-analysis-hero.png');
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-.doc-hero-art {
+/* طبقة تعتيم موحّدة فوق الصورة بالكامل — تضمن قراءة ممتازة لكل عناصر الصفحة بدون استثناء */
+.doc-analysis-page.nexo-tool-page::after {
+  content: '';
   position: absolute;
   inset: 0;
   z-index: 0;
+  background: rgba(7, 5, 13, 0.82);
   pointer-events: none;
-  overflow: hidden;
-}
-
-.doc-hero-art-img {
-  position: absolute;
-  top: 0;
-  inset-inline-end: 0;
-  width: 70%;
-  max-width: 1000px;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  opacity: 0.8;
-  animation: docHeroFloat 16s ease-in-out infinite;
-}
-
-html[dir='rtl'] .doc-hero-art-img {
-  transform: scaleX(-1);
-}
-
-.doc-hero-glow {
-  position: absolute;
-  top: 10%;
-  inset-inline-end: 0;
-  width: 55%;
-  height: 80%;
-  background: radial-gradient(ellipse 60% 60% at 60% 40%, rgba(124, 58, 237, 0.25), transparent 70%);
-  filter: blur(50px);
-}
-
-/* تعتيم واحد بس: تدرّج أفقي من جهة المحتوى، يضمن القراءة بدون ما يلتهم الصورة */
-.doc-hero-scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to inline-end, var(--bg-page) 2%, rgba(7, 5, 13, 0.55) 26%, transparent 52%);
-}
-
-@keyframes docHeroFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .doc-hero-art-img { animation: none; }
-}
-
-/* ---------- Tablet ---------- */
-@media (max-width: 1024px) {
-  .doc-hero-art-img { width: 85%; opacity: 0.55; }
-  .doc-hero-glow { width: 70%; }
-}
-
-/* ---------- Mobile ---------- */
-@media (max-width: 640px) {
-  .doc-hero-art { height: 240px; }
-  .doc-hero-art-img {
-    width: 100%;
-    height: 100%;
-    opacity: 0.3;
-    animation: none;
-  }
-  .doc-hero-glow { width: 100%; height: 100%; top: 0; }
-  .doc-hero-scrim {
-    background: linear-gradient(to bottom, transparent 0%, var(--bg-page) 90%);
-  }
 }
 
 .doc-analysis-inner { position: relative; z-index: 1; }
+
+@media (max-width: 768px) {
+  .doc-analysis-page.nexo-tool-page {
+    background-attachment: scroll;
+    background-position: center 20%;
+  }
+  .doc-analysis-page.nexo-tool-page::after {
+    background: rgba(7, 5, 13, 0.88);
+  }
+}
