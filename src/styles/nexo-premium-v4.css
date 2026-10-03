@@ -4675,6 +4675,7 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -4861,6 +4862,31 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
   z-index: 0;
   background: rgba(7, 5, 13, 0.82);
   pointer-events: none;
+}
+
+/* لمعان بنفسجي ناعم يتحرك ببطء فوق الخلفية — يعطي إحساس حيوية فاخرة */
+.doc-hero-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 45% at 72% 22%, rgba(168, 85, 247, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 35% at 15% 75%, rgba(236, 72, 153, 0.12), transparent 70%);
+  animation: docSheenPulse 10s ease-in-out infinite;
+}
+
+@keyframes docSheenPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doc-hero-sheen { animation: none; }
+}
+
+@media (max-width: 768px) {
+  .doc-hero-sheen { opacity: 0.5; }
 }
 
 .doc-analysis-inner { position: relative; z-index: 1; }

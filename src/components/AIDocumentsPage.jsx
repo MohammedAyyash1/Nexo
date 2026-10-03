@@ -207,6 +207,7 @@ export function AIDocumentsPage() {
 
   return (
     <div className="nexo-tool-page doc-analysis-page">
+     <span className="doc-hero-sheen" aria-hidden="true" />
      <div className="nexo-tool-page-inner doc-analysis-inner">
       <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>
         <ArrowRight size={15} /> {t('رجوع', 'Back')}
