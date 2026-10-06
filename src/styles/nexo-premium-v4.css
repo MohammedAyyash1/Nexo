@@ -4900,3 +4900,61 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
     background: rgba(7, 5, 13, 0.88);
   }
 }
+/* ==================================================== */
+/* ==  Live Translate — Lobby Hero Background (real)  == */
+/* ==================================================== */
+
+.lt-lobby-page {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  padding: 32px 24px;
+  color: #f3f0fa;
+  background-image: url('/assets/live-translate-hero.png');
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* تعتيم موحّد يضمن قراءة كل عناصر الواجهة (البطاقات، النصوص، الأزرار) بدون استثناء */
+.lt-lobby-page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(8, 5, 15, 0.8);
+  pointer-events: none;
+}
+
+/* لمعان بنفسجي/ماجنتا هادئ يتحرك ببطء — يربط الخلفية بهوية Nexo اللونية */
+.lt-lobby-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 40% at 12% 15%, rgba(168, 85, 247, 0.22), transparent 70%),
+    radial-gradient(ellipse 45% 40% at 88% 80%, rgba(236, 72, 153, 0.16), transparent 70%);
+  animation: ltLobbySheen 11s ease-in-out infinite;
+}
+
+@keyframes ltLobbySheen {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lt-lobby-sheen { animation: none; }
+}
+
+@media (max-width: 768px) {
+  .lt-lobby-page {
+    background-attachment: scroll;
+    background-position: center 20%;
+  }
+  .lt-lobby-page::after {
+    background: rgba(8, 5, 15, 0.87);
+  }
+  .lt-lobby-sheen { opacity: 0.55; }
+}

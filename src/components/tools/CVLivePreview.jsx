@@ -95,14 +95,20 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   const scrollRef = useRef(null);
   const [scale, setScale] = useState(0.48);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = scrollRef.current;
     if (!el) return undefined;
-    const update = () => { if (el.clientWidth > 0) setScale(el.clientWidth / A4_W); };
-    update();
-    const ro = new ResizeObserver(update);
+    let rafId = null;
+    let tries = 0;
+    const tryUpdate = () => {
+      if (el.clientWidth > 0) { setScale(el.clientWidth / A4_W); return; }
+      tries += 1;
+      if (tries < 30) rafId = requestAnimationFrame(tryUpdate); // إعادة محاولة لحد ما العرض يصير فعلي (~نص ثانية كحد أقصى)
+    };
+    tryUpdate();
+    const ro = new ResizeObserver(() => { if (el.clientWidth > 0) setScale(el.clientWidth / A4_W); });
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => { if (rafId) cancelAnimationFrame(rafId); ro.disconnect(); };
   }, []);
 
   const sectionTitleVariant = layout === 'aurora' ? 'cv-page-section-title-aurora'

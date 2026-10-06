@@ -810,11 +810,9 @@ export function LiveTranslatePage({ user }) {
   if (!roomId) {
     const inviteHint = pendingJoinId ? `${window.location.origin}/live-translate/${pendingJoinId}` : '';
     return (
-      <div style={{
-        minHeight: '100vh', padding: '32px 24px', color: '#f3f0fa',
-        background: 'radial-gradient(ellipse 1200px 700px at 15% -10%, rgba(168,85,247,0.16), transparent 60%), radial-gradient(ellipse 900px 600px at 100% 100%, rgba(236,72,153,0.08), transparent 55%), #0a0612',
-      }}>
-        <div style={{ maxWidth: 1040, margin: '0 auto' }}>
+      <div className="lt-lobby-page">
+        <span className="lt-lobby-sheen" aria-hidden="true" />
+        <div style={{ maxWidth: 1040, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <button onClick={() => navigate('/')} className="lt-hover" style={{ background: 'none', border: 'none', color: '#c4b5fd', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 18, fontSize: 13.5 }}>
             <ArrowRight size={15} /> {t('رجوع', 'Back')}
           </button>
