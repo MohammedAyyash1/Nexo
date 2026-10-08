@@ -4860,7 +4860,7 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: rgba(7, 5, 13, 0.82);
+  background: rgba(7, 5, 13, 0.68);
   pointer-events: none;
 }
 
