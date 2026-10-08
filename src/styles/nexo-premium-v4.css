@@ -4860,7 +4860,7 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: rgba(7, 5, 13, 0.68);
+  background: rgba(7, 5, 13, 0.55);
   pointer-events: none;
 }
 
@@ -4871,8 +4871,9 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 55% 45% at 72% 22%, rgba(168, 85, 247, 0.22), transparent 70%),
-    radial-gradient(ellipse 40% 35% at 15% 75%, rgba(236, 72, 153, 0.12), transparent 70%);
+    radial-gradient(ellipse 60% 50% at 75% 15%, rgba(168, 85, 247, 0.26), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 20% 50%, rgba(168, 85, 247, 0.2), transparent 70%),
+    radial-gradient(ellipse 50% 45% at 80% 85%, rgba(236, 72, 153, 0.16), transparent 70%);
   animation: docSheenPulse 10s ease-in-out infinite;
 }
 
