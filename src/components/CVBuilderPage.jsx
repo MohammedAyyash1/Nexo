@@ -1,11 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, FileUser, Plus, X, Sparkles, Download, Save, Trash2, Loader2, Camera, Inbox, AlertCircle, User, FileText, Briefcase, GraduationCap, Award, Languages, FolderKanban, BadgeCheck, CheckCircle2 } from 'lucide-react';
+import {
+  ArrowRight, FileUser, Plus, X, Sparkles, Download, Save, Trash2, Loader2, Camera, Inbox, AlertCircle,
+  User, FileText, Briefcase, GraduationCap, Award, Languages, FolderKanban, BadgeCheck, CheckCircle2,
+  Copy, ShieldCheck, Circle, AlertTriangle,
+} from 'lucide-react';
 import { exportCvAsWord, exportCvAsPdf } from '../utils/cvPdfExport.js';
 import { API_BASE } from '../../config/api.js';
 import { CV_TEMPLATES, CV_FONT_OPTIONS } from './tools/cvTemplates.js';
 import { CVTemplateGallery } from './tools/CVTemplateGallery.jsx';
 import { CVLivePreview } from './tools/CVLivePreview.jsx';
+import { computeCompletion, computeAtsCheck, firstIncompleteSection } from './tools/cvScoring.js';
 import '../styles/cv-preview.css';
 
 const TOKEN_KEY = 'nexo_token';
@@ -22,7 +27,6 @@ const EMPTY_CV = {
   experience: [], education: [], skills: [], languages: [], projects: [], certifications: [], photoUrl: '',
 };
 
-// مشهد خلفي زخرفي بحت (كرات توهج + أوراق سيرة مصغّرة عائمة + أيقونات) — pointer-events: none بالكامل
 function CvAmbientScene() {
   const miniSheet = (variant, lines) => (
     <div className={`cv-mini-sheet ${variant || ''}`}>
@@ -99,9 +103,10 @@ export function CVBuilderPage() {
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [historyError, setHistoryError] = useState(false);
+  const [duplicatingId, setDuplicatingId] = useState(null);
+  const [atsOpen, setAtsOpen] = useState(false);
 
-  // ===== حالة الحفظ + إشعار بسيط (جديد) =====
-  const [saveStatus, setSaveStatus] = useState('idle'); // idle | dirty | saving | saved | error
+  const [saveStatus, setSaveStatus] = useState('idle');
   const [toast, setToast] = useState('');
   const isFirstRender = useRef(true);
   const skipDirtyRef = useRef(false);
@@ -117,12 +122,33 @@ export function CVBuilderPage() {
     setTimeout(() => setToast(''), 2500);
   };
 
-  // ===== حالة التصميم/التخصيص - لا يؤثر على شكل البيانات المحفوظة بالـBackend =====
   const [templateId, setTemplateId] = useState(CV_TEMPLATES[0].id);
   const [accentOverride, setAccentOverride] = useState(null);
   const [fontId, setFontId] = useState('sans');
   const selectedTemplate = CV_TEMPLATES.find((tp) => tp.id === templateId) || CV_TEMPLATES[0];
   const selectedFont = CV_FONT_OPTIONS.find((f) => f.id === fontId) || CV_FONT_OPTIONS[0];
+
+  // ===== Completion Score + ATS Check: محسوبة محليًا بالكامل، بدون AI وبدون API =====
+  const isEmptyCv = !cv.fullName.trim() && !cv.summary.trim() && cv.experience.length === 0 && cv.education.length === 0 && cv.skills.length === 0;
+  const completion = useMemo(() => computeCompletion(cv), [cv]);
+  const ats = useMemo(() => computeAtsCheck(cv, selectedTemplate), [cv, selectedTemplate]);
+  const scoreColor = (score) => (score >= 80 ? 'var(--color-success)' : score >= 50 ? 'var(--color-warning)' : 'var(--color-error)');
+
+  const sectionRefs = {
+    personal: useRef(null),
+    summary: useRef(null),
+    experience: useRef(null),
+    education: useRef(null),
+    skills: useRef(null),
+    projects: useRef(null),
+    certifications: useRef(null),
+  };
+
+  const handleImproveCv = () => {
+    const key = firstIncompleteSection(completion);
+    if (!key) return;
+    sectionRefs[key]?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const loadHistory = () => {
     setLoadingHistory(true);
@@ -136,8 +162,6 @@ export function CVBuilderPage() {
 
   useEffect(() => { loadHistory(); }, []);
 
-  // ملفات محفوظة قديمة ما فيها الحقول الجديدة (projects/certifications/website/linkedin) —
-  // نضمن وجودها كمصفوفات/نصوص فاضية بدل undefined حتى ما ينكسر أي .map أو .length
   const normalizeCv = (data) => ({ ...EMPTY_CV, ...data });
 
   const updateField = (key, value) => setCv((c) => ({ ...c, [key]: value }));
@@ -221,6 +245,20 @@ export function CVBuilderPage() {
     setSaveStatus('saved');
   };
 
+  // ===== Duplicate CV: بنفس Endpoint الموجود (POST /api/cv) — نسخة مستقلة بالكامل بقاعدة البيانات =====
+  const handleDuplicate = (item) => {
+    setDuplicatingId(item.id);
+    const payload = { title: `${item.title} ${t('(نسخة)', '(Copy)')}`, data: item.data };
+    fetch(`${BASE}/cv`, { method: 'POST', headers: authHeadersJson(), body: JSON.stringify(payload) })
+      .then((res) => res.json())
+      .then(() => {
+        showToast(t('تم إنشاء نسخة مستقلة من السيرة الذاتية', 'An independent copy of the CV was created'));
+        loadHistory();
+      })
+      .catch((err) => console.error('Duplicate CV error:', err))
+      .finally(() => setDuplicatingId(null));
+  };
+
   const handleDelete = (id) => {
     if (!window.confirm(t('حذف هذه السيرة نهائيًا؟', 'Delete this CV permanently?'))) return;
     fetch(`${BASE}/cv/${id}`, { method: 'DELETE', headers: authHeaders() })
@@ -266,6 +304,13 @@ export function CVBuilderPage() {
     return null;
   };
 
+  const completionStatusIcon = (status) => (
+    status === 'done' ? <CheckCircle2 size={13} /> : status === 'partial' ? <AlertTriangle size={13} /> : <Circle size={13} />
+  );
+  const atsStatusIcon = (status) => (
+    status === 'good' ? <CheckCircle2 size={14} /> : status === 'review' ? <AlertTriangle size={14} /> : <AlertCircle size={14} />
+  );
+
   return (
     <div className="nexo-tool-page cv-builder-ambient-bg">
       <CvAmbientScene />
@@ -292,10 +337,66 @@ export function CVBuilderPage() {
         fontId={fontId} onFontChange={setFontId}
       />
 
+      {/* ===== بطاقة صحة السيرة الذاتية: اكتمال + ATS — جزء من نفس تجربة البناء ===== */}
+      {isEmptyCv ? (
+        <div className="nexo-card cv-health-card cv-health-empty" style={{ marginBottom: 20 }}>
+          <Sparkles size={20} color="var(--accent-2)" />
+          <div>
+            <div className="cv-health-empty-title">{t('لنبدأ ببناء سيرتك الذاتية', "Let's start building your CV")}</div>
+            <div className="cv-health-empty-desc">{t('عبّي معلوماتك الأساسية أول شي، وبعدين الخبرات والتعليم — سيرتك رح تتكوّن تدريجيًا.', 'Fill in your basic info first, then experience and education — your CV will take shape gradually.')}</div>
+          </div>
+        </div>
+      ) : (
+        <div className="nexo-card cv-health-card" style={{ marginBottom: 20 }}>
+          <div className="cv-health-top">
+            <div className="cv-health-metric">
+              <span className="cv-health-label">{t('اكتمال السيرة الذاتية', 'CV Completion')}</span>
+              <span className="cv-health-percent" style={{ color: scoreColor(completion.total) }}>{completion.total}%</span>
+            </div>
+            <div className="cv-completion-bar"><div className="cv-completion-fill" style={{ width: `${completion.total}%`, background: scoreColor(completion.total) }} /></div>
+            <div className="cv-completion-list">
+              {completion.sections.map((s) => (
+                <span key={s.key} className={`cv-completion-item cv-completion-${s.status}`}>
+                  {completionStatusIcon(s.status)} {t(s.label, s.label)}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="cv-health-actions">
+            <button className="nexo-btn nexo-btn-primary nexo-btn-sm" onClick={handleImproveCv} disabled={completion.total === 100}>
+              <Sparkles size={13} /> {t('تحسين سيرتي', 'Improve my CV')}
+            </button>
+            <button className="nexo-btn nexo-btn-secondary nexo-btn-sm" onClick={() => setAtsOpen((o) => !o)}>
+              <ShieldCheck size={13} /> {t('فحص توافق ATS', 'ATS Check')} · {ats.score}%
+            </button>
+          </div>
+
+          {atsOpen && (
+            <div className="cv-ats-panel">
+              <div className="cv-ats-panel-head">
+                <span>{t('نتيجة توافق ATS', 'ATS Readiness')}</span>
+                <span className="cv-ats-panel-score" style={{ color: scoreColor(ats.score) }}>{ats.score}%</span>
+              </div>
+              <p className="cv-ats-disclaimer">
+                {t('هاد تقدير مبني على قواعد عامة ومعروفة، مش ضمان قبول من أي نظام ATS فعلي حقيقي.', 'This is an estimate based on general, known rules — not a guarantee of acceptance by any specific real ATS system.')}
+              </p>
+              <ul className="cv-ats-checklist">
+                {ats.checks.map((c) => (
+                  <li key={c.key} className={`cv-ats-check-row cv-ats-${c.status}`}>
+                    {atsStatusIcon(c.status)} <span>{c.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="cv-builder-layout">
         <div>
           {/* ===== المعلومات الأساسية ===== */}
-          <div className="nexo-card" style={{ marginBottom: 20 }}>
+          <div className="nexo-card" style={{ marginBottom: 20 }} ref={sectionRefs.personal}>
 <h4 className="nexo-card-row-title cv-section-title-icon" style={{ marginBottom: 16 }}><User size={15} /> {t('المعلومات الأساسية', 'Basic Info')}</h4>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
               <label className="nexo-avatar-upload">
@@ -326,7 +427,7 @@ export function CVBuilderPage() {
           </div>
 
           {/* ===== نبذة مختصرة ===== */}
-          <div className="nexo-card" style={{ marginBottom: 20 }}>
+          <div className="nexo-card" style={{ marginBottom: 20 }} ref={sectionRefs.summary}>
             <div className="nexo-card-row-header">
 <h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><FileText size={15} /> {t('نبذة مختصرة', 'Summary')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={handleEnhanceSummary} disabled={enhancing || !cv.summary.trim()}>
                 {enhancing ? <Loader2 size={13} className="nexo-spin" /> : <Sparkles size={13} />} {t('تحسين بالذكاء الاصطناعي', 'Enhance with AI')}
@@ -336,7 +437,7 @@ export function CVBuilderPage() {
           </div>
 
           {/* ===== الخبرات العملية ===== */}
-          <div className="nexo-card" style={{ marginBottom: 20 }}>
+          <div className="nexo-card" style={{ marginBottom: 20 }} ref={sectionRefs.experience}>
             <div className="nexo-card-row-header">
 <h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><Briefcase size={15} /> {t('الخبرات العملية', 'Experience')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addExperience}><Plus size={15} /></button>
             </div>
@@ -359,7 +460,7 @@ export function CVBuilderPage() {
           </div>
 
           {/* ===== التعليم ===== */}
-          <div className="nexo-card" style={{ marginBottom: 20 }}>
+          <div className="nexo-card" style={{ marginBottom: 20 }} ref={sectionRefs.education}>
             <div className="nexo-card-row-header">
 <h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><GraduationCap size={15} /> {t('التعليم', 'Education')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addEducation}><Plus size={15} /></button>
             </div>
@@ -377,7 +478,7 @@ export function CVBuilderPage() {
           </div>
 
           {/* ===== المشاريع ===== */}
-          <div className="nexo-card" style={{ marginBottom: 20 }}>
+          <div className="nexo-card" style={{ marginBottom: 20 }} ref={sectionRefs.projects}>
             <div className="nexo-card-row-header">
 <h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><FolderKanban size={15} /> {t('المشاريع', 'Projects')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addProject}><Plus size={15} /></button>
             </div>
@@ -399,7 +500,7 @@ export function CVBuilderPage() {
           </div>
 
           {/* ===== الشهادات والدورات ===== */}
-          <div className="nexo-card" style={{ marginBottom: 20 }}>
+          <div className="nexo-card" style={{ marginBottom: 20 }} ref={sectionRefs.certifications}>
             <div className="nexo-card-row-header">
 <h4 className="nexo-card-row-title cv-section-title-icon" style={{ margin: 0 }}><BadgeCheck size={15} /> {t('الشهادات والدورات', 'Certifications')}</h4>              <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={addCertification}><Plus size={15} /></button>
             </div>
@@ -417,7 +518,7 @@ export function CVBuilderPage() {
           </div>
 
           {/* ===== المهارات واللغات ===== */}
-          <div className="nexo-cv-half-row" style={{ display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
+          <div className="nexo-cv-half-row" style={{ display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' }} ref={sectionRefs.skills}>
             <div className="nexo-card nexo-cv-half-card">
 <h4 className="nexo-card-row-title cv-section-title-icon" style={{ marginBottom: 12 }}><Award size={15} /> {t('المهارات', 'Skills')}</h4>              <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
                 <input className="nexo-input" dir="auto" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addSkill()} placeholder={t('اكتب مهارة واضغط Enter', 'Type a skill and press Enter')} />
@@ -499,6 +600,9 @@ export function CVBuilderPage() {
                   <div className="nexo-list-item-main" onClick={() => handleLoad(item)} style={{ cursor: 'pointer' }}>
                     <div className="nexo-list-item-title" dir="auto">{item.title}</div>
                   </div>
+                  <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleDuplicate(item)} disabled={duplicatingId === item.id} title={t('نسخ', 'Duplicate')}>
+                    {duplicatingId === item.id ? <Loader2 size={14} className="nexo-spin" /> : <Copy size={14} />}
+                  </button>
                   <button className="nexo-btn nexo-btn-ghost nexo-btn-icon" onClick={() => handleDelete(item.id)} title={t('حذف', 'Delete')}>
                     <Trash2 size={14} />
                   </button>
@@ -515,7 +619,6 @@ export function CVBuilderPage() {
       </div>
      </div>
 
-      {/* ===== شريط إجراءات ثابت للموبايل — بديهي وسهل بدل ما يدوّر المستخدم فوق وتحت ===== */}
       <div className="cv-mobile-actionbar">
         <button className="nexo-btn nexo-btn-primary" onClick={handleSave} disabled={saving}>
           {saving ? <Loader2 size={16} className="nexo-spin" /> : <Save size={16} />}

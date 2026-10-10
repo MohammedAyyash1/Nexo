@@ -1042,3 +1042,103 @@
 
 /* صفوف المحتوى تاخذ تباعدها الفعلي من marginBottom اللي بنحطه مباشرة عبر
    الـJS (level.gap)، فما في داعي لتعديل أي margin ثابت هون. */
+   /* ==================================================== */
+/* ===========  CV Health: Completion + ATS  =========== */
+/* ==================================================== */
+
+.cv-health-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cv-health-empty {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
+}
+.cv-health-empty-title { font-size: 14.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.cv-health-empty-desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.7; }
+
+.cv-health-top { display: flex; flex-direction: column; gap: 10px; }
+
+.cv-health-metric {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.cv-health-label { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.cv-health-percent { font-size: 20px; font-weight: 800; }
+
+.cv-completion-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 20px;
+  background: var(--bg-input-2);
+  overflow: hidden;
+}
+.cv-completion-fill {
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+
+.cv-completion-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cv-completion-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--bg-input-2);
+  color: var(--text-muted);
+}
+.cv-completion-done { color: var(--color-success); background: rgba(var(--color-success-rgb), 0.1); }
+.cv-completion-partial { color: var(--color-warning); background: rgba(var(--color-warning-rgb), 0.1); }
+.cv-completion-empty { color: var(--text-faint); }
+
+.cv-health-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.cv-ats-panel {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cv-ats-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.cv-ats-panel-score { font-size: 17px; font-weight: 800; }
+.cv-ats-disclaimer { font-size: 11px; color: var(--text-faint); line-height: 1.6; margin: 0; }
+
+.cv-ats-checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.cv-ats-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+.cv-ats-check-row svg { flex-shrink: 0; margin-top: 2px; }
+.cv-ats-good svg { color: var(--color-success); }
+.cv-ats-review svg { color: var(--color-warning); }
+.cv-ats-issue svg { color: var(--color-error); }
+
+@media (max-width: 640px) {
+  .cv-health-empty { flex-direction: column; align-items: flex-start; }
+  .cv-health-actions .nexo-btn { flex: 1; justify-content: center; }
+  .cv-completion-item { font-size: 11px; padding: 4px 8px; }
+}

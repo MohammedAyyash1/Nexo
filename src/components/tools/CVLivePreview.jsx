@@ -103,7 +103,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
     const tryUpdate = () => {
       if (el.clientWidth > 0) { setScale(el.clientWidth / A4_W); return; }
       tries += 1;
-      if (tries < 30) rafId = requestAnimationFrame(tryUpdate); // إعادة محاولة لحد ما العرض يصير فعلي (~نص ثانية كحد أقصى)
+      if (tries < 30) rafId = requestAnimationFrame(tryUpdate);
     };
     tryUpdate();
     const ro = new ResizeObserver(() => { if (el.clientWidth > 0) setScale(el.clientWidth / A4_W); });
