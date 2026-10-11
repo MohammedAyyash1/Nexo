@@ -344,7 +344,7 @@ export function AIDocumentsPage() {
           <div className="nexo-card doc-result-card">
             {activeTab === 'overview' && (
               <div className="doc-markdown" dir="rtl">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{overviewSection ? (overviewSection.body || currentResult.summary_text) : currentResult.summary_text}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[[remarkGfm, { singleTilde: false, tableCellPadding: false }]]} disallowedElements={['table', 'thead', 'tbody', 'tr', 'td', 'th']} unwrapDisallowed>{overviewSection ? (overviewSection.body || currentResult.summary_text) : currentResult.summary_text}</ReactMarkdown>
               </div>
             )}
 
@@ -361,7 +361,7 @@ export function AIDocumentsPage() {
 
             {activeTab === 'full' && (
               <div className="doc-markdown" dir="rtl">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{currentResult.summary_text}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[[remarkGfm, { singleTilde: false, tableCellPadding: false }]]} disallowedElements={['table', 'thead', 'tbody', 'tr', 'td', 'th']} unwrapDisallowed>{currentResult.summary_text}</ReactMarkdown>
               </div>
             )}
           </div>
