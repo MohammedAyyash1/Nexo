@@ -7,15 +7,12 @@ const A4_H = 1123;
 const PAGE_PAD = 46;
 
 // ===== سلّم ضغط آمن وتدريجي — One-Page-First =====
-// كل مستوى بيتم اختباره بقياس حقيقي فعلي بالمتصفح (مو تخمين)، وما بننتقل
-// للمستوى التالي إلا لو المستوى الحالي فعليًا ما كفى. النص ما بينزل تحت 92%
-// من حجمه الأصلي أبدًا (يضل مقروء).
 const COMPRESSION_LEVELS = [
-  { gap: 18, fontScale: 1, lineScale: 1 },    // 0: طبيعي
-  { gap: 13, fontScale: 1, lineScale: 1 },    // 1: تقليل المسافات بين العناصر
-  { gap: 9, fontScale: 1, lineScale: 1 },     // 2: تقليل أكبر للمسافات/الأقسام
-  { gap: 9, fontScale: 1, lineScale: 0.94 },  // 3: تقليل بسيط لتباعد الأسطر
-  { gap: 8, fontScale: 0.92, lineScale: 0.9 }, // 4: أقصى ضغط آمن (نص أصغر 8% بس)
+  { gap: 18, fontScale: 1, lineScale: 1 },
+  { gap: 13, fontScale: 1, lineScale: 1 },
+  { gap: 9, fontScale: 1, lineScale: 1 },
+  { gap: 9, fontScale: 1, lineScale: 0.94 },
+  { gap: 8, fontScale: 0.92, lineScale: 0.9 },
 ];
 
 function getContactFields(cv) {
@@ -89,9 +86,12 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   const hasContent = cv.fullName || cv.summary || cv.experience.length > 0;
   const hasSidebar = layout === 'sidebar' || layout === 'horizon';
   const isTimeline = layout === 'aurora';
-  // الرأس الوحيد اللي بياخذ مساحة من ارتفاع المحتوى الرئيسي (وليس من الـSidebar)
   const hasMainHeader = !hasSidebar || layout === 'horizon';
 
+  // اتجاه محتوى الورقة: نحدده صراحة (مو بس بالوراثة)
+  const pageDir = typeof document !== 'undefined' && document.documentElement.dir === 'ltr' ? 'ltr' : 'rtl';
+
+  // ===== قياس عرض العمود وحساب نسبة التصغير (مع إعادة محاولة لو العرض صفر وقت التحميل) =====
   const scrollRef = useRef(null);
   const [scale, setScale] = useState(0.48);
 
@@ -270,24 +270,22 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
 
   const blocks = hasContent ? buildBlocks() : [];
 
-  // ===== محرك القياس الحقيقي + الضغط التدريجي (One-Page-First) =====
+  // ===== محرك القياس + الضغط التدريجي (حالة واحدة موحّدة لتفادي تعارض ترتيب الـEffects) =====
   const measureRef = useRef(null);
   const headerMeasureRef = useRef(null);
   const contHeaderMeasureRef = useRef(null);
 
-  const [compressionLevel, setCompressionLevel] = useState(0);
-  const [measured, setMeasured] = useState(null); // { blockHeights, headerH, contHeaderH }
+  const [engine, setEngine] = useState({ sig: '', level: 0, measured: null });
 
-  const level = COMPRESSION_LEVELS[compressionLevel];
   const mainColWidth = hasSidebar ? A4_W * 0.7 - PAGE_PAD * 2 : A4_W - PAGE_PAD * 2;
-  const headerMeasureWidth = hasSidebar ? mainColWidth : A4_W; // رؤوس القوالب بدون Sidebar تمتد بعرض الصفحة كاملة
+  const headerMeasureWidth = hasSidebar ? mainColWidth : A4_W;
   const contentSignature = JSON.stringify({ cv, layout, fontStack, color });
 
-  // أي تغيير حقيقي بالمحتوى/القالب → نعيد المحاولة من مستوى الضغط صفر (One-Page-First دايمًا أولوية)
-  useEffect(() => {
-    setCompressionLevel(0);
-    setMeasured(null);
-  }, [contentSignature]);
+  // لو المحتوى تغيّر، نعتبر مستوى الضغط صفر والقياس غير جاهز لحد ما نعيد القياس
+  const sameContent = engine.sig === contentSignature;
+  const levelIndex = sameContent ? engine.level : 0;
+  const level = COMPRESSION_LEVELS[levelIndex];
+  const measured = sameContent ? engine.measured : null;
 
   const measureStyle = {
     '--cv-accent': color,
@@ -297,7 +295,14 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   };
 
   useLayoutEffect(() => {
-    if (blocks.length === 0) { setMeasured({ blockHeights: [], headerH: 0, contHeaderH: 0 }); return; }
+    if (engine.sig !== contentSignature) {
+      setEngine({ sig: contentSignature, level: 0, measured: null });
+      return;
+    }
+    if (blocks.length === 0) {
+      if (!engine.measured) setEngine((e) => ({ ...e, measured: { blockHeights: [], headerH: 0, contHeaderH: 0 } }));
+      return;
+    }
     if (!measureRef.current) return;
 
     const kids = Array.from(measureRef.current.children);
@@ -307,25 +312,28 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
 
     const available = A4_H - PAGE_PAD * 2;
     const firstCapacity = available - headerH;
-    // مجموع ارتفاع المحتوى الحقيقي + الفجوات بين العناصر فقط (بدون فجوة زايدة بعد آخر عنصر)
     const totalWithGaps = blockHeights.reduce((s, h) => s + h, 0) + Math.max(0, blockHeights.length - 1) * level.gap;
 
-    if (totalWithGaps > firstCapacity && compressionLevel < COMPRESSION_LEVELS.length - 1) {
-      // ما كفت صفحة وحدة بهالمستوى من الضغط — جرّب المستوى الأشد بعده (وبيعاد قياس حقيقي جديد بنفس الـEffect)
-      setCompressionLevel((l) => l + 1);
+    if (totalWithGaps > firstCapacity && engine.level < COMPRESSION_LEVELS.length - 1) {
+      setEngine((e) => ({ ...e, level: e.level + 1, measured: null }));
       return;
     }
 
-    setMeasured({ blockHeights, headerH, contHeaderH });
+    setEngine((e) => ({ ...e, measured: { blockHeights, headerH, contHeaderH } }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contentSignature, compressionLevel]);
+  }, [contentSignature, engine.sig, engine.level]);
+
+  // ورقة بحجم A4 منطقي مثبّتة بزاوية الإطار اليسرى فعليًا (position:absolute; left:0)،
+  // فما بتتأثر باتجاه الصفحة RTL/LTR، والتصغير بيصير حول نفس الزاوية المرئية دايمًا
+  const scalerStyle = { position: 'absolute', top: 0, left: 0, width: A4_W, height: A4_H, transform: `scale(${scale})`, transformOrigin: 'top left' };
+  const frameStyle = { position: 'relative', width: A4_W * scale, height: A4_H * scale };
 
   if (!hasContent) {
     return (
       <div className="cv-page-scroll" ref={scrollRef}>
         <div className="cv-page-stack">
-          <div className="cv-page-frame" style={{ width: A4_W * scale, height: A4_H * scale }}>
-            <div className="cv-page-scaler" style={{ width: A4_W, height: A4_H, transform: `scale(${scale})` }}>
+          <div className="cv-page-frame" style={frameStyle}>
+            <div className="cv-page-scaler" dir={pageDir} style={scalerStyle}>
               <div className="cv-preview-page cv-preview-empty" style={{ '--cv-accent': color, fontFamily: fontStack, fontSize: 34 }}>
                 <p>عبّي البيانات على اليسار وشوف سيرتك الذاتية تتكوّن هون مباشرة.</p>
               </div>
@@ -486,9 +494,6 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
       : <div className="cv-preview-sidebar" style={{ background: color }} />
   );
 
-  // لسا عم نقيس (أو بنعيد القياس بمستوى ضغط جديد) — نعرض الصفحة بمستوى الضغط الحالي كتخمين مبدئي
-  // لحد ما يجهز القياس الحقيقي، حتى ما تومض الشاشة فاضية. ما في خطر هون لأنه useLayoutEffect
-  // بيصحح القرار قبل أي Paint فعلي يشوفه المستخدم.
   const ready = measured !== null && measured.blockHeights.length === blocks.length;
   const effFirstCapacity = ready ? (A4_H - PAGE_PAD * 2 - measured.headerH) : (A4_H - PAGE_PAD * 2);
   const effNextCapacity = ready ? (A4_H - PAGE_PAD * 2 - measured.contHeaderH) : (A4_H - PAGE_PAD * 2 - 74);
@@ -522,9 +527,8 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
 
   return (
     <div className="cv-page-scroll" ref={scrollRef}>
-      {/* ممرات القياس المخفية: نفس الأنماط بالضبط (نفس مستوى الضغط الحالي) حتى يكون
-          القياس صحيح 100% بدل تخمين. */}
-      <div style={{ position: 'fixed', top: 0, insetInlineStart: -99999, visibility: 'hidden', pointerEvents: 'none' }}>
+      {/* ممرات القياس المخفية: نفس الأنماط بالضبط (نفس مستوى الضغط والاتجاه الحاليين) */}
+      <div dir={pageDir} style={{ position: 'fixed', top: 0, left: -99999, visibility: 'hidden', pointerEvents: 'none' }}>
         {hasMainHeader && (
           <div ref={headerMeasureRef} style={{ width: headerMeasureWidth, ...measureStyle }}>
             {renderFirstPageHeader()}
@@ -544,8 +548,8 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
 
       <div className="cv-page-stack">
         {pages.map((p, i) => (
-          <div key={i} className="cv-page-frame" style={{ width: A4_W * scale, height: A4_H * scale }}>
-            <div className="cv-page-scaler" style={{ width: A4_W, height: A4_H, transform: `scale(${scale})` }}>
+          <div key={i} className="cv-page-frame" style={frameStyle}>
+            <div className="cv-page-scaler" dir={pageDir} style={scalerStyle}>
               {p}
             </div>
           </div>
