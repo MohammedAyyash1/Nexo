@@ -4959,3 +4959,10 @@ html[dir='ltr'] .wfx-compact:hover .wfx-compact-arrow { transform: translateX(3p
   }
   .lt-lobby-sheen { opacity: 0.55; }
 }
+/* ==================================================== */
+/* ==  AI Documents — توحيد شدة التوهج بكل الصفحة  ===== */
+/* ==================================================== */
+
+.doc-analysis-page .nexo-card-luxe::after {
+  opacity: 0.4;
+}

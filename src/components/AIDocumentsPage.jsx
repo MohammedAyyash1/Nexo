@@ -225,9 +225,6 @@ export function AIDocumentsPage() {
 
       {/* ===== منطقة الرفع ===== */}
       <div className="nexo-card-luxe doc-upload-card">
-        <span className="nexo-glow-orb nexo-glow-orb-purple" style={{ width: 220, height: 220, top: -70, insetInlineEnd: -50 }} />
-        <span className="nexo-glow-orb nexo-glow-orb-pink" style={{ width: 160, height: 160, bottom: -60, insetInlineStart: -40 }} />
-
         {!file ? (
           <label
             className={`nexo-dropzone ${dragActive ? 'drag-active' : ''}`}
