@@ -207,6 +207,13 @@ export function AIDocumentsPage() {
 
   return (
     <div className="nexo-tool-page doc-analysis-page">
+     <img
+       src="/assets/doc-analysis-hero.png"
+       alt=""
+       aria-hidden="true"
+       className="doc-hero-bg-img"
+       onLoad={(e) => e.currentTarget.classList.add('loaded')}
+     />
      <span className="doc-hero-sheen" aria-hidden="true" />
      <div className="nexo-tool-page-inner doc-analysis-inner">
       <button className="nexo-btn nexo-btn-ghost nexo-btn-sm" onClick={() => navigate('/')} style={{ marginBottom: 18 }}>

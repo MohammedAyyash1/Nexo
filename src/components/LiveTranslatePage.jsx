@@ -811,6 +811,13 @@ export function LiveTranslatePage({ user }) {
     const inviteHint = pendingJoinId ? `${window.location.origin}/live-translate/${pendingJoinId}` : '';
     return (
       <div className="lt-lobby-page">
+        <img
+          src="/assets/live-translate-hero.png"
+          alt=""
+          aria-hidden="true"
+          className="lt-lobby-bg-img"
+          onLoad={(e) => e.currentTarget.classList.add('loaded')}
+        />
         <span className="lt-lobby-sheen" aria-hidden="true" />
         <div style={{ maxWidth: 1040, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <button onClick={() => navigate('/')} className="lt-hover" style={{ background: 'none', border: 'none', color: '#c4b5fd', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 18, fontSize: 13.5 }}>
