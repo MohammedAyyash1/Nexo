@@ -1,10 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Mail, Phone, MapPin, Globe, Link2 } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Mail, Phone, MapPin, Globe, Link2, Maximize2, X } from 'lucide-react';
 import { paginateBlocks } from './cvPagination.js';
 
 const A4_W = 794;
 const A4_H = 1123;
-const PAGE_PAD = 46;
+const PAGE_PAD = 46;   // الحشو الأفقي للمحتوى الرئيسي
+const SAFETY = 10;     // هامش أمان تحت كل صفحة (تقريب subpixel)
 
 // ===== سلّم ضغط آمن وتدريجي — One-Page-First =====
 const COMPRESSION_LEVELS = [
@@ -79,7 +81,7 @@ function HorizonContact({ cv, color }) {
   );
 }
 
-export function CVLivePreview({ cv, template, accent, fontStack }) {
+function CVPreviewCore({ cv, template, accent, fontStack }) {
   const color = accent || template.accent;
   const layout = template.layout;
   const titleColor = layout === 'ats' ? '#111827' : layout === 'executive' ? '#1f2937' : color;
@@ -87,11 +89,11 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   const hasSidebar = layout === 'sidebar' || layout === 'horizon';
   const isTimeline = layout === 'aurora';
   const hasMainHeader = !hasSidebar || layout === 'horizon';
+  // الحشو العمودي الحقيقي للمحتوى الرئيسي بكل نوع تخطيط (من الـCSS الفعلي)
+  const mainPadV = hasSidebar ? 54 : 40;
 
-  // اتجاه محتوى الورقة: نحدده صراحة (مو بس بالوراثة)
   const pageDir = typeof document !== 'undefined' && document.documentElement.dir === 'ltr' ? 'ltr' : 'rtl';
 
-  // ===== قياس عرض العمود وحساب نسبة التصغير (مع إعادة محاولة لو العرض صفر وقت التحميل) =====
   const scrollRef = useRef(null);
   const [scale, setScale] = useState(0.48);
 
@@ -134,6 +136,16 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   const buildBlocks = () => {
     const blocks = [];
 
+    // عنوان القسم بيلتصق بأول عنصر فيه (نفس الكتلة) — بيمنع عنوان يتيم آخر الصفحة ويقرّب العنوان من محتواه
+    const addSection = (prefix, title, items, renderItem) => {
+      items.forEach((item, i) => {
+        blocks.push({
+          key: `${prefix}-${i}`,
+          node: i === 0 ? (<><SectionTitle>{title}</SectionTitle>{renderItem(item)}</>) : renderItem(item),
+        });
+      });
+    };
+
     if (cv.summary) {
       blocks.push({
         key: 'summary',
@@ -146,77 +158,45 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
       });
     }
 
-    if (cv.experience.length > 0) {
-      blocks.push({ key: 'exp-title', node: <SectionTitle>{layout === 'ats' ? 'Experience' : 'الخبرات العملية'}</SectionTitle> });
-      cv.experience.forEach((e, i) => {
-        blocks.push({
-          key: `exp-${i}`,
-          node: (
-            <EntryWrap>
-              <div className="cv-page-entry">
-                <div className="cv-page-entry-head"><strong>{e.role}</strong><span>{e.period}</span></div>
-                <div className="cv-page-entry-sub">{e.company}</div>
-                {e.description && <p className="cv-page-text">{e.description}</p>}
-              </div>
-            </EntryWrap>
-          ),
-        });
-      });
-    }
+    addSection('exp', layout === 'ats' ? 'Experience' : 'الخبرات العملية', cv.experience, (e) => (
+      <EntryWrap>
+        <div className="cv-page-entry">
+          <div className="cv-page-entry-head"><strong>{e.role}</strong><span>{e.period}</span></div>
+          <div className="cv-page-entry-sub">{e.company}</div>
+          {e.description && <p className="cv-page-text">{e.description}</p>}
+        </div>
+      </EntryWrap>
+    ));
 
-    if (cv.education.length > 0) {
-      blocks.push({ key: 'edu-title', node: <SectionTitle>{layout === 'ats' ? 'Education' : 'التعليم'}</SectionTitle> });
-      cv.education.forEach((e, i) => {
-        blocks.push({
-          key: `edu-${i}`,
-          node: (
-            <EntryWrap>
-              <div className="cv-page-entry">
-                <div className="cv-page-entry-head"><strong>{e.degree}</strong><span>{e.period}</span></div>
-                <div className="cv-page-entry-sub">{e.institution}</div>
-              </div>
-            </EntryWrap>
-          ),
-        });
-      });
-    }
+    addSection('edu', layout === 'ats' ? 'Education' : 'التعليم', cv.education, (e) => (
+      <EntryWrap>
+        <div className="cv-page-entry">
+          <div className="cv-page-entry-head"><strong>{e.degree}</strong><span>{e.period}</span></div>
+          <div className="cv-page-entry-sub">{e.institution}</div>
+        </div>
+      </EntryWrap>
+    ));
 
-    if (cv.projects && cv.projects.length > 0) {
-      blocks.push({ key: 'proj-title', node: <SectionTitle>{layout === 'ats' ? 'Projects' : 'المشاريع'}</SectionTitle> });
-      cv.projects.forEach((p, i) => {
-        blocks.push({
-          key: `proj-${i}`,
-          node: (
-            <EntryWrap>
-              <div className="cv-page-entry">
-                <div className="cv-page-entry-head">
-                  <strong>{p.name}</strong>
-                  {p.link && <span className="cv-page-entry-link" style={{ color: layout === 'ats' ? '#374151' : color }} dir="ltr">{p.link}</span>}
-                </div>
-                {p.description && <p className="cv-page-text">{p.description}</p>}
-              </div>
-            </EntryWrap>
-          ),
-        });
-      });
-    }
+    addSection('proj', layout === 'ats' ? 'Projects' : 'المشاريع', cv.projects || [], (p) => (
+      <EntryWrap>
+        <div className="cv-page-entry">
+          <div className="cv-page-entry-head">
+            <strong>{p.name}</strong>
+            {p.link && <span className="cv-page-entry-link" style={{ color: layout === 'ats' ? '#374151' : color }} dir="ltr">{p.link}</span>}
+          </div>
+          {p.description && <p className="cv-page-text">{p.description}</p>}
+        </div>
+      </EntryWrap>
+    ));
 
-    if (cv.certifications && cv.certifications.length > 0) {
-      blocks.push({ key: 'cert-title', node: <SectionTitle>{layout === 'ats' ? 'Certifications' : 'الشهادات والدورات'}</SectionTitle> });
-      cv.certifications.forEach((c, i) => {
-        blocks.push({
-          key: `cert-${i}`,
-          node: (
-            <EntryWrap>
-              <div className="cv-page-entry">
-                <div className="cv-page-entry-head"><strong>{c.name}</strong><span>{c.year}</span></div>
-                <div className="cv-page-entry-sub">{c.issuer}</div>
-              </div>
-            </EntryWrap>
-          ),
-        });
-      });
-    }
+    addSection('cert', layout === 'ats' ? 'Certifications' : 'الشهادات والدورات', cv.certifications || [], (c) => (
+      <EntryWrap>
+        <div className="cv-page-entry">
+          <div className="cv-page-entry-head"><strong>{c.name}</strong><span>{c.year}</span></div>
+          <div className="cv-page-entry-sub">{c.issuer}</div>
+        </div>
+      </EntryWrap>
+    ));
 
     if ((layout === 'classic' || layout === 'ats' || layout === 'aurora' || layout === 'executive') && (cv.skills.length > 0 || cv.languages.length > 0)) {
       blocks.push({
@@ -270,7 +250,7 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
 
   const blocks = hasContent ? buildBlocks() : [];
 
-  // ===== محرك القياس + الضغط التدريجي (حالة واحدة موحّدة لتفادي تعارض ترتيب الـEffects) =====
+  // ===== محرك القياس + الضغط التدريجي (حالة واحدة موحّدة) =====
   const measureRef = useRef(null);
   const headerMeasureRef = useRef(null);
   const contHeaderMeasureRef = useRef(null);
@@ -281,18 +261,25 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   const headerMeasureWidth = hasSidebar ? mainColWidth : A4_W;
   const contentSignature = JSON.stringify({ cv, layout, fontStack, color });
 
-  // لو المحتوى تغيّر، نعتبر مستوى الضغط صفر والقياس غير جاهز لحد ما نعيد القياس
   const sameContent = engine.sig === contentSignature;
   const levelIndex = sameContent ? engine.level : 0;
   const level = COMPRESSION_LEVELS[levelIndex];
   const measured = sameContent ? engine.measured : null;
 
+  // نفس الأساس النصي الفعلي للصفحة (26px / 1.7) — بدونها كانت عناصر كتير بتنقاس أقصر من حقيقتها
+  // (لأنها بترث line-height من .cv-preview-page) وبتنقص المحتوى آخر الصفحة.
   const measureStyle = {
     '--cv-accent': color,
     '--cv-font-scale': level.fontScale,
     '--cv-line-scale': level.lineScale,
     fontFamily: fontStack,
+    fontSize: 26 * level.fontScale,
+    lineHeight: 1.7 * level.lineScale,
+    color: '#1a1a1a',
+    boxSizing: 'border-box',
   };
+
+  const available = A4_H - mainPadV * 2 - SAFETY;
 
   useLayoutEffect(() => {
     if (engine.sig !== contentSignature) {
@@ -310,7 +297,6 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
     const headerH = hasMainHeader && headerMeasureRef.current ? headerMeasureRef.current.getBoundingClientRect().height : 0;
     const contHeaderH = contHeaderMeasureRef.current ? contHeaderMeasureRef.current.getBoundingClientRect().height : 0;
 
-    const available = A4_H - PAGE_PAD * 2;
     const firstCapacity = available - headerH;
     const totalWithGaps = blockHeights.reduce((s, h) => s + h, 0) + Math.max(0, blockHeights.length - 1) * level.gap;
 
@@ -323,8 +309,6 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentSignature, engine.sig, engine.level]);
 
-  // ورقة بحجم A4 منطقي مثبّتة بزاوية الإطار اليسرى فعليًا (position:absolute; left:0)،
-  // فما بتتأثر باتجاه الصفحة RTL/LTR، والتصغير بيصير حول نفس الزاوية المرئية دايمًا
   const scalerStyle = { position: 'absolute', top: 0, left: 0, width: A4_W, height: A4_H, transform: `scale(${scale})`, transformOrigin: 'top left' };
   const frameStyle = { position: 'relative', width: A4_W * scale, height: A4_H * scale };
 
@@ -495,8 +479,8 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
   );
 
   const ready = measured !== null && measured.blockHeights.length === blocks.length;
-  const effFirstCapacity = ready ? (A4_H - PAGE_PAD * 2 - measured.headerH) : (A4_H - PAGE_PAD * 2);
-  const effNextCapacity = ready ? (A4_H - PAGE_PAD * 2 - measured.contHeaderH) : (A4_H - PAGE_PAD * 2 - 74);
+  const effFirstCapacity = ready ? (available - measured.headerH) : available;
+  const effNextCapacity = ready ? (available - measured.contHeaderH) : (available - 74);
 
   const pageGroups = ready
     ? paginateBlocks(measured.blockHeights.map((h) => h + level.gap), effNextCapacity, effFirstCapacity)
@@ -527,7 +511,6 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
 
   return (
     <div className="cv-page-scroll" ref={scrollRef}>
-      {/* ممرات القياس المخفية: نفس الأنماط بالضبط (نفس مستوى الضغط والاتجاه الحاليين) */}
       <div dir={pageDir} style={{ position: 'fixed', top: 0, left: -99999, visibility: 'hidden', pointerEvents: 'none' }}>
         {hasMainHeader && (
           <div ref={headerMeasureRef} style={{ width: headerMeasureWidth, ...measureStyle }}>
@@ -555,6 +538,42 @@ export function CVLivePreview({ cv, template, accent, fontStack }) {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+// ===== الواجهة العامة: المعاينة + زر تكبير يفتح عرض كبير مقروء =====
+export function CVLivePreview(props) {
+  const [open, setOpen] = useState(false);
+  const { cv } = props;
+  const hasAny = cv.fullName || cv.summary || cv.experience.length > 0;
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  return (
+    <div className="cv-preview-wrap">
+      <CVPreviewCore {...props} />
+      {hasAny && (
+        <button type="button" className="cv-zoom-btn" onClick={() => setOpen(true)} aria-label="تكبير المعاينة">
+          <Maximize2 size={14} /> تكبير
+        </button>
+      )}
+      {open && createPortal(
+        <div className="cv-modal-overlay" onClick={() => setOpen(false)} role="dialog" aria-modal="true" aria-label="معاينة السيرة الذاتية">
+          <button type="button" className="cv-modal-close" onClick={() => setOpen(false)} aria-label="إغلاق المعاينة">
+            <X size={18} />
+          </button>
+          <div className="cv-modal" onClick={(e) => e.stopPropagation()}>
+            <CVPreviewCore {...props} />
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
