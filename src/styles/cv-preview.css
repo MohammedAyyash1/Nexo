@@ -1219,3 +1219,21 @@
 @media (prefers-reduced-motion: reduce) {
   .cv-page-frame { animation: none; }
 }
+/* ==================================================== */
+/* ==  CV Builder — إصلاح Grid Blowout على الموبايل  === */
+/* ==================================================== */
+
+.cv-builder-layout > * {
+  min-width: 0;
+}
+
+.cv-preview-sticky {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+@media (max-width: 960px) {
+  .nexo-tool-page-inner {
+    overflow-x: hidden;
+  }
+}
