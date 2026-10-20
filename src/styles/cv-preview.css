@@ -1236,4 +1236,258 @@
   .nexo-tool-page-inner {
     overflow-x: hidden;
   }
+}/* ==================================================== */
+/* ===  كثافة النص = حجم A4 الحقيقي (Preview ≈ PDF)  ===== */
+/* ==================================================== */
+/* قيم الخطوط السابقة كانت مضبوطة لمعاينة صغيرة (أكبر ~1.8x من الحجم الحقيقي)،
+   فكان CV قصير يطلع صفحتين بالمعاينة وصفحة وحدة بالـPDF. هون كل أحجام النص
+   بتتضرب بـ--cv-type-base (بيجي من CVLivePreview.jsx = 0.56)، وبعض الصور
+   والحشوات العلوية للرؤوس بتصغر شوي. للقراءة المريحة استخدم زر "تكبير".
+   ألصق هالملف بآخر src/styles/cv-preview.css (بعد كل الإضافات). */
+
+.cv-preview-page {
+  font-size: calc(26px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+  line-height: calc(1.7 * var(--cv-line-scale, 1));
+}
+
+.cv-page-continuation-header {
+  font-size: calc(22px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+  padding: 16px 46px;
+}
+
+.cv-page-section-title {
+  font-size: calc(24px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+  letter-spacing: 0.8px;
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+}
+
+.cv-preview-name-onaccent {
+  font-size: calc(30px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-preview-title-onaccent {
+  font-size: calc(22px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-preview-contact-onaccent {
+  font-size: calc(20px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-preview-onaccent-label {
+  font-size: calc(20px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-preview-onaccent-chip {
+  font-size: calc(20px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-entry-head {
+  font-size: calc(26px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-entry-sub {
+  font-size: calc(22px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-text {
+  font-size: calc(24px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+  line-height: calc(1.75 * var(--cv-line-scale, 1));
+}
+
+.cv-page-chip {
+  font-size: calc(20px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+  padding: 4px 14px;
+}
+
+.cv-page-ats-chip {
+  font-size: calc(20px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+  padding: 3px 10px;
+}
+
+.cv-preview-classic-chip {
+  font-size: calc(20px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-contact-row, .cv-page-ats-contact {
+  font-size: calc(22px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-entry-link {
+  font-size: calc(19px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-contact-value {
+  font-size: calc(20px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-contact-label {
+  font-size: calc(14px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-contact-item .cv-page-contact-label {
+  font-size: calc(15px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-contact-item .cv-page-contact-value {
+  font-size: calc(20px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-contact-cell .cv-page-contact-label {
+  font-size: calc(14px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-contact-cell .cv-page-contact-value {
+  font-size: calc(20px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-contact-pills .cv-page-contact-cell {
+  padding: 7px 18px;
+}
+
+.cv-preview-gradient-header h2 {
+  font-size: calc(34px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-preview-gradient-header {
+  padding: 42px 46px 34px;
+}
+
+.cv-preview-classic-header h2 {
+  font-size: calc(36px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-preview-classic-header {
+  padding: 40px 46px 26px;
+}
+
+.cv-preview-dark-header {
+  padding: 40px 46px 30px;
+  gap: 22px;
+}
+
+.cv-page-ats-header {
+  padding: 40px 46px 24px;
+}
+
+.cv-page-ats-header h2 {
+  font-size: calc(38px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-ats-header p {
+  font-size: calc(24px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-preview-photo {
+  width: 100px;
+  height: 100px;
+  border-width: 5px;
+}
+
+.cv-preview-photo-round {
+  width: 96px;
+  height: 96px;
+}
+
+.cv-page-aurora-header {
+  padding: 44px 46px 84px;
+  margin-bottom: -34px;
+}
+
+.cv-page-aurora-header h2 {
+  font-size: calc(54px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-aurora-title-pill {
+  font-size: calc(22px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+  padding: 5px 18px;
+}
+
+.cv-page-aurora-photo {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+}
+
+.cv-page-section-title-aurora {
+  font-size: calc(26px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+  gap: 10px;
+}
+
+.cv-preview-sidebar {
+  padding: 40px 28px;
+  gap: 30px;
+}
+
+.cv-page-horizon-side {
+  padding: 40px 26px;
+  gap: 28px;
+}
+
+.cv-page-horizon-photo {
+  width: 116px;
+  height: 116px;
+}
+
+.cv-page-horizon-monogram {
+  width: 116px;
+  height: 116px;
+  font-size: calc(76px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-horizon-contact .cv-page-contact-value {
+  font-size: calc(19px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-horizon-label {
+  font-size: calc(20px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-horizon-chip {
+  font-size: calc(19px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+  padding: 4px 12px;
+}
+
+.cv-page-horizon-lang {
+  font-size: calc(21px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-horizon-header h2 {
+  font-size: calc(50px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-horizon-header p {
+  font-size: calc(27px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-section-title-horizon {
+  font-size: calc(22px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-exec-header {
+  padding: 42px 46px 34px;
+  border-bottom-width: 8px;
+}
+
+.cv-page-exec-header h2 {
+  font-size: calc(48px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-exec-header p {
+  font-size: calc(26px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+}
+
+.cv-page-exec-photo {
+  width: 112px;
+  height: 112px;
+}
+
+.cv-page-section-title-exec {
+  font-size: calc(24px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
+  padding: 6px 16px;
+  border-inline-start-width: 6px;
+}
+
+.cv-page-exec-date {
+  font-size: calc(21px * var(--cv-type-base, 1) * var(--cv-font-scale, 1));
 }

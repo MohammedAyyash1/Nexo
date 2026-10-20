@@ -7,6 +7,9 @@ const A4_W = 794;
 const A4_H = 1123;
 const PAGE_PAD = 46;   // الحشو الأفقي للمحتوى الرئيسي
 const SAFETY = 10;     // هامش أمان تحت كل صفحة (تقريب subpixel)
+// كثافة النص: قيم الخطوط بالـCSS كانت مضبوطة لمعاينة صغيرة (أكبر ~1.8x من الحجم الحقيقي)،
+// فكان CV قصير يطلع صفحتين بالمعاينة وصفحة وحدة بالـPDF. هالمعامل بيرجّع النص لكثافة A4 حقيقية.
+const TYPE_BASE = 0.56;
 
 // ===== سلّم ضغط آمن وتدريجي — One-Page-First =====
 const COMPRESSION_LEVELS = [
@@ -34,7 +37,7 @@ function ContactRow({ cv, light, iconColor, pills }) {
     <div className={`cv-page-contact-grid ${light ? 'cv-page-contact-grid-light' : 'cv-page-contact-grid-dark'} ${pills ? 'cv-page-contact-pills' : ''}`}>
       {fields.map((f, i) => (
         <div key={i} className="cv-page-contact-cell">
-          <f.Icon size={22} className="cv-page-contact-icon" style={iconColor ? { color: iconColor } : undefined} />
+          <f.Icon size={14} className="cv-page-contact-icon" style={iconColor ? { color: iconColor } : undefined} />
           <div>
             <div className="cv-page-contact-label">{f.label}</div>
             <div className="cv-page-contact-value" dir="auto">{f.value}</div>
@@ -52,7 +55,7 @@ function ContactStack({ cv }) {
     <div className="cv-preview-contact-onaccent">
       {fields.map((f, i) => (
         <div key={i} className="cv-page-contact-item">
-          <f.Icon size={24} className="cv-page-contact-icon" />
+          <f.Icon size={15} className="cv-page-contact-icon" />
           <div>
             <div className="cv-page-contact-label">{f.label}</div>
             <div className="cv-page-contact-value" dir="auto">{f.value}</div>
@@ -70,7 +73,7 @@ function HorizonContact({ cv, color }) {
     <div className="cv-page-horizon-contact">
       {fields.map((f, i) => (
         <div key={i} className="cv-page-contact-item">
-          <f.Icon size={22} className="cv-page-contact-icon" style={{ color }} />
+          <f.Icon size={14} className="cv-page-contact-icon" style={{ color }} />
           <div>
             <div className="cv-page-contact-label">{f.label}</div>
             <div className="cv-page-contact-value" dir="auto">{f.value}</div>
@@ -270,10 +273,11 @@ function CVPreviewCore({ cv, template, accent, fontStack }) {
   // (لأنها بترث line-height من .cv-preview-page) وبتنقص المحتوى آخر الصفحة.
   const measureStyle = {
     '--cv-accent': color,
+    '--cv-type-base': TYPE_BASE,
     '--cv-font-scale': level.fontScale,
     '--cv-line-scale': level.lineScale,
     fontFamily: fontStack,
-    fontSize: 26 * level.fontScale,
+    fontSize: 26 * TYPE_BASE * level.fontScale,
     lineHeight: 1.7 * level.lineScale,
     color: '#1a1a1a',
     boxSizing: 'border-box',
@@ -328,7 +332,7 @@ function CVPreviewCore({ cv, template, accent, fontStack }) {
     );
   }
 
-  const style = { '--cv-accent': color, '--cv-font-scale': level.fontScale, '--cv-line-scale': level.lineScale, fontFamily: fontStack };
+  const style = { '--cv-accent': color, '--cv-type-base': TYPE_BASE, '--cv-font-scale': level.fontScale, '--cv-line-scale': level.lineScale, fontFamily: fontStack };
 
   const renderMainBlocks = (indices) => indices.map((i) => (
     <div key={blocks[i].key} style={{ marginBottom: level.gap }}>{blocks[i].node}</div>
